@@ -15,9 +15,10 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(int $id)
+    public function show(string $token)
     {
-        $user = User::where('id', $id);
+        $confirmedToken = \Laravel\Sanctum\PersonalAccessToken::findToken($token);
+        $user = $confirmedToken->tokenable;
         if ($user) {
             return response()->json(['user' => $user], 200);
         }
@@ -32,9 +33,10 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateUserRequest $request, $id)
+    public function update(UpdateUserRequest $request, string $token)
     {
-        $user = User::where('id', $id);
+        $confirmedToken = \Laravel\Sanctum\PersonalAccessToken::findToken($token);
+        $user = $confirmedToken->tokenable;
         if ($user) {
             $user->name = $request->name;
 

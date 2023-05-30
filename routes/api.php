@@ -31,8 +31,8 @@ Route::group(['middleware' => 'guest:sanctum'], function () {
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('logout', [App\Http\Controllers\API\AuthController::class, 'logout'])->name('logout');
 
-    Route::get('users/{id}', [App\Http\Controllers\API\UserController::class, 'show'])->name('users.show');
-    Route::put('users/{id}', [App\Http\Controllers\API\UserController::class, 'update'])->name('users.update');
+    Route::get('users/{token}', [App\Http\Controllers\API\UserController::class, 'show'])->name('users.show');
+    Route::put('users/{token}', [App\Http\Controllers\API\UserController::class, 'update'])->name('users.update'); // Not using it yet
 });
 
 Route::get('/auth/google/redirect', [App\Http\Controllers\SocialiteController::class, 'socialiteRedirect'])->name('auth-google.socialiteRedirect');
