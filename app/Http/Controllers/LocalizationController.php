@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\LocalizationRequest;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Session;
 
 class LocalizationController extends Controller
 {
@@ -11,7 +12,7 @@ class LocalizationController extends Controller
     {
         $locale = $request->locale;
         App::setLocale($locale);
-        session()->put('locale', $locale);
-        return response()->json($request->validated(), 201);
+        Session::put('locale', $locale);
+        return response()->json($request->validated(), 200);
     }
 }
