@@ -5,7 +5,9 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
-use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
@@ -15,10 +17,9 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(string $token)
+    public function show(string $token): JsonResponse
     {
-        $confirmedToken = \Laravel\Sanctum\PersonalAccessToken::findToken($token);
-        $user = $confirmedToken->tokenable;
+        $user = User::where('token', $token)->first();
         if ($user) {
             return response()->json(['user' => $user], 200);
         }
@@ -35,13 +36,32 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request, string $token)
     {
-        $confirmedToken = \Laravel\Sanctum\PersonalAccessToken::findToken($token);
-        $user = $confirmedToken->tokenable;
+        $user = User::where('token', $token)->first();
         if ($user) {
-            $user->name = $request->name;
+            if($request->new_username) {
+                $user->name = $request->new_username;
+            }
+
+            if($request->new_password) {
+                $user->name = $request->new_password;
+            }
+
+            if($request->image) {
+                $image = $request->image;
+                $extension = explode(';', explode('/', $image)[1])[0];
+                $image = str_replace('data:image/png;base64,', '', $image);
+                $image = str_replace(' ', '+', $image);
+                $imageName = Str::random(30) . '.' . $extension;
+                if($user->image) {
+                    Storage::delete($user->image);
+                }
+                Storage::put('userImages/' . $imageName, base64_decode($image));
+
+                $user->image = 'userImages/' .  $imageName;
+            }
 
             $user->save();
-            return response()->json(['message' => 'User details updated'], 200);
+            return response()->json(['user' => $user], 200);
         }
 
         return response()->json(['message' => 'Something went wrong'], 400);
