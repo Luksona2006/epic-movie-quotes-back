@@ -16,14 +16,14 @@
             <p style="margin-bottom: 24px; font-size: 16px; font-weight: 400; color: white;">Hola {{ $data['name'] }}</p>
             <p style="margin-bottom: 40px; font-size: 16px; font-weight: 400; color: white;">Thanks for joining Movie quotes! We really appreciate it. Please click the button below to verify your account:</p>
 
-            <a style="margin-bottom: 40px;" href="{{ route('verify.verifyEmail', ['token' => $data['token']]) }}">
+            <a style="margin-bottom: 40px;" href="{{ route('verify.verify-email', ['token' => $data['token']]) }}">
                 <button
                 style="background-color: #E31221; border:#E31221 1px solid; padding: 7px 13px; border-radius:4px; color:white; font-weight:400; font-size:16px; cursor: pointer;">
                     Verify account
                 </button>
             </a>
             <p style="margin-bottom: 24px; font-size: 16px; font-weight: 400; color: white;">If clicking doesn't work, you can try copying and pasting it to your browser:</p>
-            <a href="{{ route('verify.verifyEmail', ['token' => $data['token']]) }} style="text-decoration: none; margin-bottom: 40px;">
+            <a href="{{ route('verify.verify-email', ['token' => $data['token']]) }} style="text-decoration: none; margin-bottom: 40px;">
                 <p style="color: #DDCCAA; font-size: 16px; font-weight: 400;">http://localhost:8000/verify/{{$data['token']}}</p>
             </a>
             <p style="margin-bottom: 24px; font-size: 16px; font-weight: 400; color: white;">If you have any problems, please contact us:support@moviequotes.ge</p>

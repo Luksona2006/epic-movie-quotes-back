@@ -16,7 +16,7 @@ return [
     'google' => [
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
-        'redirect' => 'http://localhost:8000/auth/google/callback',
+        'redirect' => 'http://localhost:8000/api/auth/google/callback',
     ],
     'mailgun' => [
         'domain' => env('MAILGUN_DOMAIN'),

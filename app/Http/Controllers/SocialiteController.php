@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
 
@@ -13,11 +14,12 @@ class SocialiteController extends Controller
         return Socialite::driver('google')->redirect();
     }
 
-    public function socialiteCreateUser()
+    public function socialiteCreateUser(): JsonResponse
     {
         $googleUser = Socialite::driver('google')->user();
 
         $user = User::updateOrCreate(
+            ['google_id' => $googleUser->getId()],
             [
             'name' => $googleUser->name,
             'email' => $googleUser->email,
@@ -26,8 +28,7 @@ class SocialiteController extends Controller
 
         Auth::login($user);
 
-        $token = $user->createToken('user_token')->plainTextToken;
-        return response()->json(['user' => $user, 'token' => $token], 200);
+        return response()->json(['user' => $user], 200);
     }
 
 }
