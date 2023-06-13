@@ -12,12 +12,9 @@ return new class () extends Migration {
      */
     public function up()
     {
-        Schema::create('quotes', function (Blueprint $table) {
+        Schema::create('genres', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('movie_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->json('text');
-            $table->string('image');
+            $table->json('name');
             $table->timestamps();
         });
     }
@@ -29,6 +26,6 @@ return new class () extends Migration {
      */
     public function down()
     {
-        Schema::dropIfExists('quotes');
+        Schema::dropIfExists('genres');
     }
 };

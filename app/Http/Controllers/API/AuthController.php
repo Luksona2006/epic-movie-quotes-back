@@ -29,7 +29,7 @@ class AuthController extends Controller
 
         if(Auth::attempt($credentials, $request->remember)) {
             Auth::login($user, $request->remember);
-            return response()->json(['user' => $user], 200);
+            return response()->json(['user' => $user]);
         };
         return response()->json(['message' => 'Invalid credentials'], 401);
     }
@@ -38,7 +38,7 @@ class AuthController extends Controller
     {
         Auth::guard('web')->logout();
         session()->regenerate();
-        return response()->json(['message' => 'User logged out'], 200);
+        return response()->json(['message' => 'User logged out']);
     }
 
     public function register(RegisterRequest $request): JsonResponse
@@ -58,7 +58,7 @@ class AuthController extends Controller
             Mail::send('email.verification', ['data' => $data], function ($message) use ($data) {
                 $message->to($data['email'])->subject('Please verify your email address');
             });
-            return response()->json(['user' => $user], 200);
+            return response()->json(['user' => $user]);
         }
 
         return response()->json(['message' => 'Invalid details'], 401);
@@ -96,7 +96,7 @@ class AuthController extends Controller
                 ['password_reset_token' => $token]
             );
 
-            return response()->json(['message' => 'Email has sended to confirm password reset'], 200);
+            return response()->json(['message' => 'Email has sended to confirm password reset']);
         }
 
         return response()->json(['message' => 'Invalid credentials'], 401);
@@ -106,6 +106,6 @@ class AuthController extends Controller
     {
         $user = User::where('password_reset_token', $request->token)->first();
         $user->update(['password' => bcrypt($request->password) ,'password_reset_token' => null]);
-        return response()->json(['user' => $user], 200);
+        return response()->json(['user' => $user]);
     }
 }
