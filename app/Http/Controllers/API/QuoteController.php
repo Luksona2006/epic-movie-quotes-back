@@ -2,14 +2,19 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Events\CommentQuote;
+use App\Events\LikeQuote;
+use App\Events\QuoteNotification;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateQuoteRequest;
 use App\Http\Requests\UpdateQuoteRequest;
 use App\Models\Comment;
 use App\Models\Like;
 use App\Models\Movie;
+use App\Models\Notification;
 use App\Models\Quote;
 use App\Models\User;
+use App\Models\UserNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -66,14 +71,14 @@ class QuoteController extends Controller
     public function update(int $id, UpdateQuoteRequest $request): JsonResponse
     {
         $quote = Quote::where('id', $id)->first();
-        $user = User::where('token', $request->user_token)->first()->toArray();
+        $user = User::where('token', $request->user_token)->first();
 
         if($quote && $user) {
-            if($user['id'] === $quote->user_id) {
+            if($user->id === $quote->user_id) {
                 if($request->quote_en && $request->quote_ka) {
                     $text = [
-                        'en' => $request->quote_en,
-                        'ka' => $request->quote_ka
+                        'en' => $request->quote_en ?? $quote->toArray()['text']['en'],
+                        'ka' => $request->quote_ka ?? $quote->toArray()['text']['ka'],
                     ];
 
                     $quote->text = $text;
@@ -100,7 +105,7 @@ class QuoteController extends Controller
             $likes = $quote->likes->toArray();
             $likesSum = count($likes);
             $liked = array_filter($likes, function ($like) use ($user) {
-                return $like['user_id'] === $user['id'];
+                return $like['user_id'] === $user->id;
             });
 
             $quote['liked'] = count($liked) ? true : false;
@@ -108,7 +113,7 @@ class QuoteController extends Controller
             if($request->liked !== null) {
                 if($request->liked === true) {
                     Like::create([
-                        'user_id' => $user['id'],
+                        'user_id' => $user->id,
                         'quote_id' => $quote->id
                     ]);
 
@@ -118,7 +123,7 @@ class QuoteController extends Controller
 
                 if($request->liked === false) {
                     $likeId = Like::where([
-                        ['user_id', '=', $user['id']],
+                        ['user_id', '=', $user->id],
                         ['quote_id', '=', $quote->id]
                     ])->first()->id;
 
@@ -127,36 +132,57 @@ class QuoteController extends Controller
                     $likesSum = $likesSum - 1;
                     $quote['liked'] = false;
                 }
+
+                if($user->id !== $quote->user->id) {
+                    UserNotification::create(['from_user_id' => $user->id, 'to_user_id' => $quote->user_id]);
+                    Notification::create(['user_id' => $user->id,'quote_id' => $quote->id, 'type' => 'like']);
+                    event(new QuoteNotification($user, $quote->user, 'like'));
+                }
+
+                event(new LikeQuote($quote->id, $likesSum));
             }
 
             $quote['likes'] = $likesSum;
 
 
             if($request->comment) {
-                Comment::create([
+                $comment = Comment::create([
                     'text' => $request->comment,
                     'quote_id' => $quote->id,
-                    'user_id' => $user['id']
+                    'user_id' => $user->id
                 ]);
+
+                $comment->user;
+
+                if($user->id !== $quote->user->id) {
+                    UserNotification::create(['from_user_id' => $user['id'], 'to_user_id' => $quote->user_id]);
+                    Notification::create(['user_id' => $user->id,'quote_id' => $quote->id, 'type' => 'comment']);
+                    event(new QuoteNotification($user, $quote->user, 'comment'));
+                }
+
+                UserNotification::create(['from_user_id' => $user['id'], 'to_user_id' => $quote->user_id]);
+                Notification::create(['user_id' => $user->id,'quote_id' => $quote->id, 'type' => 'comment']);
+                event(new QuoteNotification($user, $quote->user, 'comment'));
+
+                event(new CommentQuote($quote->id, $comment));
             }
 
-            $movie = Movie::where('id', $quote['movie_id'])->first()->toArray();
-            $author = User::where('id', $quote['user_id'])->first()->toArray();
+            $quote['movie'] = $quote->movie;
+            $quote['author'] = $quote->user;
             $comments = $quote->comments->toArray();
 
             $commentsWithUsers = [];
 
             if(count($comments)) {
                 $commentsWithUsers = array_map(function ($comment) {
-                    $commentUser = User::where('id', $comment['user_id'])->first()->toArray();
-                    $comment['user'] = $commentUser;
+                    $comment['user'] = User::where('id', $comment['user_id']);
                     return $comment;
                 }, $comments);
             }
 
-            $quote = $quote->toArray();
-            $quotesFullData = [...$quote, 'movie' => $movie, 'author' => $author, 'comments' => $commentsWithUsers];
-            return response()->json(['quote' => $quotesFullData]);
+            $quote['comments']= $commentsWithUsers;
+
+            return response()->json(['quote' => $quote]);
         }
 
         return response()->json(['message' => 'Wrong id, no quote found'], 404);
@@ -193,7 +219,7 @@ class QuoteController extends Controller
 
                 if(count($comments)) {
                     $commentsWithUsers = array_map(function ($comment) {
-                        $commentUser = User::where('id', $comment['user_id'])->first()->toArray();
+                        $commentUser = User::where('id', $comment['user_id'])->first();
                         $comment['user'] = $commentUser;
                         return $comment;
                     }, $comments);
@@ -232,7 +258,7 @@ class QuoteController extends Controller
 
                 if(count($comments)) {
                     $commentsWithUsers = array_map(function ($comment) {
-                        $commentUser = User::where('id', $comment['user_id'])->first()->toArray();
+                        $commentUser = User::where('id', $comment['user_id'])->first();
                         $comment['user'] = $commentUser;
                         return $comment;
                     }, $comments);

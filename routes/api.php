@@ -3,6 +3,7 @@
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\GenreController;
 use App\Http\Controllers\API\MovieController;
+use App\Http\Controllers\API\NotificationsController;
 use App\Http\Controllers\API\QuoteController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\LocalizationController;
@@ -44,16 +45,20 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('quote/create', [QuoteController::class, 'create'])->name('quote.create');
     Route::put('quote/update/{id}', [QuoteController::class, 'update'])->name('quote.update');
     Route::post('quote/remove/{id}', [QuoteController::class, 'remove'])->name('quote.remove');
-    Route::get('user/{token}/quotes', [QuoteController::class, 'getAllQuotes'])->name('quote.get-all-quotes');
-    Route::get('user/{token}/quotes/{id}', [QuoteController::class, 'getQuote'])->name('quote.get-quote');
+    Route::get('user/{token}/quotes', [QuoteController::class, 'getAllQuotes'])->name('user.get-all-quotes');
+    Route::get('user/{token}/quotes/{id}', [QuoteController::class, 'getQuote'])->name('user.get-quote');
 
     Route::post('movie/create', [MovieController::class, 'create'])->name('movie.create');
     Route::put('movie/update/{id}', [MovieController::class, 'update'])->name('movie.update');
     Route::post('movie/remove/{id}', [MovieController::class, 'remove'])->name('movie.remove');
-    Route::get('user/{token}/movies', [MovieController::class, 'getAllMovies'])->name('movie.get-all-movies');
-    Route::get('user/{token}/movies/{id}', [MovieController::class, 'getMovie'])->name('movie.get-movie');
+    Route::get('user/{token}/movies', [MovieController::class, 'getAllMovies'])->name('user.get-all-movies');
+    Route::get('user/{token}/movies/{id}', [MovieController::class, 'getMovie'])->name('user.get-movie');
 
-    Route::get('user/{token}/genres', [GenreController::class, 'getAllGenres'])->name('genre.get-all-genres');
+    Route::get('user/{token}/genres', [GenreController::class, 'getAllGenres'])->name('user.get-all-genres');
+
+    Route::get('user/{token}/notifications', [NotificationsController::class, 'getAllNotifications'])->name('user.get-all-notifications');
+    Route::post('notification/update/{id}', [NotificationsController::class, 'update'])->name('notification.update');
+    Route::post('user/{token}/notifications/update', [NotificationsController::class, 'updateAll'])->name('user.update-all');
 });
 
 Route::get('auth/google/redirect', [SocialiteController::class, 'socialiteRedirect'])->name('auth-google.socialite-redirect');
