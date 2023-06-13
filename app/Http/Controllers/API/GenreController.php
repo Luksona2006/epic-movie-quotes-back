@@ -10,12 +10,12 @@ use Illuminate\Http\Request;
 
 class GenreController extends Controller
 {
-    public function getAllGenres(Request $request): JsonResponse
+    public function getAllGenres(string $userToken): JsonResponse
     {
-        $user = User::where('token', $request->user_token)->first();
+        $user = User::where('token', $userToken)->first();
         if($user) {
             $genres = Genre::all();
-            return response()->json(['genres' => $genres], 200);
+            return response()->json(['genres' => $genres]);
         }
 
         return response()->json(['message' => 'You are not able to get genres'], 401);

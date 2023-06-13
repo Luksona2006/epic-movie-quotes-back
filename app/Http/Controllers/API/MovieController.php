@@ -62,7 +62,7 @@ class MovieController extends Controller
             $movie['quotes'] = $movie->quotes;
             $movie['genres'] = $movie->genres;
 
-            return response()->json(['movie' => $movie], 200);
+            return response()->json(['movie' => $movie]);
         }
 
         return response()->json(['message' => 'You are not able to create movie'], 401);
@@ -124,7 +124,7 @@ class MovieController extends Controller
                 $movie['genres'] = $genres;
             }
 
-            return response()->json(['movie' => $movie], 200);
+            return response()->json(['movie' => $movie]);
         }
 
         return response()->json(['message' => 'Wrong id, no movie found'], 404);
@@ -138,7 +138,7 @@ class MovieController extends Controller
             $movie = Movie::where('id', $id)->where('user_id', $user->id)->first();
             if($movie) {
                 $movie->delete();
-                return response()->json(['message' => 'Movie deleted successfully', 200]);
+                return response()->json(['message' => 'Movie deleted successfully']);
             }
 
             return response()->json(['message' => 'Wrong id, no movie found', 404]);
@@ -147,9 +147,9 @@ class MovieController extends Controller
         return response()->json(['message' => 'You are not able to remove movie', 404]);
     }
 
-    public function getAllMovies(Request $request): JsonResponse
+    public function getAllMovies(string $userToken): JsonResponse
     {
-        $user = User::where('token', $request->user_token)->first();
+        $user = User::where('token', $userToken)->first();
 
         if($user) {
             $movies = Movie::where('user_id', $user->id)->orderBy('created_at', 'DESC')->get();
@@ -159,15 +159,15 @@ class MovieController extends Controller
                 array_push($moviesFullData, [...$movie->toArray(), 'genres' => $movie->genres, 'quotes' => $movie->quotes]);
             }
 
-            return response()->json(['movies' => $moviesFullData], 200);
+            return response()->json(['movies' => $moviesFullData]);
         };
 
         return response()->json(['message' => 'You are not able to get movies'], 401);
     }
 
-    public function getMovie(int $movieId, Request $request): JsonResponse
+    public function getMovie(string $userToken, int $movieId): JsonResponse
     {
-        $user = User::where('token', $request->user_token)->first();
+        $user = User::where('token', $userToken)->first();
         if($user) {
             $movie = Movie::where('user_id', $user->id)->where('id', $movieId)->first();
 
@@ -195,7 +195,7 @@ class MovieController extends Controller
                 };
                 $movie['genres'] = $genres;
 
-                return response()->json(['movie' => $movie], 200);
+                return response()->json(['movie' => $movie]);
             }
 
             return response()->json(['message' => 'Movie not found'], 404);

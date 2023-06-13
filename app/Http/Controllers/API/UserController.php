@@ -21,7 +21,7 @@ class UserController extends Controller
     {
         $user = User::where('token', $token)->first();
         if ($user) {
-            return response()->json(['user' => $user], 200);
+            return response()->json(['user' => $user]);
         }
 
         return response()->json(['message' => 'Something went wrong'], 400);
@@ -61,7 +61,7 @@ class UserController extends Controller
             }
 
             $user->save();
-            return response()->json(['user' => $user], 200);
+            return response()->json(['user' => $user]);
         }
 
         return response()->json(['message' => 'Something went wrong'], 400);
