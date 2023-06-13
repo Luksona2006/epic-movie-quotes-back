@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreateQuoteRequest extends FormRequest
+class CreateMovieRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,10 +25,14 @@ class CreateQuoteRequest extends FormRequest
     {
         return [
             'user_token' => ['required', 'exists:users,token'],
-            'quote_en' => ['required', 'string'],
-            'quote_ka' => ['required', 'string'],
-            'image' => ['required', 'string'],
-            'movie_id' => ['required', 'numeric'],
+            'genres_ids' => ['required', 'array'],
+            'name_en' => ['required', 'string'],
+            'name_ka' => ['required', 'string'],
+            'director_en' => ['required', 'string'],
+            'director_ka' => ['required', 'string'],
+            'description_en' => ['required', 'string'],
+            'description_ka' => ['required', 'string'],
+            'image' => ['required', 'string']
         ];
     }
 }

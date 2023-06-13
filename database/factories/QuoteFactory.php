@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Models\Movie;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -18,7 +17,8 @@ class QuoteFactory extends Factory
     public function definition()
     {
         return [
-            'movie_id' => Movie::all()->first()->id,
+            'movie_id' => 1,
+            'user_id' => 1,
             'text' => [
                 'en' => fake()->sentence(5),
                 'ka' => fake('ka_GE')->sentence(5),

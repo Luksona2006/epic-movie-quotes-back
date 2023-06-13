@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API\GenreController;
 use App\Http\Controllers\API\MovieController;
 use App\Http\Controllers\API\QuoteController;
 use App\Http\Controllers\API\UserController;
@@ -41,8 +42,18 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::put('users/{token}', [UserController::class, 'update'])->name('users.update');
 
     Route::post('quote/create', [QuoteController::class, 'create'])->name('quote.create');
+    Route::put('quote/update/{id}', [QuoteController::class, 'update'])->name('quote.update');
+    Route::post('quote/remove/{id}', [QuoteController::class, 'remove'])->name('quote.remove');
+    Route::post('quote/get-all', [QuoteController::class, 'getAllQuotes'])->name('quote.get-all-quotes');
+    Route::post('quote/{id}', [QuoteController::class, 'getQuote'])->name('quote.get-quote');
 
-    Route::post('movies/get-all', [MovieController::class, 'getAllMovies'])->name('movies.get-all-movies');
+    Route::post('movie/create', [MovieController::class, 'create'])->name('movie.create');
+    Route::put('movie/update/{id}', [MovieController::class, 'update'])->name('movie.update');
+    Route::post('movie/remove/{id}', [MovieController::class, 'remove'])->name('movie.remove');
+    Route::post('movie/get-all', [MovieController::class, 'getAllMovies'])->name('movie.get-all-movies');
+    Route::post('movie/{id}', [MovieController::class, 'getMovie'])->name('movie.get-movie');
+
+    Route::post('genre/get-all', [GenreController::class, 'getAllGenres'])->name('genre.get-all-genres');
 });
 
 Route::get('auth/google/redirect', [SocialiteController::class, 'socialiteRedirect'])->name('auth-google.socialite-redirect');

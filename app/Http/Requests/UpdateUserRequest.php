@@ -27,7 +27,7 @@ class UpdateUserRequest extends FormRequest
             'new_username' => ['nullable'],
             'new_password' => ['nullable'],
             'confirm_password' => ['nullable', 'same:new_password'],
-            'image' => ['nullable', 'string']
+            'image' => ['nullable']
         ];
     }
 }
