@@ -201,7 +201,7 @@ class MovieController extends Controller
             $search = $request->searchBy;
             if($search) {
                 $search = ltrim($search, '#');
-                $movies = Movie::whereRaw('LOWER(JSON_EXTRACT(name, "$.en")) like ?', '%'.strtolower($search).'%')
+                $movies = Movie::where('user_id', $user->id)->whereRaw('LOWER(JSON_EXTRACT(name, "$.en")) like ?', '%'.strtolower($search).'%')
                 ->orWhereRaw('LOWER(JSON_EXTRACT(name, "$.ka")) like ?', '%'.strtolower($search).'%')
                 ->orderBy('created_at', 'desc')
                 ->get()->toArray();
