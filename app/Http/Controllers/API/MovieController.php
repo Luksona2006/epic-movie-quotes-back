@@ -102,16 +102,11 @@ class MovieController extends Controller
 
                 $quotes = $movie->quotes;
                 foreach ($quotes as $quote) {
-                    $comments = Comment::where('quote_id', $quote['id'])->get()->toArray();
-                    $quote['comments'] = count($comments);
+                    $quoteModel = Quote::find($quote['id'])->getFullData();
+                    $quote['comments'] = count($quoteModel['comments']->toArray());
 
-                    $likes = Like::where('quote_id', $quote['id'])->get()->toArray();
-                    $likesSum = count($likes);
-                    $liked = array_filter($likes, function ($like) use ($user) {
-                        return $like['user_id'] === $user->id;
-                    });
-                    $quote['likes'] = $likesSum;
-                    $quote['liked'] = count($liked) ? true : false;
+                    $quote['likes'] = $quoteModel['likes'];
+                    $quote['liked'] = $quoteModel['liked'];
                 };
                 $movie['quotes'] = $quotes;
 
@@ -174,16 +169,11 @@ class MovieController extends Controller
             if($movie) {
                 $quotes = $movie->quotes;
                 foreach ($quotes as $quote) {
-                    $comments = Comment::where('quote_id', $quote['id'])->get()->toArray();
-                    $quote['comments'] = count($comments);
+                    $quoteModel = Quote::find($quote['id'])->getFullData();
+                    $quote['comments'] = count($quoteModel['comments']->toArray());
 
-                    $likes = Like::where('quote_id', $quote['id'])->get()->toArray();
-                    $likesSum = count($likes);
-                    $liked = array_filter($likes, function ($like) use ($user) {
-                        return $like['user_id'] === $user->id;
-                    });
-                    $quote['likes'] = $likesSum;
-                    $quote['liked'] = count($liked) ? true : false;
+                    $quote['likes'] = $quoteModel['likes'];
+                    $quote['liked'] = $quoteModel['liked'];
                 };
                 $movie['quotes'] = $quotes;
 
@@ -202,5 +192,32 @@ class MovieController extends Controller
         };
 
         return response()->json(['message' => 'You are not able to get movie'], 401);
+    }
+
+    public function filterMovies(Request $request): JsonResponse
+    {
+        $user = User::where('token', $request->user_token)->first();
+        if($user) {
+            $search = $request->searchBy;
+            if($search) {
+                $search = ltrim($search, '#');
+                $movies = Movie::whereRaw('LOWER(JSON_EXTRACT(name, "$.en")) like ?', '%'.strtolower($search).'%')
+                ->orWhereRaw('LOWER(JSON_EXTRACT(name, "$.ka")) like ?', '%'.strtolower($search).'%')
+                ->orderBy('created_at', 'desc')
+                ->get()->toArray();
+
+                $updatedMovies = [];
+                foreach ($movies as $movie) {
+                    $movieModel = Movie::find($movie['id']);
+                    array_push($updatedMovies, $movieModel->getFullData());
+                };
+
+                return response()->json(['movies' => $updatedMovies]);
+            }
+
+            return response()->json(['message' => 'Enter movie name to search movie', 'movies' => []], 204);
+        }
+
+        return response()->json(['message' => 'You are not able to search for movies'], 401);
     }
 }

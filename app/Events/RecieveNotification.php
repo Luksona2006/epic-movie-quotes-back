@@ -2,26 +2,30 @@
 
 namespace App\Events;
 
-use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class QuoteNotification
+class RecieveNotification implements ShouldBroadcast
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable;
+    use InteractsWithSockets;
+    use SerializesModels;
+
+    public $recieverToken;
+    public $notification;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct($recieverToken, $notification)
     {
-        //
+        $this->recieverToken = $recieverToken;
+        $this->notification = $notification;
     }
 
     /**
@@ -31,6 +35,6 @@ class QuoteNotification
      */
     public function broadcastOn()
     {
-        return new PrivateChannel('channel-name');
+        return [new PrivateChannel('notifications.'.$this->recieverToken)];
     }
 }

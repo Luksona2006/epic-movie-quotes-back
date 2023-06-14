@@ -19,7 +19,7 @@ class NotificationsController extends Controller
         $user = User::where('token', $token)->first();
 
         if($user) {
-            $notifications = $user->notifications->toArray();
+            $notifications = $user->notifications()->orderBy('created_at', 'desc')->get()->toArray();
 
             $notificationsWithUsers = [];
 
@@ -29,8 +29,7 @@ class NotificationsController extends Controller
                     $notificationUser = User::where('id', $notificationUserId)->first();
                     $notification['time'] =  Carbon::parse($notification['created_at'])->diffForHumans(Carbon::now());
                     $notification['user'] =  $notificationUser;
-                    $notificationQuote = Quote::where('id', $notification['quote_id'])->first();
-                    $notification['movie'] = $notificationQuote->movie;
+
                     return $notification;
                 }, $notifications);
             }
@@ -51,8 +50,11 @@ class NotificationsController extends Controller
             if($notification) {
                 $notification->seen = true;
                 $notification->save();
-                $notification['time'] = $notification->created_at->diffForHumans(Carbon::now());
-                $notification->quote;
+                $notificationUserId = UserNotification::where('to_user_id', $user->id)->first()->from_user_id;
+                $notificationUser = User::where('id', $notificationUserId)->first();
+                $notification['time'] =  Carbon::parse($notification['created_at'])->diffForHumans(Carbon::now());
+                $notification['user'] =  $notificationUser;
+
                 return response()->json(['notification' => $notification]);
             }
 

@@ -45,12 +45,14 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('quote/create', [QuoteController::class, 'create'])->name('quote.create');
     Route::put('quote/update/{id}', [QuoteController::class, 'update'])->name('quote.update');
     Route::post('quote/remove/{id}', [QuoteController::class, 'remove'])->name('quote.remove');
+    Route::post('quotes/search', [QuoteController::class, 'filterQuotes'])->name('quotes.filter-quotes');
     Route::get('user/{token}/quotes', [QuoteController::class, 'getAllQuotes'])->name('user.get-all-quotes');
     Route::get('user/{token}/quotes/{id}', [QuoteController::class, 'getQuote'])->name('user.get-quote');
 
     Route::post('movie/create', [MovieController::class, 'create'])->name('movie.create');
     Route::put('movie/update/{id}', [MovieController::class, 'update'])->name('movie.update');
     Route::post('movie/remove/{id}', [MovieController::class, 'remove'])->name('movie.remove');
+    Route::post('movies/search', [MovieController::class, 'filterMovies'])->name('quotes.filter-movies');
     Route::get('user/{token}/movies', [MovieController::class, 'getAllMovies'])->name('user.get-all-movies');
     Route::get('user/{token}/movies/{id}', [MovieController::class, 'getMovie'])->name('user.get-movie');
 

@@ -4,7 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Events\CommentQuote;
 use App\Events\LikeQuote;
-use App\Events\QuoteNotification;
+use App\Events\RecieveNotification;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateQuoteRequest;
 use App\Http\Requests\UpdateQuoteRequest;
@@ -45,24 +45,7 @@ class QuoteController extends Controller
         $quote = Quote::create($attributes);
 
         if($quote) {
-            $movie = Movie::where('id', $quote->movie_id)->first()->toArray();
-            $author = User::where('id', $quote->user_id)->first()->toArray();
-            $comments = Comment::where('quote_id', $quote->id)->get()->toArray();
-
-            $commentsWithUsers = [];
-
-            if(count($comments)) {
-                $commentsWithUsers = array_map(function ($comment) {
-                    $commentUser = User::where('id', $comment['user_id'])->first()->toArray();
-                    $comment['user'] = $commentUser;
-                    return $comment;
-                }, $comments);
-            }
-
-            $quote = $quote->toArray();
-            $quotesFullData = [...$quote, 'movie' => $movie, 'author' => $author, 'comments' => $commentsWithUsers];
-
-            return response()->json(['quote' => $quotesFullData]);
+            return response()->json(['quote' => $quote->getFullData()]);
         }
 
         return response()->json(['message', 'Something went wrong, please check provided details and try again']);
@@ -135,8 +118,10 @@ class QuoteController extends Controller
 
                 if($user->id !== $quote->user->id) {
                     UserNotification::create(['from_user_id' => $user->id, 'to_user_id' => $quote->user_id]);
-                    Notification::create(['user_id' => $user->id,'quote_id' => $quote->id, 'type' => 'like']);
-                    event(new QuoteNotification($user, $quote->user, 'like'));
+                    $notification = Notification::create(['user_id' => $user->id,'quote_id' => $quote->id, 'type' => 'like']);
+                    $notification['user'] = $user;
+                    $notification['quoteId'] = $notification->quote->id;
+                    event(new RecieveNotification($quote->user->token, $notification));
                 }
 
                 event(new LikeQuote($quote->id, $likesSum));
@@ -156,13 +141,17 @@ class QuoteController extends Controller
 
                 if($user->id !== $quote->user->id) {
                     UserNotification::create(['from_user_id' => $user['id'], 'to_user_id' => $quote->user_id]);
-                    Notification::create(['user_id' => $user->id,'quote_id' => $quote->id, 'type' => 'comment']);
-                    event(new QuoteNotification($user, $quote->user, 'comment'));
+                    $notification = Notification::create(['user_id' => $user->id,'quote_id' => $quote->id, 'type' => 'comment']);
+                    $notification['user'] = $user;
+                    $notification['quoteId'] = $notification->quote->id;
+                    event(new RecieveNotification($quote->user->token, $notification));
                 }
 
                 UserNotification::create(['from_user_id' => $user['id'], 'to_user_id' => $quote->user_id]);
-                Notification::create(['user_id' => $user->id,'quote_id' => $quote->id, 'type' => 'comment']);
-                event(new QuoteNotification($user, $quote->user, 'comment'));
+                $notification = Notification::create(['user_id' => $user->id,'quote_id' => $quote->id, 'type' => 'comment']);
+                $notification['user'] = $user;
+                $notification['quoteId'] = $notification->quote->id;
+                event(new RecieveNotification($quote->user->token, $notification));
 
                 event(new CommentQuote($quote->id, $comment));
             }
@@ -209,33 +198,11 @@ class QuoteController extends Controller
     {
         $user = User::where('token', $userToken)->first();
         if($user) {
-            $quotes = Quote::orderBy('created_at', 'DESC')->get()->toArray();
+            $quotes = $user->quotes()->orderBy('created_at', 'desc')->get()->toArray();
             $quotesFullData = array_map(function ($quote) {
-                $movie = Movie::where('id', $quote['movie_id'])->first()->toArray();
-                $author = User::where('id', $quote['user_id'])->first()->toArray();
-                $comments = Comment::where('quote_id', $quote['id'])->get()->toArray();
+                $quoteModel = Quote::find($quote['id']);
 
-                $commentsWithUsers = [];
-
-                if(count($comments)) {
-                    $commentsWithUsers = array_map(function ($comment) {
-                        $commentUser = User::where('id', $comment['user_id'])->first();
-                        $comment['user'] = $commentUser;
-                        return $comment;
-                    }, $comments);
-                }
-
-                $likes = Like::where('quote_id', $quote['id'])->get()->toArray();
-
-                $likesSum = count($likes);
-                $liked = array_filter($likes, function ($like) use ($author) {
-                    return $like['user_id'] === $author['id'];
-                });
-
-                $quote['likes'] = $likesSum;
-                $quote['liked'] = count($liked) ? true : false;
-
-                return [...$quote, 'movie' => $movie, 'author' => $author, 'comments' => $commentsWithUsers];
+                return $quoteModel->getFullData();
             }, $quotes);
 
             return response()->json(['quotes' => $quotesFullData]);
@@ -250,40 +217,59 @@ class QuoteController extends Controller
         if($user) {
             $quote = Quote::where('user_id', $user->id)->where('id', $quoteId)->first();
             if($quote) {
-                $quote['movie'] = $quote->movie;
-
-                $comments = Comment::where('quote_id', $quote->id)->get()->toArray();
-
-                $commentsWithUsers = [];
-
-                if(count($comments)) {
-                    $commentsWithUsers = array_map(function ($comment) {
-                        $commentUser = User::where('id', $comment['user_id'])->first();
-                        $comment['user'] = $commentUser;
-                        return $comment;
-                    }, $comments);
-                }
-
-                $quote['comments'] = $commentsWithUsers;
-
-                $likes = Like::where('quote_id', $quote->id)->where('user_id', $user->id)->get()->toArray();
-                $likesSum = count($likes);
-
-                $liked = array_filter($likes, function ($like) use ($user) {
-                    return $like['user_id'] === $user->id;
-                });
-
-                $quote['likes'] = $likesSum;
-                $quote['liked'] = count($liked) ? true : false;
-
-
-                $quote['author'] = $user;
-                return response()->json(['quote' => $quote]);
+                return response()->json(['quote' => $quote->getFullData()]);
             }
 
             return response()->json(['message' => 'Quote not found'], 404);
         };
 
         return response()->json(['message' => 'You are not able to get movie'], 401);
+    }
+
+    public function filterQuotes(Request $request): JsonResponse
+    {
+        $user = User::where('token', $request->user_token)->first();
+        if($user) {
+            $search = $request->searchBy;
+            if($search[0] === '#') {
+                $search = ltrim($search, '#');
+                $quotes = Quote::whereRaw('LOWER(JSON_EXTRACT(text, "$.en")) like ?', '%'.strtolower($search).'%')
+                ->orWhereRaw('LOWER(JSON_EXTRACT(text, "$.ka")) like ?', '%'.strtolower($search).'%')
+                ->orderBy('created_at', 'desc')
+                ->get()->toArray();
+
+                $updatedQuotes = [];
+                foreach ($quotes as $quote) {
+                    $quoteModel = Quote::find($quote['id']);
+                    array_push($updatedQuotes, $quoteModel->getFullData());
+                };
+
+                return response()->json(['quotes' => $updatedQuotes]);
+            }
+
+            if($search[0] === '@') {
+                $search = ltrim($search, '@');
+                $movies = Movie::whereRaw('LOWER(JSON_EXTRACT(name, "$.en")) like ?', '%'.strtolower($search).'%')
+                ->orWhereRaw('LOWER(JSON_EXTRACT(name, "$.ka")) like ?', '%'.strtolower($search).'%')
+                ->get()->toArray();
+
+                $updatedQuotes = [];
+                foreach ($movies as $movie) {
+                    $movieQuotes = Movie::where('id', $movie['id'])->first()->quotes->toArray();
+
+                    foreach ($movieQuotes as $quote) {
+                        $quoteModel = Quote::find($quote['id']);
+                        array_push($updatedQuotes, $quoteModel->getFullData());
+                    };
+                };
+
+                return response()->json(['quotes' => $updatedQuotes]);
+            }
+
+            return response()->json(['message' => 'Use # or @ at the beginning', 'quotes' => []], 204);
+        }
+
+
+        return response()->json(['message' => 'You are not able to search for quotes'], 401);
     }
 }
