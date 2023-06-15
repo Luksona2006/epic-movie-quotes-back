@@ -21,20 +21,29 @@ class NotificationsController extends Controller
         if($user) {
             $notifications = $user->notifications()->orderBy('created_at', 'desc')->get()->toArray();
 
-            $notificationsWithUsers = [];
-
             if(count($notifications)) {
-                $notificationsWithUsers = array_map(function ($notification) use ($user) {
+                $notificationsWithUsers = [];
+                $newsSum = 0;
+
+                $notificationsWithUsers = array_map(function ($notification) use ($user, $newsSum) {
                     $notificationUserId = UserNotification::where('to_user_id', $user->id)->first()->from_user_id;
                     $notificationUser = User::where('id', $notificationUserId)->first();
                     $notification['time'] =  Carbon::parse($notification['created_at'])->diffForHumans(Carbon::now());
                     $notification['user'] =  $notificationUser;
-
+                    if(!$notification['seen']) {
+                        $newsSum = $newsSum + 1;
+                    }
                     return $notification;
                 }, $notifications);
+
+                $newsSum = count(array_filter($notifications, function ($notification) {
+                    return $notification['seen'] === 0;
+                }));
+
+                return response()->json(['notifications' => $notificationsWithUsers, 'newsSum' => $newsSum]);
             }
 
-            return response()->json(['notifications' => $notificationsWithUsers]);
+            return response()->json(['message' => 'No notifications found'], 204);
         }
 
         return response()->json(['message' => 'Wrong user, you are not able to get notifications'], 401);

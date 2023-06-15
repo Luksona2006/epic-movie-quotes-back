@@ -54,6 +54,7 @@ class QuoteController extends Controller
     public function update(int $id, UpdateQuoteRequest $request): JsonResponse
     {
         $quote = Quote::where('id', $id)->first();
+        $quoteUser = User::where('id', $quote->user_id)->first();
         $user = User::where('token', $request->user_token)->first();
 
         if($quote && $user) {
@@ -85,7 +86,7 @@ class QuoteController extends Controller
             }
 
 
-            $likes = $quote->likes->toArray();
+            $likes = Like::where('quote_id', $quote->id)->get()->toArray();
             $likesSum = count($likes);
             $liked = array_filter($likes, function ($like) use ($user) {
                 return $like['user_id'] === $user->id;
@@ -116,15 +117,16 @@ class QuoteController extends Controller
                     $quote['liked'] = false;
                 }
 
-                if($user->id !== $quote->user->id) {
+                if($user->id !== $quoteUser->id) {
                     UserNotification::create(['from_user_id' => $user->id, 'to_user_id' => $quote->user_id]);
                     $notification = Notification::create(['user_id' => $user->id,'quote_id' => $quote->id, 'type' => 'like']);
                     $notificationFullData = [...$notification->toArray()];
                     $notificationFullData['user'] = $user;
-                    event(new RecieveNotification($quote->user->token, $notificationFullData));
+                    event(new RecieveNotification($quoteUser->token, $notificationFullData));
                 }
 
-                event(new LikeQuote($quote->id, $likesSum));
+                $isOwnQuote = $user->id === $quote->id;
+                event(new LikeQuote($quote->id, $likesSum, $isOwnQuote));
             }
 
             $quote['likes'] = $likesSum;
@@ -139,31 +141,32 @@ class QuoteController extends Controller
 
                 $comment->user;
 
-                if($user->id !== $quote->user->id) {
+                if($user->id !== $quoteUser->id) {
                     UserNotification::create(['from_user_id' => $user->id, 'to_user_id' => $quote->user_id]);
                     $notification = Notification::create(['user_id' => $user->id,'quote_id' => $quote->id, 'type' => 'comment']);
                     $notificationFullData = [...$notification->toArray()];
                     $notificationFullData['user'] = $user;
-                    event(new RecieveNotification($quote->user->token, $notificationFullData));
+                    event(new RecieveNotification($quoteUser->token, $notificationFullData));
                 }
 
-                event(new CommentQuote($quote->id, $comment));
+                $isOwnQuote = $user->id === $quote->id;
+                event(new CommentQuote($quote->id, $comment, $isOwnQuote));
             }
 
             $quote['movie'] = $quote->movie;
-            $quote['author'] = $quote->user;
-            $comments = $quote->comments->toArray();
+            $quote['author'] = $quoteUser;
+            $comments = Comment::where('quote_id', $quote->id)->get()->toArray();
 
             $commentsWithUsers = [];
 
             if(count($comments)) {
                 $commentsWithUsers = array_map(function ($comment) {
-                    $comment['user'] = User::where('id', $comment['user_id']);
+                    $comment['user'] = User::where('id', $comment['user_id'])->first();
                     return $comment;
                 }, $comments);
             }
 
-            $quote['comments']= $commentsWithUsers;
+            $quote['comments'] = $commentsWithUsers;
 
             return response()->json(['quote' => $quote]);
         }

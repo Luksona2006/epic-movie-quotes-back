@@ -47,7 +47,7 @@ class Quote extends Model
         $comments = $this->comments;
 
         $commentsWithUsers = $comments->map(function ($comment) {
-            return ['user' => $comment->user, $comment];
+            return ['user' => $comment->user, ...$comment->toArray()];
         });
 
 
