@@ -35,6 +35,6 @@ class RecieveNotification implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return [new PrivateChannel('notifications.'.$this->recieverToken)];
+        return new PrivateChannel('notifications.'.$this->recieverToken);
     }
 }

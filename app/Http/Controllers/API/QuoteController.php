@@ -119,9 +119,9 @@ class QuoteController extends Controller
                 if($user->id !== $quote->user->id) {
                     UserNotification::create(['from_user_id' => $user->id, 'to_user_id' => $quote->user_id]);
                     $notification = Notification::create(['user_id' => $user->id,'quote_id' => $quote->id, 'type' => 'like']);
-                    $notification['user'] = $user;
-                    $notification['quoteId'] = $notification->quote->id;
-                    event(new RecieveNotification($quote->user->token, $notification));
+                    $notificationFullData = [...$notification->toArray()];
+                    $notificationFullData['user'] = $user;
+                    event(new RecieveNotification($quote->user->token, $notificationFullData));
                 }
 
                 event(new LikeQuote($quote->id, $likesSum));
@@ -140,18 +140,12 @@ class QuoteController extends Controller
                 $comment->user;
 
                 if($user->id !== $quote->user->id) {
-                    UserNotification::create(['from_user_id' => $user['id'], 'to_user_id' => $quote->user_id]);
+                    UserNotification::create(['from_user_id' => $user->id, 'to_user_id' => $quote->user_id]);
                     $notification = Notification::create(['user_id' => $user->id,'quote_id' => $quote->id, 'type' => 'comment']);
-                    $notification['user'] = $user;
-                    $notification['quoteId'] = $notification->quote->id;
-                    event(new RecieveNotification($quote->user->token, $notification));
+                    $notificationFullData = [...$notification->toArray()];
+                    $notificationFullData['user'] = $user;
+                    event(new RecieveNotification($quote->user->token, $notificationFullData));
                 }
-
-                UserNotification::create(['from_user_id' => $user['id'], 'to_user_id' => $quote->user_id]);
-                $notification = Notification::create(['user_id' => $user->id,'quote_id' => $quote->id, 'type' => 'comment']);
-                $notification['user'] = $user;
-                $notification['quoteId'] = $notification->quote->id;
-                event(new RecieveNotification($quote->user->token, $notification));
 
                 event(new CommentQuote($quote->id, $comment));
             }
