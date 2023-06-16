@@ -19,6 +19,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Pagination\Paginator;
 
 class QuoteController extends Controller
 {
@@ -191,18 +192,19 @@ class QuoteController extends Controller
         return response()->json(['message' => 'You are not able to remove quote'], 404);
     }
 
-    public function getAllQuotes(string $userToken): JsonResponse
+    public function paginateQuotes(string $userToken, int $pageNum): JsonResponse
     {
         $user = User::where('token', $userToken)->first();
         if($user) {
-            $quotes = $user->quotes()->orderBy('created_at', 'desc')->get()->toArray();
+            $quotesPaginate = Quote::where('user_id', $user->id)->orderBy('created_at', 'desc')->paginate(10, ['*'], 'quotes-per-page', $pageNum)->toArray();
+            $quotes = $quotesPaginate['data'];
             $quotesFullData = array_map(function ($quote) {
                 $quoteModel = Quote::find($quote['id']);
 
                 return $quoteModel->getFullData();
             }, $quotes);
 
-            return response()->json(['quotes' => $quotesFullData]);
+            return response()->json(['quotes' => $quotesFullData, 'isLastPage' => $quotesPaginate['last_page'] === $pageNum]);
         };
 
         return response()->json(['message' => 'You are not able to get quotes'], 401);
@@ -230,10 +232,11 @@ class QuoteController extends Controller
             $search = $request->searchBy;
             if($search[0] === '#') {
                 $search = ltrim($search, '#');
-                $quotes = Quote::whereRaw('LOWER(JSON_EXTRACT(text, "$.en")) like ?', '%'.strtolower($search).'%')
+                $quotesPaginate = Quote::whereRaw('LOWER(JSON_EXTRACT(text, "$.en")) like ?', '%'.strtolower($search).'%')
                 ->orWhereRaw('LOWER(JSON_EXTRACT(text, "$.ka")) like ?', '%'.strtolower($search).'%')
-                ->orderBy('created_at', 'desc')
-                ->get()->toArray();
+                ->orderBy('created_at', 'desc')->paginate(10, ['*'], 'quotes-per-page', $request->pageNum)->toArray();
+
+                $quotes = $quotesPaginate['data'];
 
                 $updatedQuotes = [];
                 foreach ($quotes as $quote) {
@@ -241,14 +244,14 @@ class QuoteController extends Controller
                     array_push($updatedQuotes, $quoteModel->getFullData());
                 };
 
-                return response()->json(['quotes' => $updatedQuotes]);
+                return response()->json(['quotes' => $updatedQuotes, 'isLastPage' => $quotesPaginate['last_page'] === $request->pageNum]);
             }
 
             if($search[0] === '@') {
                 $search = ltrim($search, '@');
                 $movies = Movie::whereRaw('LOWER(JSON_EXTRACT(name, "$.en")) like ?', '%'.strtolower($search).'%')
                 ->orWhereRaw('LOWER(JSON_EXTRACT(name, "$.ka")) like ?', '%'.strtolower($search).'%')
-                ->get()->toArray();
+                ->orderBy('created_at', 'desc')->get()->toArray();
 
                 $updatedQuotes = [];
                 foreach ($movies as $movie) {
