@@ -201,13 +201,33 @@ class QuoteController extends Controller
             $quotesFullData = array_map(function ($quote) {
                 $quoteModel = Quote::find($quote['id']);
 
-                return $quoteModel->getFullData();
+                $quoteFullData = $quoteModel->getFullData();
+                $quotesFullData['commentsTotal'] = count($quoteModel->comments->toArray());
+                $quoteFullData['comments'] = array_slice($quoteModel->comments->toArray(), -2);
+
+                return [...$quoteFullData, 'commentsTotal' => count($quoteModel->comments->toArray())];
             }, $quotes);
+
+
+
 
             return response()->json(['quotes' => $quotesFullData, 'isLastPage' => $quotesPaginate['last_page'] === $pageNum]);
         };
 
         return response()->json(['message' => 'You are not able to get quotes'], 401);
+    }
+
+    public function getAllComments(string $userToken, int $quoteId)
+    {
+        $user = User::where('token', $userToken)->first();
+        if($user) {
+            $quote = Quote::find($quoteId);
+            $quoteFullData = $quote->getFullData();
+
+            return response()->json(['comments' => $quoteFullData['comments']]);
+        };
+
+        return response()->json(['message' => 'You are not able to get comments'], 401);
     }
 
     public function getQuote(string $userToken, int $quoteId): JsonResponse

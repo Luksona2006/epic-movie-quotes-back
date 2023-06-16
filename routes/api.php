@@ -48,6 +48,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('quotes/search', [QuoteController::class, 'filterQuotes'])->name('quotes.filter-quotes');
     // Route::get('user/{token}/quotes', [QuoteController::class, 'getAllQuotes'])->name('user.get-all-quotes');
     Route::get('user/{token}/quotes/page/{num}', [QuoteController::class, 'paginateQuotes'])->name('user.paginate-quotes');
+    Route::get('user/{token}/quotes/{id}/comments', [QuoteController::class, 'getAllComments'])->name('user.get-all-comments');
     Route::get('user/{token}/quotes/{id}', [QuoteController::class, 'getQuote'])->name('user.get-quote');
 
     Route::post('movie/create', [MovieController::class, 'create'])->name('movie.create');
