@@ -54,7 +54,8 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('movie/create', [MovieController::class, 'create'])->name('movie.create');
     Route::put('movie/update/{id}', [MovieController::class, 'update'])->name('movie.update');
     Route::post('movie/remove/{id}', [MovieController::class, 'remove'])->name('movie.remove');
-    Route::post('movies/search', [MovieController::class, 'filterMovies'])->name('quotes.filter-movies');
+    Route::post('my-movies/search', [MovieController::class, 'filterMyMovies'])->name('my-movies.filter-my-movies');
+    Route::post('movies/search', [MovieController::class, 'filterMovies'])->name('movies.filter-movies');
     Route::get('user/{token}/movies', [MovieController::class, 'getAllMovies'])->name('user.get-all-movies');
     Route::get('user/{token}/movies/page/{num}', [MovieController::class, 'paginateMovies'])->name('user.paginate-movies');
     Route::get('user/{token}/movies/{id}', [MovieController::class, 'getMovie'])->name('user.get-movie');

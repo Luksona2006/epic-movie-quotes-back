@@ -215,15 +215,45 @@ class MovieController extends Controller
         return response()->json(['message' => 'You are not able to get movie'], 401);
     }
 
-    public function filterMovies(Request $request): JsonResponse
+    public function filterMyMovies(Request $request): JsonResponse
     {
         $user = User::where('token', $request->user_token)->first();
         if($user) {
             $search = $request->searchBy;
             if($search) {
-                $search = ltrim($search, '#');
+                $search = ltrim($search, '@');
                 $moviesPaginate = Movie::where('user_id', $user->id)
                 ->whereRaw('LOWER(JSON_EXTRACT(name, "$.en")) like ?', '%'.strtolower($search).'%')
+                ->orWhereRaw('LOWER(JSON_EXTRACT(name, "$.ka")) like ?', '%'.strtolower($search).'%')
+                ->orderBy('created_at', 'desc')
+                ->paginate(10, ['*'], 'movies-per-page', $request->pageNum)->toArray();
+
+                $movies = $moviesPaginate['data'];
+
+                $updatedMovies = [];
+                foreach ($movies as $movie) {
+                    $movieModel = Movie::find($movie['id']);
+                    array_push($updatedMovies, $movieModel->getFullData());
+                };
+
+                return response()->json(['movies' => $updatedMovies, 'isLastPage' => $moviesPaginate['last_page'] === $request->pageNum]);
+            }
+
+            return response()->json(['message' => 'Enter movie name to search movie', 'movies' => []], 204);
+        }
+
+        return response()->json(['message' => 'You are not able to search for movies'], 401);
+    }
+
+    public function filterMovies(Request $request): JsonResponse
+    {
+        $user = User::where('token', $request->user_token)->first();
+        if($user) {
+            $search = $request->searchBy;
+
+            if($search) {
+                $search = ltrim($search, '@');
+                $moviesPaginate = Movie::whereRaw('LOWER(JSON_EXTRACT(name, "$.en")) like ?', '%'.strtolower($search).'%')
                 ->orWhereRaw('LOWER(JSON_EXTRACT(name, "$.ka")) like ?', '%'.strtolower($search).'%')
                 ->orderBy('created_at', 'desc')
                 ->paginate(10, ['*'], 'movies-per-page', $request->pageNum)->toArray();
