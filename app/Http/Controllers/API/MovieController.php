@@ -5,9 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateMovieRequest;
 use App\Http\Requests\UpdateMovieRequest;
-use App\Models\Comment;
 use App\Models\Genre;
-use App\Models\Like;
 use App\Models\Movie;
 use App\Models\MovieGenre;
 use App\Models\Quote;
@@ -65,7 +63,7 @@ class MovieController extends Controller
             return response()->json(['movie' => $movie]);
         }
 
-        return response()->json(['message' => 'You are not able to create movie'], 401);
+        return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.create_movie')])], 401);
     }
 
     public function update(int $movieId, UpdateMovieRequest $request): JsonResponse
@@ -122,7 +120,7 @@ class MovieController extends Controller
             return response()->json(['movie' => $movie]);
         }
 
-        return response()->json(['message' => 'Wrong id, no movie found'], 404);
+        return response()->json(['message' => __('messages.wrong_id')], 404);
     }
 
     public function remove(int $id, Request $request): JsonResponse
@@ -133,13 +131,13 @@ class MovieController extends Controller
             $movie = Movie::where('id', $id)->where('user_id', $user->id)->first();
             if($movie) {
                 $movie->delete();
-                return response()->json(['message' => 'Movie deleted successfully']);
+                return response()->json(['message' => __('messages.deleted_successfully', ['deleted' => __('messages.movie')])]);
             }
 
-            return response()->json(['message' => 'Wrong id, no movie found', 404]);
+            return response()->json(['message' => __('messages.wrong_id'), 404]);
         }
 
-        return response()->json(['message' => 'You are not able to remove movie', 404]);
+        return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.get_movies')]), 404]);
     }
 
     public function paginateMovies(string $userToken, int $pageNum): JsonResponse
@@ -159,7 +157,7 @@ class MovieController extends Controller
             return response()->json(['movies' => $moviesFullData, 'isLastPage' => $moviesPaginate['last_page'] === $pageNum, 'total' => $totalMovies]);
         };
 
-        return response()->json(['message' => 'You are not able to get movies'], 401);
+        return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.get_movies')])], 401);
     }
 
 
@@ -178,7 +176,7 @@ class MovieController extends Controller
             return response()->json(['movies' => $moviesFullData]);
         };
 
-        return response()->json(['message' => 'You are not able to get movies'], 401);
+        return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.get_movies')])], 401);
     }
 
     public function getMovie(string $userToken, int $movieId): JsonResponse
@@ -209,10 +207,10 @@ class MovieController extends Controller
                 return response()->json(['movie' => $movie]);
             }
 
-            return response()->json(['message' => 'Movie not found'], 404);
+            return response()->json(['message' => __('messages.not_found', ['notFound' => __('messages.movie')])], 404);
         };
 
-        return response()->json(['message' => 'You are not able to get movie'], 401);
+        return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.get_movie')])], 401);
     }
 
     public function filterMyMovies(Request $request): JsonResponse
@@ -239,10 +237,10 @@ class MovieController extends Controller
                 return response()->json(['movies' => $updatedMovies, 'isLastPage' => $moviesPaginate['last_page'] === $request->pageNum]);
             }
 
-            return response()->json(['message' => 'Enter movie name to search movie', 'movies' => []], 204);
+            return response()->json(['message' => __('messages.enter_movie_name_to_search_movie'), 'movies' => []], 204);
         }
 
-        return response()->json(['message' => 'You are not able to search for movies'], 401);
+        return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.search_for_movies')])], 401);
     }
 
     public function filterMovies(Request $request): JsonResponse
@@ -269,9 +267,9 @@ class MovieController extends Controller
                 return response()->json(['movies' => $updatedMovies, 'isLastPage' => $moviesPaginate['last_page'] === $request->pageNum]);
             }
 
-            return response()->json(['message' => 'Enter movie name to search movie', 'movies' => []], 204);
+            return response()->json(['message' => __('messages.enter_movie_name_to_search_movie'), 'movies' => []], 204);
         }
 
-        return response()->json(['message' => 'You are not able to search for movies'], 401);
+        return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.search_for_movies')])], 401);
     }
 }

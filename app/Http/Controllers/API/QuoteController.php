@@ -49,7 +49,7 @@ class QuoteController extends Controller
             return response()->json(['quote' => $quote->getFullData()]);
         }
 
-        return response()->json(['message', 'Something went wrong, please check provided details and try again']);
+        return response()->json(['message', __('messages.invalid_credentials')], 401);
     }
 
     public function update(int $id, UpdateQuoteRequest $request): JsonResponse
@@ -172,7 +172,7 @@ class QuoteController extends Controller
             return response()->json(['quote' => $quote]);
         }
 
-        return response()->json(['message' => 'Wrong id, no quote found'], 404);
+        return response()->json(['message' => __('messages.wrong_id')], 404);
     }
 
     public function remove(int $id, Request $request): JsonResponse
@@ -183,13 +183,13 @@ class QuoteController extends Controller
             $quote = Quote::where('id', $id)->where('user_id', $user->id)->first();
             if($quote) {
                 $quote->delete();
-                return response()->json(['message' => 'Quote deleted successfully']);
+                return response()->json(['message' => __('messages.deleted_successfully', ['deleted' => __('messages.quote')])]);
             }
 
-            return response()->json(['message' => 'Wrong id, no quote found'], 404);
+            return response()->json(['message' => __('messages.wrong_id')], 404);
         }
 
-        return response()->json(['message' => 'You are not able to remove quote'], 404);
+        return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.remove_quote')])], 404);
     }
 
     public function paginateQuotes(string $userToken, int $pageNum): JsonResponse
@@ -214,7 +214,7 @@ class QuoteController extends Controller
             return response()->json(['quotes' => $quotesFullData, 'isLastPage' => $quotesPaginate['last_page'] === $pageNum]);
         };
 
-        return response()->json(['message' => 'You are not able to get quotes'], 401);
+        return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.get_quotes')])], 401);
     }
 
     public function getAllComments(string $userToken, int $quoteId)
@@ -227,7 +227,7 @@ class QuoteController extends Controller
             return response()->json(['comments' => $quoteFullData['comments']]);
         };
 
-        return response()->json(['message' => 'You are not able to get comments'], 401);
+        return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.get_comments')])], 401);
     }
 
     public function getQuote(string $userToken, int $quoteId): JsonResponse
@@ -239,10 +239,10 @@ class QuoteController extends Controller
                 return response()->json(['quote' => $quote->getFullData()]);
             }
 
-            return response()->json(['message' => 'Quote not found'], 404);
+            return response()->json(['message' => __('messages.not_found', ['notFound' => __('messages.quote')])], 404);
         };
 
-        return response()->json(['message' => 'You are not able to get movie'], 401);
+        return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.get_quote')])], 401);
     }
 
     public function filterQuotes(Request $request): JsonResponse
@@ -268,10 +268,10 @@ class QuoteController extends Controller
             }
 
 
-            return response()->json(['message' => 'Use # or @ at the beginning', 'quotes' => []], 204);
+            return response()->json(['quotes' => []], 204);
         }
 
 
-        return response()->json(['message' => 'You are not able to search for quotes'], 401);
+        return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.search_for_quotes')])], 401);
     }
 }

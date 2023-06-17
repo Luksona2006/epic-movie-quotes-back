@@ -24,21 +24,21 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
         if(!$user->email_verified_at) {
-            return response()->json(['message' => 'Account is not verified yet']);
+            return response()->json(['message' => __('messages.account_is_not_verified_yet')]);
         }
 
         if(Auth::attempt($credentials, $request->remember)) {
             Auth::login($user, $request->remember);
             return response()->json(['user' => $user]);
         };
-        return response()->json(['message' => 'Invalid credentials'], 401);
+        return response()->json(['message' => __('messages.invalid_credentials')], 401);
     }
 
     public function logout(): JsonResponse
     {
         Auth::guard('web')->logout();
         session()->regenerate();
-        return response()->json(['message' => 'User logged out']);
+        return response()->json(['message' => __('messages.user_logged_out')]);
     }
 
     public function register(RegisterRequest $request): JsonResponse
@@ -61,7 +61,7 @@ class AuthController extends Controller
             return response()->json(['user' => $user]);
         }
 
-        return response()->json(['message' => 'Invalid details'], 401);
+        return response()->json(['message' => __('messages.invalid_credentials')], 401);
     }
 
     public function verifyEmail(string $token): RedirectResponse
@@ -96,10 +96,10 @@ class AuthController extends Controller
                 ['password_reset_token' => $token]
             );
 
-            return response()->json(['message' => 'Email has sended to confirm password reset']);
+            return response()->json(['message' => __('messages.email_confirmation_sent_for_reset_password')]);
         }
 
-        return response()->json(['message' => 'Invalid credentials'], 401);
+        return response()->json(['message' => __('messages.invalid_credentials')], 401);
     }
 
     public function resetPassword(ResetPasswordRequest $request): JsonResponse

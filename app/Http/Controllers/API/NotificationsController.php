@@ -86,12 +86,12 @@ class NotificationsController extends Controller
                     $notificationData->seen = true;
                     $notificationData->save();
                 };
-                return response()->json(['message' => 'All notifications has been marked as read']);
+                return response()->json(['message' => __('messages.all_notifications_marked')]);
             }
 
-            return response()->json(['message' => 'Wrong id, no notificaiton found']);
+            return response()->json(['message' => __('messages.wrong_id')]);
         }
 
-        return response()->json(['message' => 'Wrong user, you are not able to get notifications'], 401);
+        return response()->json(['message' => __('messages.wrong_user')], 401);
     }
 }

@@ -18,6 +18,6 @@ class GenreController extends Controller
             return response()->json(['genres' => $genres]);
         }
 
-        return response()->json(['message' => 'You are not able to get genres'], 401);
+        return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.get_genres')])], 401);
     }
 }
