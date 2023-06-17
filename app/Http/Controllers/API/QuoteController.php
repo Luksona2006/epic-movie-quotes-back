@@ -267,24 +267,6 @@ class QuoteController extends Controller
                 return response()->json(['quotes' => $updatedQuotes, 'isLastPage' => $quotesPaginate['last_page'] === $request->pageNum]);
             }
 
-            if($search[0] === '@') {
-                $search = ltrim($search, '@');
-                $movies = Movie::whereRaw('LOWER(JSON_EXTRACT(name, "$.en")) like ?', '%'.strtolower($search).'%')
-                ->orWhereRaw('LOWER(JSON_EXTRACT(name, "$.ka")) like ?', '%'.strtolower($search).'%')
-                ->orderBy('created_at', 'desc')->get()->toArray();
-
-                $updatedQuotes = [];
-                foreach ($movies as $movie) {
-                    $movieQuotes = Movie::where('id', $movie['id'])->first()->quotes->toArray();
-
-                    foreach ($movieQuotes as $quote) {
-                        $quoteModel = Quote::find($quote['id']);
-                        array_push($updatedQuotes, $quoteModel->getFullData());
-                    };
-                };
-
-                return response()->json(['quotes' => $updatedQuotes]);
-            }
 
             return response()->json(['message' => 'Use # or @ at the beginning', 'quotes' => []], 204);
         }
