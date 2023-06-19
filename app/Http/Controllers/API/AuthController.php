@@ -27,8 +27,8 @@ class AuthController extends Controller
             return response()->json(['message' => __('messages.account_is_not_verified_yet')]);
         }
 
-        if(Auth::attempt($credentials, $request->remember)) {
-            Auth::login($user, $request->remember);
+        $remember = $request->remember ? true : false;
+        if(Auth::guard()->attempt($credentials, $remember)) {
             return response()->json(['user' => $user]);
         };
         return response()->json(['message' => __('messages.invalid_credentials')], 401);
