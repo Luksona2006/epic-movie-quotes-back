@@ -10,7 +10,6 @@ use App\Http\Requests\CreateQuoteRequest;
 use App\Http\Requests\UpdateQuoteRequest;
 use App\Models\Comment;
 use App\Models\Like;
-use App\Models\Movie;
 use App\Models\Notification;
 use App\Models\Quote;
 use App\Models\User;
@@ -19,14 +18,13 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Pagination\Paginator;
 
 class QuoteController extends Controller
 {
     public function create(CreateQuoteRequest $request): JsonResponse
     {
         $attributes['movie_id'] = $request->movie_id;
-        $user = User::where('token', $request->user_token)->first();
+        $user = auth()->user();
         $attributes['user_id'] = $user->id;
         $attributes['text'] = [
             'en' => $request->quote_en,
@@ -123,7 +121,7 @@ class QuoteController extends Controller
                     $notification = Notification::create(['user_id' => $user->id,'quote_id' => $quote->id, 'type' => 'like']);
                     $notificationFullData = [...$notification->toArray()];
                     $notificationFullData['user'] = $user;
-                    event(new RecieveNotification($quoteUser->token, $notificationFullData));
+                    event(new RecieveNotification($quoteUser->id, $notificationFullData));
                 }
 
                 $isOwnQuote = $user->id === $quote->id;
@@ -147,7 +145,7 @@ class QuoteController extends Controller
                     $notification = Notification::create(['user_id' => $user->id,'quote_id' => $quote->id, 'type' => 'comment']);
                     $notificationFullData = [...$notification->toArray()];
                     $notificationFullData['user'] = $user;
-                    event(new RecieveNotification($quoteUser->token, $notificationFullData));
+                    event(new RecieveNotification($quoteUser->id, $notificationFullData));
                 }
 
                 $isOwnQuote = $user->id === $quote->id;
@@ -175,9 +173,9 @@ class QuoteController extends Controller
         return response()->json(['message' => __('messages.wrong_id')], 404);
     }
 
-    public function remove(int $id, Request $request): JsonResponse
+    public function remove(int $id): JsonResponse
     {
-        $user = User::where('token', $request->user_token)->first();
+        $user = auth()->user();
 
         if($user) {
             $quote = Quote::where('id', $id)->where('user_id', $user->id)->first();
@@ -192,9 +190,9 @@ class QuoteController extends Controller
         return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.remove_quote')])], 404);
     }
 
-    public function paginateQuotes(string $userToken, int $pageNum): JsonResponse
+    public function paginateQuotes(int $pageNum): JsonResponse
     {
-        $user = User::where('token', $userToken)->first();
+        $user = auth()->user();
         if($user) {
             $quotesPaginate = Quote::where('user_id', $user->id)->orderBy('created_at', 'desc')->paginate(10, ['*'], 'quotes-per-page', $pageNum)->toArray();
             $quotes = $quotesPaginate['data'];
@@ -217,9 +215,9 @@ class QuoteController extends Controller
         return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.get_quotes')])], 401);
     }
 
-    public function getAllComments(string $userToken, int $quoteId)
+    public function getAllComments(int $quoteId)
     {
-        $user = User::where('token', $userToken)->first();
+        $user = auth()->user();
         if($user) {
             $quote = Quote::find($quoteId);
             $quoteFullData = $quote->getFullData();
@@ -230,9 +228,9 @@ class QuoteController extends Controller
         return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.get_comments')])], 401);
     }
 
-    public function getQuote(string $userToken, int $quoteId): JsonResponse
+    public function getQuote(int $quoteId): JsonResponse
     {
-        $user = User::where('token', $userToken)->first();
+        $user = auth()->user();
         if($user) {
             $quote = Quote::where('user_id', $user->id)->where('id', $quoteId)->first();
             if($quote) {

@@ -17,9 +17,9 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(string $token): JsonResponse
+    public function show(): JsonResponse
     {
-        $user = User::where('token', $token)->first();
+        $user = auth()->user();
         if ($user) {
             return response()->json(['user' => $user]);
         }
@@ -34,9 +34,9 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateUserRequest $request, string $token)
+    public function update(UpdateUserRequest $request)
     {
-        $user = User::where('token', $token)->first();
+        $user = User::where('id', auth()->user()->id)->first();
         if ($user) {
             if($request->new_username) {
                 $user->name = $request->new_username;

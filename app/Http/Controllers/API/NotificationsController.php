@@ -10,16 +10,15 @@ use App\Models\User;
 use App\Models\UserNotification;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class NotificationsController extends Controller
 {
-    public function getAllNotifications(string $token): JsonResponse
+    public function getAllNotifications(): JsonResponse
     {
-        $user = User::where('token', $token)->first();
+        $user = auth()->user();
 
         if($user) {
-            $notifications = $user->notifications()->orderBy('created_at', 'desc')->get()->toArray();
+            $notifications = Notification::where('user_id', $user->id)->orderBy('created_at', 'desc')->get()->toArray();
 
             if(count($notifications)) {
                 $notificationsWithUsers = [];
@@ -49,9 +48,9 @@ class NotificationsController extends Controller
         return response()->json(['message' => 'Wrong user, you are not able to get notifications'], 401);
     }
 
-    public function update(int $notificationId, Request $request): JsonResponse
+    public function update(int $notificationId): JsonResponse
     {
-        $user = User::where('token', $request->user_token)->first();
+        $user = auth()->user();
 
         if($user) {
             $notification = Notification::where('id', $notificationId)->first();
@@ -74,9 +73,9 @@ class NotificationsController extends Controller
         return response()->json(['message' => 'Wrong user, you are not able to get notifications'], 401);
     }
 
-    public function updateAll(string $userToken): JsonResponse
+    public function updateAll(): JsonResponse
     {
-        $user = User::where('token', $userToken)->first();
+        $user = auth()->user();
 
         if($user) {
             $notifications = Notification::where('user_id', $user->id)->get()->toArray();

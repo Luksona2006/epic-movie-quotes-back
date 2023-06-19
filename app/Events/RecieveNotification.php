@@ -14,7 +14,7 @@ class RecieveNotification implements ShouldBroadcast
     use InteractsWithSockets;
     use SerializesModels;
 
-    public $recieverToken;
+    public $recieverid;
     public $notification;
 
     /**
@@ -22,9 +22,9 @@ class RecieveNotification implements ShouldBroadcast
      *
      * @return void
      */
-    public function __construct($recieverToken, $notification)
+    public function __construct($recieverid, $notification)
     {
-        $this->recieverToken = $recieverToken;
+        $this->recieverid = $recieverid;
         $this->notification = $notification;
     }
 
@@ -35,6 +35,6 @@ class RecieveNotification implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new PrivateChannel('notifications.'.$this->recieverToken);
+        return new PrivateChannel('notifications.'.$this->recieverid);
     }
 }

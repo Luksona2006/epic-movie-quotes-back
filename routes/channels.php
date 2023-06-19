@@ -13,6 +13,6 @@ use Illuminate\Support\Facades\Broadcast;
 |
 */
 
-Broadcast::channel('notifications.{token}', function ($user, $token) {
-    return $user->token === (string) $token;
+Broadcast::channel('notifications.{id}', function ($user, $id) {
+    return $user->id === (int) $id;
 });

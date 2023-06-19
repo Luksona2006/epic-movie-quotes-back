@@ -19,7 +19,7 @@ class MovieController extends Controller
 {
     public function create(CreateMovieRequest $request): JsonResponse
     {
-        $user = User::where('token', $request->user_token)->first();
+        $user = auth()->user();
 
         if($user) {
             $movie['year'] = $request->year;
@@ -69,7 +69,7 @@ class MovieController extends Controller
     public function update(int $movieId, UpdateMovieRequest $request): JsonResponse
     {
         $movie = Movie::where('id', $movieId)->first();
-        $user = User::where('token', $request->user_token)->first()->toArray();
+        $user = auth()->user->toArray();
 
         if($movie && $user) {
             if($user['id'] === $movie->user_id) {
@@ -123,9 +123,9 @@ class MovieController extends Controller
         return response()->json(['message' => __('messages.wrong_id')], 404);
     }
 
-    public function remove(int $id, Request $request): JsonResponse
+    public function remove(int $id): JsonResponse
     {
-        $user = User::where('token', $request->user_token)->first();
+        $user = auth()->user();
 
         if($user) {
             $movie = Movie::where('id', $id)->where('user_id', $user->id)->first();
@@ -140,9 +140,9 @@ class MovieController extends Controller
         return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.get_movies')]), 404]);
     }
 
-    public function paginateMovies(string $userToken, int $pageNum): JsonResponse
+    public function paginateMovies(int $pageNum): JsonResponse
     {
-        $user = User::where('token', $userToken)->first();
+        $user = auth()->user();
         if($user) {
             $moviesPaginate = Movie::where('user_id', $user->id)->orderBy('created_at', 'DESC')->paginate(6, ['*'], 'movies-per-page', $pageNum)->toArray();
             $movies = $moviesPaginate['data'];
@@ -161,9 +161,9 @@ class MovieController extends Controller
     }
 
 
-    public function getAllMovies(string $userToken): JsonResponse
+    public function getAllMovies(): JsonResponse
     {
-        $user = User::where('token', $userToken)->first();
+        $user = auth()->user();
 
         if($user) {
             $movies = Movie::where('user_id', $user->id)->orderBy('created_at', 'DESC')->get();
@@ -179,9 +179,9 @@ class MovieController extends Controller
         return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.get_movies')])], 401);
     }
 
-    public function getMovie(string $userToken, int $movieId): JsonResponse
+    public function getMovie(int $movieId): JsonResponse
     {
-        $user = User::where('token', $userToken)->first();
+        $user = auth()->user();
         if($user) {
             $movie = Movie::where('user_id', $user->id)->where('id', $movieId)->first();
 
@@ -215,7 +215,7 @@ class MovieController extends Controller
 
     public function filterMyMovies(Request $request): JsonResponse
     {
-        $user = User::where('token', $request->user_token)->first();
+        $user = auth()->user();
         if($user) {
             $search = $request->searchBy;
             if($search) {
@@ -245,7 +245,7 @@ class MovieController extends Controller
 
     public function filterMovies(Request $request): JsonResponse
     {
-        $user = User::where('token', $request->user_token)->first();
+        $user = auth()->user();
         if($user) {
             $search = $request->searchBy;
 
