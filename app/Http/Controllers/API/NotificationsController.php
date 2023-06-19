@@ -78,7 +78,7 @@ class NotificationsController extends Controller
         $user = auth()->user();
 
         if($user) {
-            $notifications = Notification::where('user_id', $user->id)->get()->toArray();
+            $notifications = $user->notifications->get()->toArray();
             if($notifications) {
                 foreach ($notifications as $notification) {
                     $notificationData = Notification::where('id', $notification['id'])->first();

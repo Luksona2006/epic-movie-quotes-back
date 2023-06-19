@@ -54,7 +54,7 @@ class QuoteController extends Controller
     {
         $quote = Quote::where('id', $id)->first();
         $quoteUser = User::where('id', $quote->user_id)->first();
-        $user = User::where('token', $request->user_token)->first();
+        $user = auth()->user();
 
         if($quote && $user) {
             if($user->id === $quote->user_id) {
@@ -178,7 +178,7 @@ class QuoteController extends Controller
         $user = auth()->user();
 
         if($user) {
-            $quote = Quote::where('id', $id)->where('user_id', $user->id)->first();
+            $quote = Quote::where('id', $id)->first();
             if($quote) {
                 $quote->delete();
                 return response()->json(['message' => __('messages.deleted_successfully', ['deleted' => __('messages.quote')])]);
@@ -232,7 +232,7 @@ class QuoteController extends Controller
     {
         $user = auth()->user();
         if($user) {
-            $quote = Quote::where('user_id', $user->id)->where('id', $quoteId)->first();
+            $quote = Quote::where('id', $quoteId)->first();
             if($quote) {
                 return response()->json(['quote' => $quote->getFullData()]);
             }
@@ -245,7 +245,7 @@ class QuoteController extends Controller
 
     public function filterQuotes(Request $request): JsonResponse
     {
-        $user = User::where('token', $request->user_token)->first();
+        $user = auth()->user();
         if($user) {
             $search = $request->searchBy;
             if($search[0] === '#') {

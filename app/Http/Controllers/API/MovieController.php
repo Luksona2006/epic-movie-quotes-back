@@ -69,7 +69,7 @@ class MovieController extends Controller
     public function update(int $movieId, UpdateMovieRequest $request): JsonResponse
     {
         $movie = Movie::where('id', $movieId)->first();
-        $user = auth()->user->toArray();
+        $user = auth()->user();
 
         if($movie && $user) {
             if($user['id'] === $movie->user_id) {
@@ -128,7 +128,7 @@ class MovieController extends Controller
         $user = auth()->user();
 
         if($user) {
-            $movie = Movie::where('id', $id)->where('user_id', $user->id)->first();
+            $movie = Movie::where('id', $id)->first();
             if($movie) {
                 $movie->delete();
                 return response()->json(['message' => __('messages.deleted_successfully', ['deleted' => __('messages.movie')])]);
@@ -220,7 +220,7 @@ class MovieController extends Controller
             $search = $request->searchBy;
             if($search) {
                 $search = ltrim($search, '@');
-                $moviesPaginate = Movie::where('user_id', $user->id)
+                $moviesPaginate = $user->movies
                 ->whereRaw('LOWER(JSON_EXTRACT(name, "$.en")) like ?', '%'.strtolower($search).'%')
                 ->orWhereRaw('LOWER(JSON_EXTRACT(name, "$.ka")) like ?', '%'.strtolower($search).'%')
                 ->orderBy('created_at', 'desc')

@@ -42,6 +42,11 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    public function movies(): HasMany
+    {
+        return $this->hasMany(Movie::class);
+    }
+
     public function quotes(): HasMany
     {
         return $this->hasMany(Quote::class);
