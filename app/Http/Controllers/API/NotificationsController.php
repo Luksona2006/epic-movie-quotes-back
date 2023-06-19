@@ -26,7 +26,7 @@ class NotificationsController extends Controller
 
                 $notificationsWithUsers = array_map(function ($notification) use ($user, $newsSum) {
                     $notificationUserId = UserNotification::where('to_user_id', $user->id)->first()->from_user_id;
-                    $notificationUser = User::where('id', $notificationUserId)->first();
+                    $notificationUser = User::find($notificationUserId);
                     $notification['time'] =  Carbon::parse($notification['created_at'])->diffForHumans(Carbon::now());
                     $notification['user'] =  $notificationUser;
                     if(!$notification['seen']) {
@@ -53,13 +53,13 @@ class NotificationsController extends Controller
         $user = auth()->user();
 
         if($user) {
-            $notification = Notification::where('id', $notificationId)->first();
+            $notification = Notification::find($notificationId);
 
             if($notification) {
                 $notification->seen = true;
                 $notification->save();
                 $notificationUserId = UserNotification::where('to_user_id', $user->id)->first()->from_user_id;
-                $notificationUser = User::where('id', $notificationUserId)->first();
+                $notificationUser = User::find($notificationUserId);
                 $notification['time'] =  Carbon::parse($notification['created_at'])->diffForHumans(Carbon::now());
                 $notification['user'] =  $notificationUser;
 
@@ -81,7 +81,7 @@ class NotificationsController extends Controller
             $notifications = $user->notifications->get()->toArray();
             if($notifications) {
                 foreach ($notifications as $notification) {
-                    $notificationData = Notification::where('id', $notification['id'])->first();
+                    $notificationData = Notification::find($notification['id']);
                     $notificationData->seen = true;
                     $notificationData->save();
                 };

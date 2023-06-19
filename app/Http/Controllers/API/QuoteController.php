@@ -52,8 +52,8 @@ class QuoteController extends Controller
 
     public function update(int $id, UpdateQuoteRequest $request): JsonResponse
     {
-        $quote = Quote::where('id', $id)->first();
-        $quoteUser = User::where('id', $quote->user_id)->first();
+        $quote = Quote::find($id);
+        $quoteUser = User::find($quote->user_id);
         $user = auth()->user();
 
         if($quote && $user) {
@@ -160,7 +160,7 @@ class QuoteController extends Controller
 
             if(count($comments)) {
                 $commentsWithUsers = array_map(function ($comment) {
-                    $comment['user'] = User::where('id', $comment['user_id'])->first();
+                    $comment['user'] = User::find($comment['user_id']);
                     return $comment;
                 }, $comments);
             }
@@ -178,7 +178,7 @@ class QuoteController extends Controller
         $user = auth()->user();
 
         if($user) {
-            $quote = Quote::where('id', $id)->first();
+            $quote = Quote::find($id);
             if($quote) {
                 $quote->delete();
                 return response()->json(['message' => __('messages.deleted_successfully', ['deleted' => __('messages.quote')])]);
@@ -232,7 +232,7 @@ class QuoteController extends Controller
     {
         $user = auth()->user();
         if($user) {
-            $quote = Quote::where('id', $quoteId)->first();
+            $quote = Quote::find($quoteId);
             if($quote) {
                 return response()->json(['quote' => $quote->getFullData()]);
             }
