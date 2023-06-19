@@ -46,24 +46,24 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::put('quote/update/{id}', [QuoteController::class, 'update'])->name('quote.update');
     Route::post('quote/remove/{id}', [QuoteController::class, 'remove'])->name('quote.remove');
     Route::post('quotes/search', [QuoteController::class, 'filterQuotes'])->name('quotes.filter-quotes');
-    Route::get('user/quotes/page/{num}', [QuoteController::class, 'paginateQuotes'])->name('user.paginate-quotes');
-    Route::get('user/quotes/{id}/comments', [QuoteController::class, 'getAllComments'])->name('user.get-all-comments');
-    Route::get('user/quotes/{id}', [QuoteController::class, 'getQuote'])->name('user.get-quote');
+    Route::get('quotes/page/{num}', [QuoteController::class, 'paginateQuotes'])->name('quotes.paginate-quotes');
+    Route::get('quotes/{id}/comments', [QuoteController::class, 'getAllComments'])->name('quotes.get-all-comments');
+    Route::get('quotes/{id}', [QuoteController::class, 'getQuote'])->name('quotes.get-quote');
 
     Route::post('movie/create', [MovieController::class, 'create'])->name('movie.create');
     Route::put('movie/update/{id}', [MovieController::class, 'update'])->name('movie.update');
     Route::post('movie/remove/{id}', [MovieController::class, 'remove'])->name('movie.remove');
     Route::post('my-movies/search', [MovieController::class, 'filterMyMovies'])->name('my-movies.filter-my-movies');
     Route::post('movies/search', [MovieController::class, 'filterMovies'])->name('movies.filter-movies');
-    Route::get('user/movies', [MovieController::class, 'getAllMovies'])->name('user.get-all-movies');
-    Route::get('user/movies/page/{num}', [MovieController::class, 'paginateMovies'])->name('user.paginate-movies');
-    Route::get('user/movies/{id}', [MovieController::class, 'getMovie'])->name('user.get-movie');
+    Route::get('movies', [MovieController::class, 'getAllMovies'])->name('movies.get-all-movies');
+    Route::get('movies/page/{num}', [MovieController::class, 'paginateMovies'])->name('movies.paginate-movies');
+    Route::get('movies/{id}', [MovieController::class, 'getMovie'])->name('movies.get-movie');
 
-    Route::get('user/genres', [GenreController::class, 'getAllGenres'])->name('user.get-all-genres');
+    Route::get('genres', [GenreController::class, 'getAllGenres'])->name('genres.get-all-genres');
 
-    Route::get('user/notifications', [NotificationsController::class, 'getAllNotifications'])->name('user.get-all-notifications');
+    Route::get('notifications', [NotificationsController::class, 'getAllNotifications'])->name('notifications.get-all-notifications');
     Route::post('notification/update/{id}', [NotificationsController::class, 'update'])->name('notification.update');
-    Route::post('user/notifications/update', [NotificationsController::class, 'updateAll'])->name('user.update-all');
+    Route::post('notifications/update', [NotificationsController::class, 'updateAll'])->name('notifications.update-all');
 });
 
 Route::get('auth/google/redirect', [SocialiteController::class, 'socialiteRedirect'])->name('auth-google.socialite-redirect');
