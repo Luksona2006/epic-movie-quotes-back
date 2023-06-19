@@ -15,8 +15,8 @@ jobs:
         run: cp .env.example .env
       - name: install npm dependencies
         run: npm ci
-      - name: run linter
-        run: npm run lint
+      - name: install composer
+        run: composer install
       - name: Set ssh key
         run: |
           mkdir -p ~/.ssh
@@ -27,9 +27,9 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << EOF
             cd apps
-            cd nextjs-folder-structure-example
+            cd luka-bakuridze-epic-movie-quotes-back
             git pull
+            composer install
             npm ci
-            npm run build
-            pm2 restart nextjs-example-process
+            npm run prod
           EOF
