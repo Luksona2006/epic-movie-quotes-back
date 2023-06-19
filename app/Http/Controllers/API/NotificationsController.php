@@ -48,13 +48,11 @@ class NotificationsController extends Controller
         return response()->json(['message' => 'Wrong user, you are not able to get notifications'], 401);
     }
 
-    public function update(int $notificationId): JsonResponse
+    public function update(Notification $notification): JsonResponse
     {
         $user = auth()->user();
 
         if($user) {
-            $notification = Notification::find($notificationId);
-
             if($notification) {
                 $notification->seen = true;
                 $notification->save();

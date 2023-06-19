@@ -66,9 +66,8 @@ class MovieController extends Controller
         return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.create_movie')])], 401);
     }
 
-    public function update(int $movieId, UpdateMovieRequest $request): JsonResponse
+    public function update(Movie $movie, UpdateMovieRequest $request): JsonResponse
     {
-        $movie = Movie::find($movieId);
         $user = auth()->user();
 
         if($movie && $user) {
@@ -116,12 +115,11 @@ class MovieController extends Controller
         return response()->json(['message' => __('messages.wrong_id')], 404);
     }
 
-    public function remove(int $id): JsonResponse
+    public function remove(Movie $movie): JsonResponse
     {
         $user = auth()->user();
 
         if($user) {
-            $movie = Movie::find($id);
             if($movie) {
                 $movie->delete();
                 return response()->json(['message' => __('messages.deleted_successfully', ['deleted' => __('messages.movie')])]);
@@ -133,11 +131,11 @@ class MovieController extends Controller
         return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.get_movies')]), 404]);
     }
 
-    public function paginateMovies(int $pageNum): JsonResponse
+    public function paginateMovies(Request $request): JsonResponse
     {
         $user = auth()->user();
         if($user) {
-            $moviesPaginate = Movie::where('user_id', $user->id)->orderBy('created_at', 'DESC')->paginate(6, ['*'], 'movies-per-page', $pageNum)->toArray();
+            $moviesPaginate = Movie::where('user_id', $user->id)->orderBy('created_at', 'DESC')->paginate(6, ['*'], 'movies-per-page', $request->pageNum)->toArray();
             $movies = $moviesPaginate['data'];
 
             $moviesFullData = [];
@@ -147,7 +145,7 @@ class MovieController extends Controller
             }
 
             $totalMovies = count($user->movies->toArray());
-            return response()->json(['movies' => $moviesFullData, 'isLastPage' => $moviesPaginate['last_page'] === $pageNum, 'total' => $totalMovies]);
+            return response()->json(['movies' => $moviesFullData, 'isLastPage' => $moviesPaginate['last_page'] === $request->pageNum, 'total' => $totalMovies]);
         };
 
         return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.get_movies')])], 401);
@@ -171,12 +169,10 @@ class MovieController extends Controller
         return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.get_movies')])], 401);
     }
 
-    public function getMovie(int $movieId): JsonResponse
+    public function getMovie(Movie $movie): JsonResponse
     {
         $user = auth()->user();
         if($user) {
-            $movie = Movie::find($movieId);
-
             if($movie) {
                 $quotes = $movie->quotes;
                 foreach ($quotes as $quote) {

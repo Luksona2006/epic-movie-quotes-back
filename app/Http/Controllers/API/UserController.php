@@ -36,7 +36,7 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request)
     {
-        $user = User::where('id', auth()->user()->id)->first();
+        $user = User::find(auth()->user()->id);
         if ($user) {
             if($request->new_username) {
                 $user->name = $request->new_username;

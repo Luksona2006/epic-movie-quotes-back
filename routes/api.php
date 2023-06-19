@@ -46,7 +46,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::put('quote/update/{id}', [QuoteController::class, 'update'])->name('quote.update');
     Route::post('quote/remove/{id}', [QuoteController::class, 'remove'])->name('quote.remove');
     Route::post('quotes/search', [QuoteController::class, 'filterQuotes'])->name('quotes.filter-quotes');
-    Route::get('quotes/page/{num}', [QuoteController::class, 'paginateQuotes'])->name('quotes.paginate-quotes');
+    Route::post('quotes/page', [QuoteController::class, 'paginateQuotes'])->name('quotes.paginate-quotes');
     Route::get('quotes/{id}/comments', [QuoteController::class, 'getAllComments'])->name('quotes.get-all-comments');
     Route::get('quotes/{id}', [QuoteController::class, 'getQuote'])->name('quotes.get-quote');
 
@@ -56,7 +56,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('my-movies/search', [MovieController::class, 'filterMyMovies'])->name('my-movies.filter-my-movies');
     Route::post('movies/search', [MovieController::class, 'filterMovies'])->name('movies.filter-movies');
     Route::get('movies', [MovieController::class, 'getAllMovies'])->name('movies.get-all-movies');
-    Route::get('movies/page/{num}', [MovieController::class, 'paginateMovies'])->name('movies.paginate-movies');
+    Route::post('movies/page', [MovieController::class, 'paginateMovies'])->name('movies.paginate-movies');
     Route::get('movies/{id}', [MovieController::class, 'getMovie'])->name('movies.get-movie');
 
     Route::get('genres', [GenreController::class, 'getAllGenres'])->name('genres.get-all-genres');

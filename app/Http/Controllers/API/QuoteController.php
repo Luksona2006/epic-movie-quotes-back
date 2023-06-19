@@ -50,9 +50,8 @@ class QuoteController extends Controller
         return response()->json(['message', __('messages.invalid_credentials')], 401);
     }
 
-    public function update(int $id, UpdateQuoteRequest $request): JsonResponse
+    public function update(Quote $quote, UpdateQuoteRequest $request): JsonResponse
     {
-        $quote = Quote::find($id);
         $quoteUser = User::find($quote->user_id);
         $user = auth()->user();
 
@@ -173,12 +172,11 @@ class QuoteController extends Controller
         return response()->json(['message' => __('messages.wrong_id')], 404);
     }
 
-    public function remove(int $id): JsonResponse
+    public function remove(Quote $quote): JsonResponse
     {
         $user = auth()->user();
 
         if($user) {
-            $quote = Quote::find($id);
             if($quote) {
                 $quote->delete();
                 return response()->json(['message' => __('messages.deleted_successfully', ['deleted' => __('messages.quote')])]);
@@ -190,11 +188,11 @@ class QuoteController extends Controller
         return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.remove_quote')])], 404);
     }
 
-    public function paginateQuotes(int $pageNum): JsonResponse
+    public function paginateQuotes(Request $request): JsonResponse
     {
         $user = auth()->user();
         if($user) {
-            $quotesPaginate = Quote::where('user_id', $user->id)->orderBy('created_at', 'desc')->paginate(10, ['*'], 'quotes-per-page', $pageNum)->toArray();
+            $quotesPaginate = Quote::where('user_id', $user->id)->orderBy('created_at', 'desc')->paginate(10, ['*'], 'quotes-per-page', $request->pageNum)->toArray();
             $quotes = $quotesPaginate['data'];
             $quotesFullData = array_map(function ($quote) {
                 $quoteModel = Quote::find($quote['id']);
@@ -209,17 +207,16 @@ class QuoteController extends Controller
 
 
 
-            return response()->json(['quotes' => $quotesFullData, 'isLastPage' => $quotesPaginate['last_page'] === $pageNum]);
+            return response()->json(['quotes' => $quotesFullData, 'isLastPage' => $quotesPaginate['last_page'] === $request->pageNum]);
         };
 
         return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.get_quotes')])], 401);
     }
 
-    public function getAllComments(int $quoteId)
+    public function getAllComments(Quote $quote)
     {
         $user = auth()->user();
         if($user) {
-            $quote = Quote::find($quoteId);
             $quoteFullData = $quote->getFullData();
 
             return response()->json(['comments' => $quoteFullData['comments']]);
@@ -228,11 +225,10 @@ class QuoteController extends Controller
         return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.get_comments')])], 401);
     }
 
-    public function getQuote(int $quoteId): JsonResponse
+    public function getQuote(Quote $quote): JsonResponse
     {
         $user = auth()->user();
         if($user) {
-            $quote = Quote::find($quoteId);
             if($quote) {
                 return response()->json(['quote' => $quote->getFullData()]);
             }
