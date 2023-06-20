@@ -74,10 +74,10 @@ class AuthController extends Controller
                 'email_verification_token' => null
             ]);
 
-            return redirect(`localhost:5173/verified/$token`);
+            return redirect(env('FRONTEND_URL').`/verified/$token`);
         };
 
-        return redirect('http://localhost:5173/404');
+        return redirect(env('FRONTEND_URL')."/404");
     }
 
     public function sendPasswordResetRequest(PasswordResetEmailRequest $request): JsonResponse
