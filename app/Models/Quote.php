@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Models\Like;
 use App\Models\Comment;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection as SupportCollection;
 
 class Quote extends Model
 {
@@ -41,4 +42,21 @@ class Quote extends Model
         return $this->hasMany(Comment::class);
     }
 
+    public function getFullData(): SupportCollection
+    {
+        $comments = $this->comments;
+
+        $commentsWithUsers = $comments->map(function ($comment) {
+            return ['user' => $comment->user, ...$comment->toArray()];
+        });
+
+
+        $likes = $this->likes->toArray();
+        $likesSum = count($likes);
+        $liked = count(array_filter($likes, function ($like) {
+            return $like['user_id'] === $this->user->id;
+        })) ? true : false;
+
+        return collect([...$this->toArray() ,'movie' => $this->movie, 'author' => $this->user ,'comments' => $commentsWithUsers, 'likes' => $likesSum, 'liked' => $liked]);
+    }
 }

@@ -17,14 +17,14 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(string $token): JsonResponse
+    public function show(): JsonResponse
     {
-        $user = User::where('token', $token)->first();
+        $user = auth()->user();
         if ($user) {
             return response()->json(['user' => $user]);
         }
 
-        return response()->json(['message' => 'Something went wrong'], 400);
+        return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.update_details')])], 401);
     }
 
     /**
@@ -34,9 +34,9 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateUserRequest $request, string $token)
+    public function update(UpdateUserRequest $request)
     {
-        $user = User::where('token', $token)->first();
+        $user = User::find(auth()->user()->id);
         if ($user) {
             if($request->new_username) {
                 $user->name = $request->new_username;
@@ -64,7 +64,7 @@ class UserController extends Controller
             return response()->json(['user' => $user]);
         }
 
-        return response()->json(['message' => 'Something went wrong'], 400);
+        return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.update_details')])], 401);
     }
 
 }

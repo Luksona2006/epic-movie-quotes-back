@@ -3,6 +3,7 @@
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\GenreController;
 use App\Http\Controllers\API\MovieController;
+use App\Http\Controllers\API\NotificationsController;
 use App\Http\Controllers\API\QuoteController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\LocalizationController;
@@ -38,22 +39,31 @@ Route::group(['middleware' => 'guest:sanctum'], function () {
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('logout', [AuthController::class, 'logout'])->name('logout');
 
-    Route::get('users/{token}', [UserController::class, 'show'])->name('users.show');
-    Route::put('users/{token}', [UserController::class, 'update'])->name('users.update');
+    Route::get('user/details', [UserController::class, 'show'])->name('users.show');
+    Route::put('user/details', [UserController::class, 'update'])->name('users.update');
 
     Route::post('quote/create', [QuoteController::class, 'create'])->name('quote.create');
     Route::put('quote/update/{id}', [QuoteController::class, 'update'])->name('quote.update');
     Route::post('quote/remove/{id}', [QuoteController::class, 'remove'])->name('quote.remove');
-    Route::get('user/{token}/quotes', [QuoteController::class, 'getAllQuotes'])->name('quote.get-all-quotes');
-    Route::get('user/{token}/quotes/{id}', [QuoteController::class, 'getQuote'])->name('quote.get-quote');
+    Route::post('quotes/search', [QuoteController::class, 'filterQuotes'])->name('quotes.filter-quotes');
+    Route::post('quotes/page', [QuoteController::class, 'paginateQuotes'])->name('quotes.paginate-quotes');
+    Route::get('quotes/{id}/comments', [QuoteController::class, 'getAllComments'])->name('quotes.get-all-comments');
+    Route::get('quotes/{id}', [QuoteController::class, 'getQuote'])->name('quotes.get-quote');
 
     Route::post('movie/create', [MovieController::class, 'create'])->name('movie.create');
     Route::put('movie/update/{id}', [MovieController::class, 'update'])->name('movie.update');
     Route::post('movie/remove/{id}', [MovieController::class, 'remove'])->name('movie.remove');
-    Route::get('user/{token}/movies', [MovieController::class, 'getAllMovies'])->name('movie.get-all-movies');
-    Route::get('user/{token}/movies/{id}', [MovieController::class, 'getMovie'])->name('movie.get-movie');
+    Route::post('my-movies/search', [MovieController::class, 'filterMyMovies'])->name('my-movies.filter-my-movies');
+    Route::post('movies/search', [MovieController::class, 'filterMovies'])->name('movies.filter-movies');
+    Route::get('movies', [MovieController::class, 'getAllMovies'])->name('movies.get-all-movies');
+    Route::post('movies/page', [MovieController::class, 'paginateMovies'])->name('movies.paginate-movies');
+    Route::get('movies/{id}', [MovieController::class, 'getMovie'])->name('movies.get-movie');
 
-    Route::get('user/{token}/genres', [GenreController::class, 'getAllGenres'])->name('genre.get-all-genres');
+    Route::get('genres', [GenreController::class, 'getAllGenres'])->name('genres.get-all-genres');
+
+    Route::get('notifications', [NotificationsController::class, 'getAllNotifications'])->name('notifications.get-all-notifications');
+    Route::post('notification/update/{id}', [NotificationsController::class, 'update'])->name('notification.update');
+    Route::post('notifications/update', [NotificationsController::class, 'updateAll'])->name('notifications.update-all');
 });
 
 Route::get('auth/google/redirect', [SocialiteController::class, 'socialiteRedirect'])->name('auth-google.socialite-redirect');
