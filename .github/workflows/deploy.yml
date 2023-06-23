@@ -12,7 +12,14 @@ jobs:
         with:
           node-version: 18
       - name: install npm dependencies
-        run: npm ci
+        run: |
+          if [ -e yarn.lock ]; then
+          yarn install --frozen-lockfile
+          elif [ -e package-lock.json ]; then
+          npm ci
+          else
+          npm i
+          fi
       - name: install composer
         run: composer install
       - name: Set ssh key
