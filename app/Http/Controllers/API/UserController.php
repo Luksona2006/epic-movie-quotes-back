@@ -68,6 +68,11 @@ class UserController extends Controller
 
             $userWithEmail = User::where('email', $request->new_email)->count();
             if($request->new_email && !$userWithEmail) {
+                $hasChangeRequest = ChangeEmail::where('from_email', $user->email)->first();
+                if($hasChangeRequest) {
+                    $hasChangeRequest->delete();
+                }
+
                 $emailVerificationToken = Str::random(100);
                 ChangeEmail::create([
                     'from_email' => $user->email,
@@ -94,7 +99,6 @@ class UserController extends Controller
         $emailModel = ChangeEmail::where('email_verification_token', $token)->first();
 
         if ($emailModel) {
-
             if($emailModel->expires_at > Carbon::now()) {
                 $user = User::where('email', $emailModel->from_email)->first();
                 $user->email = $emailModel->to_email;
@@ -105,8 +109,8 @@ class UserController extends Controller
                 return redirect(env('FRONTEND_URL'));
             }
 
-            return redirect(env('FRONTEND_URL').'/498');
-
+            $emailModel->delete();
+            return redirect(env('FRONTEND_URL').'/expired');
         };
 
         return redirect(env('FRONTEND_URL').'/404');

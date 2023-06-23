@@ -1,9 +1,9 @@
 <?php
 
+use Carbon\Carbon;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Str;
 
 return new class () extends Migration {
     /**
@@ -13,16 +13,11 @@ return new class () extends Migration {
      */
     public function up()
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('change_passwords', function (Blueprint $table) {
             $table->id();
-            $table->string('google_id')->nullable();
-            $table->string('name');
             $table->string('email')->unique();
-            $table->string('image')->nullable();
-            $table->string('password')->nullable();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->rememberToken()->nullable();
-            $table->string('email_verification_token')->unique()->nullable();
+            $table->string('token')->unique();
+            $table->date('expires_at')->default(Carbon::now()->addWeek());
             $table->timestamps();
         });
     }
@@ -34,6 +29,6 @@ return new class () extends Migration {
      */
     public function down()
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('change_passwords');
     }
 };

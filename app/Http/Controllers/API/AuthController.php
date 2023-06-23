@@ -7,9 +7,11 @@ use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\PasswordResetEmailRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\ResetPasswordRequest;
+use App\Models\ChangePassword;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -91,10 +93,11 @@ class AuthController extends Controller
                 $message->to($data['email'])->subject('Reset Password');
             });
 
-            User::updateOrCreate(
-                ['id' => $user->id],
-                ['password_reset_token' => $token]
-            );
+            if(ChangePassword::where('email', $request->email)->first()) {
+                ChangePassword::where('email', $request->email)->first()->delete();
+            }
+
+            ChangePassword::create(['email' => $request->email, 'token' => $token]);
 
             return response()->json(['message' => __('messages.email_confirmation_sent_for_reset_password')]);
         }
@@ -102,10 +105,35 @@ class AuthController extends Controller
         return response()->json(['message' => __('messages.invalid_credentials')], 401);
     }
 
+
+    public function redirectToPasswordReset(Request $request): RedirectResponse
+    {
+        $changePasswordModel = ChangePassword::where('token', $request->token)->first();
+        if($changePasswordModel) {
+            if($changePasswordModel->expires_at > Carbon::now()) {
+                return redirect()->away(env('FRONTEND_URL').`/reset-password/$request->token`);
+            }
+            $changePasswordModel->delete();
+            return redirect()->away(env('FRONTEND_URL').'/expired');
+        }
+
+        return redirect()->away(env('FRONTEND_URL').'/404');
+    }
+
     public function resetPassword(ResetPasswordRequest $request): JsonResponse
     {
-        $user = User::where('password_reset_token', $request->token)->first();
-        $user->update(['password' => bcrypt($request->password) ,'password_reset_token' => null]);
-        return response()->json(['user' => $user]);
+        $changePasswordModel = ChangePassword::where('token', $request->token)->first();
+        if($changePasswordModel) {
+            if($changePasswordModel->expires_at > Carbon::now()) {
+                $user = User::where('email', $changePasswordModel->email)->first();
+                $user->update(['password' => bcrypt($request->password)]);
+                $changePasswordModel->delete();
+                return response()->json(['user' => $user]);
+            }
+            $changePasswordModel->delete();
+            return redirect()->away(env('FRONTEND_URL').'/expired');
+        }
+
+        return redirect()->away(env('FRONTEND_URL').'/404');
     }
 }
