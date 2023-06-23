@@ -34,6 +34,8 @@ Route::group(['middleware' => 'guest:sanctum'], function () {
     Route::get('verify/{token}', [AuthController::class, 'verifyEmail'])->name('verify.verify-email');
     Route::post('forgot-password', [AuthController::class, 'sendPasswordResetRequest'])->name('forgot-password.send-password-reset-request');
     Route::post('reset-password/{token}', [AuthController::class, 'resetPassword'])->name('reset-password');
+
+    Route::get('change-email/{token}', [UserController::class, 'confirmEmailChange'])->name('change-email.confirm-email-change');
 });
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
@@ -66,5 +68,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('notifications/update', [NotificationsController::class, 'updateAll'])->name('notifications.update-all');
 });
 
-Route::get('auth/google/redirect', [SocialiteController::class, 'socialiteRedirect'])->name('auth-google.socialite-redirect');
-Route::get('auth/google/callback', [SocialiteController::class, 'socialiteCreateUser'])->name('auth-google.socialite-create-user');
+Route::group(['middleware' => 'web'], function () {
+    Route::get('auth/google/redirect', [SocialiteController::class, 'socialiteRedirect'])->name('auth-google.socialite-redirect');
+    Route::get('auth/google/callback', [SocialiteController::class, 'socialiteCreateUser'])->name('auth-google.socialite-create-user');
+});

@@ -24,7 +24,7 @@
             </a>
             <p style="margin-bottom: 24px; font-size: 16px; font-weight: 400; color: white;">If clicking doesn't work, you can try copying and pasting it to your browser:</p>
             <a href="{{ route('verify.verify-email', ['token' => $data['token']]) }} style="text-decoration: none; margin-bottom: 40px;">
-                <p style="color: #DDCCAA; font-size: 16px; font-weight: 400;">http://localhost:8000/verify/{{$data['token']}}</p>
+                <p style="color: #DDCCAA; font-size: 16px; font-weight: 400;">{{env('APP_URL')}}/verify/{{$data['token']}}</p>
             </a>
             <p style="margin-bottom: 24px; font-size: 16px; font-weight: 400; color: white;">If you have any problems, please contact us:support@moviequotes.ge</p>
             <p style="font-size: 16px; font-weight: 400; color: white;">MovieQuotes Crew</p>
