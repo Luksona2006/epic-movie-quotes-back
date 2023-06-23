@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Events\ChangeUserEmail;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateUserRequest;
 use App\Models\ChangeEmail;
@@ -99,8 +100,8 @@ class UserController extends Controller
                 $user->email = $emailModel->to_email;
                 $user->save();
 
-                Auth::guard('web')->logout();
-                session()->regenerate();
+                event(new ChangeUserEmail($user->id, $emailModel->to_email));
+
                 return redirect(env('FRONTEND_URL'));
             }
 

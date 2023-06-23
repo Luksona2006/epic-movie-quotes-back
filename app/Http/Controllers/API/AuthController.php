@@ -29,7 +29,6 @@ class AuthController extends Controller
 
         $remember = $request->remember ? true : false;
         if(Auth::guard()->attempt($credentials, $remember)) {
-            Auth::guard()->attempt($credentials, $remember);
             return response()->json(['user' => $user]);
         };
         return response()->json(['message' => __('messages.invalid_credentials')], 401);

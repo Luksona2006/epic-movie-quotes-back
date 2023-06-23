@@ -68,5 +68,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('notifications/update', [NotificationsController::class, 'updateAll'])->name('notifications.update-all');
 });
 
-Route::get('auth/google/redirect', [SocialiteController::class, 'socialiteRedirect'])->name('auth-google.socialite-redirect');
-Route::get('auth/google/callback', [SocialiteController::class, 'socialiteCreateUser'])->name('auth-google.socialite-create-user');
+Route::group(['middleware' => 'web'], function () {
+    Route::get('auth/google/redirect', [SocialiteController::class, 'socialiteRedirect'])->name('auth-google.socialite-redirect');
+    Route::get('auth/google/callback', [SocialiteController::class, 'socialiteCreateUser'])->name('auth-google.socialite-create-user');
+});
