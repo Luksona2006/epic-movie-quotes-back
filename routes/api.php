@@ -33,6 +33,7 @@ Route::group(['middleware' => 'guest:sanctum'], function () {
     Route::post('signup', [AuthController::class, 'register'])->name('signup.register');
     Route::get('verify/{token}', [AuthController::class, 'verifyEmail'])->name('verify.verify-email');
     Route::post('forgot-password', [AuthController::class, 'sendPasswordResetRequest'])->name('forgot-password.send-password-reset-request');
+    Route::get('reset-password/redirect/{token}', [AuthController::class, 'redirectToPasswordReset'])->name('reset.redirect-to-password-reset');
     Route::post('reset-password/{token}', [AuthController::class, 'resetPassword'])->name('reset-password');
 
     Route::get('change-email/{token}', [UserController::class, 'confirmEmailChange'])->name('change-email.confirm-email-change');
