@@ -152,7 +152,7 @@ class MovieController extends Controller
     }
 
 
-    public function getAllMovies(): JsonResponse
+    public function getMovies(): JsonResponse
     {
         $user = auth()->user();
 

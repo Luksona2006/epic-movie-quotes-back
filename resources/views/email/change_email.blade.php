@@ -16,14 +16,14 @@
             <p style="margin-bottom: 24px; font-size: 16px; font-weight: 400; color: white;">Hola {{ $data['email'] }}</p>
             <p style="margin-bottom: 40px; font-size: 16px; font-weight: 400; color: white;">Please click the button below to confirm your account email address change:</p>
 
-            <a style="margin-bottom: 40px;" href="{{ route('change-email.confirm-email-change', ['token' => $data['token']]) }}">
+            <a style="margin-bottom: 40px;" href="{{ route('change_email.confirm_email_change', ['token' => $data['token']]) }}">
                 <button
                 style="background-color: #E31221; border:#E31221 1px solid; padding: 7px 13px; border-radius:4px; color:white; font-weight:400; font-size:16px; cursor: pointer;">
                     Confirm 
                 </button>
             </a>
             <p style="margin-bottom: 24px; font-size: 16px; font-weight: 400; color: white;">If clicking doesn't work, you can try copying and pasting it to your browser:</p>
-            <a href="{{ route('verify.verify-email', ['token' => $data['token']]) }} style="text-decoration: none; margin-bottom: 40px;">
+            <a href="{{ route('change_email.confirm_email_change', ['token' => $data['token']]) }} style="text-decoration: none; margin-bottom: 40px;">
                 <p style="color: #DDCCAA; font-size: 16px; font-weight: 400;">{{env('APP_URL')}}/change-email/{{$data['token']}}</p>
             </a>
             <p style="margin-bottom: 24px; font-size: 16px; font-weight: 400; color: white;">If you have any problems, please contact us:support@moviequotes.ge</p>

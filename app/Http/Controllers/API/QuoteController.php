@@ -188,7 +188,7 @@ class QuoteController extends Controller
         return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.remove_quote')])], 404);
     }
 
-    public function paginateQuotes(Request $request): JsonResponse
+    public function getQuotes(Request $request): JsonResponse
     {
         $user = auth()->user();
         if($user) {

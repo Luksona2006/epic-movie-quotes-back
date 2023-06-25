@@ -15,14 +15,14 @@
         <div style="margin-top: 73px;">
             <p style="margin-bottom: 40px; font-size: 16px; font-weight: 400; color: white;">Welcome back! Please click the button below to confirm that you want to reset password</p>
 
-            <a style="margin-bottom: 40px;"  href="{{ route('reset.redirect-to-password-reset', ['token' => $data['token']]) }}">
+            <a style="margin-bottom: 40px;"  href="{{ route('reset.redirect_to_password_reset', ['token' => $data['token']]) }}">
                 <button
                 style="background-color: #E31221; border:#E31221 1px solid; padding: 7px 13px; border-radius:4px; color:white; font-weight:400; font-size:16px; cursor: pointer;">
                     Reset Password
                 </button>
             </a>
             <p style="margin-bottom: 24px; font-size: 16px; font-weight: 400; color: white;">If clicking doesn't work, you can try copying and pasting it to your browser:</p>
-            <a href="{{ route('reset.redirect-to-password-reset', ['token' => $data['token']]) }}" style="text-decoration: none; margin-bottom: 40px;">
+            <a href="{{ route('reset.redirect_to_password_reset', ['token' => $data['token']]) }}" style="text-decoration: none; margin-bottom: 40px;">
                 <p style="color: #DDCCAA; font-size: 16px; font-weight: 400;">{{env('APP_URL')}}/reset-password/redirect/{{$data['token']}}</p>
             </a>
             <p style="margin-bottom: 24px; font-size: 16px; font-weight: 400; color: white;">If you have any problems, please contact us:support@moviequotes.ge</p>
