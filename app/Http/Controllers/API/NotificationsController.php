@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Events\QuoteNotification;
 use App\Http\Controllers\Controller;
 use App\Models\Notification;
-use App\Models\Quote;
 use App\Models\User;
 use App\Models\UserNotification;
 use Carbon\Carbon;
