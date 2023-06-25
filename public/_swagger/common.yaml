@@ -1,0 +1,41 @@
+components:
+  parameters:
+    id:
+      name: id
+      in: path
+      description: The id of the resource
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+
+  schemas:
+    Id:
+      type: object
+      properties:
+        id:
+          type: integer
+          minimum: 1
+          example: 1
+    TimeStamps:
+      type: object
+      properties:
+        created_at:
+          type: string
+          example: "2023-06-25T12:05:09.000000Z"
+        updated_at:
+          type: string
+          example: "2023-06-25T12:05:09.000000Z"
+
+  responses:
+    401:
+      description: Unauthenticated
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                default: Needs authentication
