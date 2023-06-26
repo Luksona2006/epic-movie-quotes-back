@@ -275,7 +275,7 @@ class MovieController extends Controller
         return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.get_movie')])], 401);
     }
 
-    public function filterMyMovies(Request $request): JsonResponse
+    public function search(Request $request): JsonResponse
     {
         $user = auth()->user();
         if($user) {
@@ -298,36 +298,6 @@ class MovieController extends Controller
 
                 $totalMovies = count($searchedMovies->get()->toArray());
                 return response()->json(['movies' => $updatedMovies, 'isLastPage' => $moviesPaginate['last_page'] === $request->pageNum, 'total' => $totalMovies]);
-            }
-
-            return response()->json(['message' => __('messages.enter_movie_name_to_search_movie'), 'movies' => []], 204);
-        }
-
-        return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.search_for_movies')])], 401);
-    }
-
-    public function filterMovies(Request $request): JsonResponse
-    {
-        $user = auth()->user();
-        if($user) {
-            $search = $request->searchBy;
-
-            if($search) {
-                $search = ltrim($search, '@');
-                $moviesPaginate = Movie::whereRaw('LOWER(JSON_EXTRACT(name, "$.en")) like ?', '%'.strtolower($search).'%')
-                ->orWhereRaw('LOWER(JSON_EXTRACT(name, "$.ka")) like ?', '%'.strtolower($search).'%')
-                ->orderBy('created_at', 'desc')
-                ->paginate(10, ['*'], 'movies-per-page', $request->pageNum)->toArray();
-
-                $movies = $moviesPaginate['data'];
-
-                $updatedMovies = [];
-                foreach ($movies as $movie) {
-                    $movieModel = Movie::find($movie['id']);
-                    array_push($updatedMovies, [...$movieModel->toArray(), 'quotes' => count($movieModel->quotes->toArray())]);
-                };
-
-                return response()->json(['movies' => $updatedMovies, 'isLastPage' => $moviesPaginate['last_page'] === $request->pageNum]);
             }
 
             return response()->json(['message' => __('messages.enter_movie_name_to_search_movie'), 'movies' => []], 204);

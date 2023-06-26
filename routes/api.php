@@ -61,7 +61,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::put('quotes/{id}', 'update')->name('quotes.update');
         Route::delete('quotes/{id}', 'remove')->name('quotes.remove');
 
-        Route::post('quotes/search', 'filterQuotes')->name('quotes.filter_quotes');
+        Route::post('quotes/search', 'search')->name('quotes.search');
     });
 
     Route::post('quotes/{id}/like', [LikeController::class, 'like'])->name('quote.like');
@@ -75,8 +75,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::put('movies/{id}', 'update')->name('movies.update');
         Route::delete('movies/{id}', 'remove')->name('movies.remove');
 
-        Route::post('my-movies/search', 'filterMyMovies')->name('my_movies.filter_my_movies');
-        Route::post('movies/search', 'filterMovies')->name('movies.filter_movies');
+        Route::post('movies/search', 'search')->name('movies.search');
     });
 
     Route::group(['controller' => NotificationsController::class], function () {

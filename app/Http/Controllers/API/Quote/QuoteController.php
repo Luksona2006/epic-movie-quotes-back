@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateQuoteRequest;
 use App\Http\Requests\UpdateQuoteRequest;
+use App\Models\Movie;
 use App\Models\Quote;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Str;
@@ -175,7 +176,7 @@ class QuoteController extends Controller
         return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.get_quote')])], 401);
     }
 
-    public function filterQuotes(Request $request): JsonResponse
+    public function search(Request $request): JsonResponse
     {
         $user = auth()->user();
         if($user) {
@@ -217,6 +218,23 @@ class QuoteController extends Controller
                 };
 
                 return response()->json(['quotes' => $updatedQuotes, 'isLastPage' => $quotesPaginate['last_page'] === $request->pageNum]);
+            }
+            if($search[0] === '@') {
+                $search = ltrim($search, '@');
+                $moviesPaginate = Movie::whereRaw('LOWER(JSON_EXTRACT(name, "$.en")) like ?', '%'.strtolower($search).'%')
+                ->orWhereRaw('LOWER(JSON_EXTRACT(name, "$.ka")) like ?', '%'.strtolower($search).'%')
+                ->orderBy('created_at', 'desc')
+                ->paginate(10, ['*'], 'movies-per-page', $request->pageNum)->toArray();
+
+                $movies = $moviesPaginate['data'];
+
+                $updatedMovies = [];
+                foreach ($movies as $movie) {
+                    $movieModel = Movie::find($movie['id']);
+                    array_push($updatedMovies, [...$movieModel->toArray(), 'quotes' => count($movieModel->quotes->toArray())]);
+                };
+
+                return response()->json(['movies' => $updatedMovies, 'isLastPage' => $moviesPaginate['last_page'] === $request->pageNum]);
             }
 
 
