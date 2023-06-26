@@ -293,7 +293,7 @@ class MovieController extends Controller
                 $updatedMovies = [];
                 foreach ($movies as $movie) {
                     $movieModel = Movie::find($movie['id']);
-                    array_push($updatedMovies, $movieModel->getFullData());
+                    array_push($updatedMovies, [...$movieModel->toArray(), 'quotes' => count($movieModel->quotes)]);
                 };
 
                 $totalMovies = count($searchedMovies->get()->toArray());
@@ -324,7 +324,7 @@ class MovieController extends Controller
                 $updatedMovies = [];
                 foreach ($movies as $movie) {
                     $movieModel = Movie::find($movie['id']);
-                    array_push($updatedMovies, [...$movieModel->toArray(), $movieModel->genres, $movieModel->quotes]);
+                    array_push($updatedMovies, [...$movieModel->toArray(), 'quotes' => count($movieModel->quotes->toArray())]);
                 };
 
                 return response()->json(['movies' => $updatedMovies, 'isLastPage' => $moviesPaginate['last_page'] === $request->pageNum]);

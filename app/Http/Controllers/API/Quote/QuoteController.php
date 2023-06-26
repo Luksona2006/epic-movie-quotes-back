@@ -210,7 +210,7 @@ class QuoteController extends Controller
                     $quoteFullData['author'] = $quoteModel->user;
                     $quoteFullData['likes'] = $likesSum;
                     $quoteFullData['liked'] = $liked;
-                    $quotesFullData['commentsTotal'] = count($quoteModel->comments->toArray());
+                    $quoteFullData['commentsTotal'] = count($quoteModel->comments->toArray());
                     $quoteFullData['comments'] = $commentsWithUsers;
 
                     array_push($updatedQuotes, $quoteFullData);
