@@ -14,7 +14,7 @@ class NotificationController extends Controller
     {
         $user = auth()->user();
 
-        $notifications = Notification::where('user_id', $user->id)->orderBy('created_at', 'desc')->get()->toArray();
+        $notifications = Notification::where('to_user', $user->id)->orderBy('created_at', 'desc')->get()->toArray();
 
         if(count($notifications)) {
             $notificationsWithUsers = [];

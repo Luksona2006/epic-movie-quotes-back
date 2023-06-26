@@ -29,7 +29,7 @@ class CommentController extends Controller
                 $comment['user'] = $comment->user;
 
                 if($user->id !== $quote->user_id) {
-                    $notification = Notification::create(['from_user' => $user->id,'to_user' => $quote->user_id ,'quote_id' => $quote->id, 'type' => 'comment']);
+                    $notification = Notification::create(['from_user' => $user->id, 'to_user' => $quote->user_id ,'quote_id' => $quote->id, 'type' => 'comment']);
                     $notificationFullData = [...$notification->toArray()];
                     $notificationFullData['user'] = $user;
                     event(new RecieveNotification($quote->user_id, $notificationFullData));
