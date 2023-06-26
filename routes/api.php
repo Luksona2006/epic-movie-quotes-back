@@ -6,7 +6,7 @@ use App\Http\Controllers\API\Quote\LikeController;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\GenreController;
 use App\Http\Controllers\API\MovieController;
-use App\Http\Controllers\API\NotificationsController;
+use App\Http\Controllers\API\NotificationController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\LocalizationController;
 use App\Http\Controllers\SocialiteController;
@@ -77,7 +77,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::post('movies/search', 'search')->name('movies.search');
     });
 
-    Route::group(['controller' => NotificationsController::class], function () {
+    Route::group(['controller' => NotificationController::class], function () {
         Route::get('notifications', 'getAllNotifications')->name('notifications.get_all_notifications');
         Route::post('notification/update/{id}', 'update')->name('notification.update');
         Route::post('notifications/update', 'updateAll')->name('notifications.update_all');

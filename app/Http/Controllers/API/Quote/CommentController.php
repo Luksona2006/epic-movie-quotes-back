@@ -6,8 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Comment;
 use App\Models\Notification;
 use App\Models\Quote;
-use App\Models\User;
-use App\Models\UserNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Events\CommentQuote;
@@ -18,7 +16,6 @@ class CommentController extends Controller
     public function comment(int $id, Request $request): JsonResponse
     {
         $quote = Quote::find($id);
-        $quoteUser = User::find($quote->user_id);
         $user = auth()->user();
 
         if($quote) {
@@ -31,12 +28,11 @@ class CommentController extends Controller
 
                 $comment['user'] = $comment->user;
 
-                if($user->id !== $quoteUser->id) {
-                    UserNotification::create(['from_user_id' => $user->id, 'to_user_id' => $quote->user_id]);
-                    $notification = Notification::create(['user_id' => $user->id,'quote_id' => $quote->id, 'type' => 'comment']);
+                if($user->id !== $quote->user_id) {
+                    $notification = Notification::create(['from_user' => $user->id,'to_user' => $quote->user_id ,'quote_id' => $quote->id, 'type' => 'comment']);
                     $notificationFullData = [...$notification->toArray()];
                     $notificationFullData['user'] = $user;
-                    event(new RecieveNotification($quoteUser->id, $notificationFullData));
+                    event(new RecieveNotification($quote->user_id, $notificationFullData));
                 }
 
                 $isOwnQuote = $user->id === $quote->id;

@@ -5,11 +5,10 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\Notification;
 use App\Models\User;
-use App\Models\UserNotification;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 
-class NotificationsController extends Controller
+class NotificationController extends Controller
 {
     public function getAllNotifications(): JsonResponse
     {
@@ -21,11 +20,9 @@ class NotificationsController extends Controller
             $notificationsWithUsers = [];
             $newsSum = 0;
 
-            $notificationsWithUsers = array_map(function ($notification) use ($user, $newsSum) {
-                $notificationUserId = UserNotification::where('to_user_id', $user->id)->first()->from_user_id;
-                $notificationUser = User::find($notificationUserId);
-                $notification['time'] =  Carbon::parse($notification['created_at'])->diffForHumans(Carbon::now());
-                $notification['user'] =  $notificationUser;
+            $notificationsWithUsers = array_map(function ($notification) use ($newsSum) {
+                $notification['time'] = Carbon::parse($notification['created_at'])->diffForHumans(Carbon::now());
+                $notification['user'] = User::find($notification['from_user']);
                 if(!$notification['seen']) {
                     $newsSum = $newsSum + 1;
                 }
@@ -44,22 +41,12 @@ class NotificationsController extends Controller
 
     public function update(Notification $notification): JsonResponse
     {
-        $user = auth()->user();
+        $notification->seen = true;
+        $notification->save();
+        $notification['time'] = Carbon::parse($notification['created_at'])->diffForHumans(Carbon::now());
+        $notification['user'] = User::find($notification->from_user);
 
-
-        if($notification) {
-            $notification->seen = true;
-            $notification->save();
-            $notificationUserId = UserNotification::where('to_user_id', $user->id)->first()->from_user_id;
-            $notificationUser = User::find($notificationUserId);
-            $notification['time'] =  Carbon::parse($notification['created_at'])->diffForHumans(Carbon::now());
-            $notification['user'] =  $notificationUser;
-
-            return response()->json(['notification' => $notification]);
-        }
-
-        return response()->json(['message' => __('messages.wrong_id')], 404);
-
+        return response()->json(['notification' => $notification]);
     }
 
     public function updateAll(): JsonResponse

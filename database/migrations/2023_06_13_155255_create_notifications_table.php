@@ -14,7 +14,8 @@ return new class () extends Migration {
     {
         Schema::create('notifications', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('to_user')->constrained('users', 'id')->cascadeOnDelete();
+            $table->foreignId('from_user')->constrained('users', 'id')->cascadeOnDelete();
             $table->foreignId('quote_id')->constrained()->cascadeOnDelete();
             $table->string('type');
             $table->boolean('seen')->default(false);
