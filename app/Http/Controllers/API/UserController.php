@@ -39,7 +39,7 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateUserRequest $request)
+    public function update(UpdateUserRequest $request): JsonResponse
     {
         $user = User::find(auth()->user()->id);
         if ($user) {
