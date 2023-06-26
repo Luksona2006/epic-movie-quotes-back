@@ -24,7 +24,7 @@ class AuthController extends Controller
     {
         $credentials = $request->only(['email', 'password']);
 
-        $user = User::where('email', $request->email)->first();
+        $user = User::where('email', $request->email)->firstOrFailOrFail();
         if(!$user->email_verified_at) {
             return response()->json(['message' => __('messages.account_is_not_verified_yet')]);
         }
@@ -68,7 +68,7 @@ class AuthController extends Controller
 
     public function verifyEmail(string $token): RedirectResponse
     {
-        $user = User::where('email_verification_token', $token)->first();
+        $user = User::where('email_verification_token', $token)->firstOrFail();
         if (!$user->email_verified_at) {
             $user->update([
                 'email_verified_at' => Carbon::now(),
@@ -83,7 +83,7 @@ class AuthController extends Controller
 
     public function sendPasswordResetRequest(PasswordResetEmailRequest $request): JsonResponse
     {
-        $user = User::where('email', $request->email)->first();
+        $user = User::where('email', $request->email)->firstOrFail();
         if ($user) {
             $token = Str::random(40);
             $data['token'] = $token;
@@ -93,8 +93,8 @@ class AuthController extends Controller
                 $message->to($data['email'])->subject('Reset Password');
             });
 
-            if(ChangePassword::where('email', $request->email)->first()) {
-                ChangePassword::where('email', $request->email)->first()->delete();
+            if(ChangePassword::where('email', $request->email)->firstOrFail()) {
+                ChangePassword::where('email', $request->email)->firstOrFail()->delete();
             }
 
             ChangePassword::create(['email' => $request->email, 'token' => $token]);
@@ -108,7 +108,7 @@ class AuthController extends Controller
 
     public function redirectToPasswordReset(Request $request): RedirectResponse
     {
-        $changePasswordModel = ChangePassword::where('token', $request->token)->first();
+        $changePasswordModel = ChangePassword::where('token', $request->token)->firstOrFail();
         if($changePasswordModel) {
             if($changePasswordModel->expires_at > Carbon::now()) {
                 return redirect()->away(env('FRONTEND_URL').`/reset-password/$request->token`);
@@ -122,10 +122,10 @@ class AuthController extends Controller
 
     public function resetPassword(ResetPasswordRequest $request): JsonResponse
     {
-        $changePasswordModel = ChangePassword::where('token', $request->token)->first();
+        $changePasswordModel = ChangePassword::where('token', $request->token)->firstOrFail();
         if($changePasswordModel) {
             if($changePasswordModel->expires_at > Carbon::now()) {
-                $user = User::where('email', $changePasswordModel->email)->first();
+                $user = User::where('email', $changePasswordModel->email)->firstOrFail();
                 $user->update(['password' => bcrypt($request->password)]);
                 $changePasswordModel->delete();
                 return response()->json(['user' => $user]);

@@ -117,7 +117,7 @@ class MovieController extends Controller
                         }
 
                         if($isRemoved) {
-                            MovieGenre::where('genre_id', $movieGenre['id'])->first()->delete();
+                            MovieGenre::where('genre_id', $movieGenre['id'])->firstOrFail()->delete();
                         }
                     }
                 }
