@@ -59,7 +59,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::post('quotes', 'create')->name('quotes.create');
         Route::get('quotes/{id}', 'getQuote')->name('quotes.get_quote');
         Route::put('quotes/{id}', 'update')->name('quotes.update');
-        Route::delete('quotes/{id}', 'remove')->name('quotes.remove');
+        Route::delete('quotes/{id}', 'destroy')->name('quotes.destroy');
 
         Route::post('quotes/search', 'search')->name('quotes.search');
     });
@@ -73,7 +73,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::post('movies', 'create')->name('movies.create');
         Route::get('movies/{id}', 'getMovie')->name('movies.get_movie');
         Route::put('movies/{id}', 'update')->name('movies.update');
-        Route::delete('movies/{id}', 'remove')->name('movies.remove');
+        Route::delete('movies/{id}', 'destroy')->name('movies.destroy');
 
         Route::post('movies/search', 'search')->name('movies.search');
     });

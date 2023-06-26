@@ -87,7 +87,7 @@ class QuoteController extends Controller
         return response()->json(['message' => __('messages.wrong_id')], 404);
     }
 
-    public function remove(Quote $quote): JsonResponse
+    public function destroy(Quote $quote): JsonResponse
     {
         $user = auth()->user();
 

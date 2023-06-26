@@ -185,7 +185,7 @@ class MovieController extends Controller
         return response()->json(['message' => __('messages.wrong_id')], 404);
     }
 
-    public function remove(int $id): JsonResponse
+    public function destroy(int $id): JsonResponse
     {
         $movie = Movie::find($id);
         $user = auth()->user();
