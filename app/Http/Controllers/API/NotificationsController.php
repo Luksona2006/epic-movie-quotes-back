@@ -15,78 +15,67 @@ class NotificationsController extends Controller
     {
         $user = auth()->user();
 
-        if($user) {
-            $notifications = Notification::where('user_id', $user->id)->orderBy('created_at', 'desc')->get()->toArray();
+        $notifications = Notification::where('user_id', $user->id)->orderBy('created_at', 'desc')->get()->toArray();
 
-            if(count($notifications)) {
-                $notificationsWithUsers = [];
-                $newsSum = 0;
+        if(count($notifications)) {
+            $notificationsWithUsers = [];
+            $newsSum = 0;
 
-                $notificationsWithUsers = array_map(function ($notification) use ($user, $newsSum) {
-                    $notificationUserId = UserNotification::where('to_user_id', $user->id)->first()->from_user_id;
-                    $notificationUser = User::find($notificationUserId);
-                    $notification['time'] =  Carbon::parse($notification['created_at'])->diffForHumans(Carbon::now());
-                    $notification['user'] =  $notificationUser;
-                    if(!$notification['seen']) {
-                        $newsSum = $newsSum + 1;
-                    }
-                    return $notification;
-                }, $notifications);
+            $notificationsWithUsers = array_map(function ($notification) use ($user, $newsSum) {
+                $notificationUserId = UserNotification::where('to_user_id', $user->id)->first()->from_user_id;
+                $notificationUser = User::find($notificationUserId);
+                $notification['time'] =  Carbon::parse($notification['created_at'])->diffForHumans(Carbon::now());
+                $notification['user'] =  $notificationUser;
+                if(!$notification['seen']) {
+                    $newsSum = $newsSum + 1;
+                }
+                return $notification;
+            }, $notifications);
 
-                $newsSum = count(array_filter($notifications, function ($notification) {
-                    return $notification['seen'] === 0;
-                }));
+            $newsSum = count(array_filter($notifications, function ($notification) {
+                return $notification['seen'] === 0;
+            }));
 
-                return response()->json(['notifications' => $notificationsWithUsers, 'newsSum' => $newsSum]);
-            }
-
-            return response()->json(['message' => 'No notifications found'], 204);
+            return response()->json(['notifications' => $notificationsWithUsers, 'newsSum' => $newsSum]);
         }
 
-        return response()->json(['message' => 'Wrong user, you are not able to get notifications'], 401);
+        return response()->json(['message' => __('messages.wrong_user')], 204);
     }
 
     public function update(Notification $notification): JsonResponse
     {
         $user = auth()->user();
 
-        if($user) {
-            if($notification) {
-                $notification->seen = true;
-                $notification->save();
-                $notificationUserId = UserNotification::where('to_user_id', $user->id)->first()->from_user_id;
-                $notificationUser = User::find($notificationUserId);
-                $notification['time'] =  Carbon::parse($notification['created_at'])->diffForHumans(Carbon::now());
-                $notification['user'] =  $notificationUser;
 
-                return response()->json(['notification' => $notification]);
-            }
+        if($notification) {
+            $notification->seen = true;
+            $notification->save();
+            $notificationUserId = UserNotification::where('to_user_id', $user->id)->first()->from_user_id;
+            $notificationUser = User::find($notificationUserId);
+            $notification['time'] =  Carbon::parse($notification['created_at'])->diffForHumans(Carbon::now());
+            $notification['user'] =  $notificationUser;
 
-
-            return response()->json(['message' => 'Wrong id, no notificaiton found']);
+            return response()->json(['notification' => $notification]);
         }
 
-        return response()->json(['message' => 'Wrong user, you are not able to get notifications'], 401);
+        return response()->json(['message' => __('messages.wrong_id')], 404);
+
     }
 
     public function updateAll(): JsonResponse
     {
         $user = auth()->user();
 
-        if($user) {
-            $notifications = $user->notifications->get()->toArray();
-            if($notifications) {
-                foreach ($notifications as $notification) {
-                    $notificationData = Notification::find($notification['id']);
-                    $notificationData->seen = true;
-                    $notificationData->save();
-                };
-                return response()->json(['message' => __('messages.all_notifications_marked')]);
-            }
-
-            return response()->json(['message' => __('messages.wrong_id')]);
+        $notifications = $user->notifications->get()->toArray();
+        if($notifications) {
+            foreach ($notifications as $notification) {
+                $notificationData = Notification::find($notification['id']);
+                $notificationData->seen = true;
+                $notificationData->save();
+            };
+            return response()->json(['message' => __('messages.all_notifications_marked')]);
         }
 
-        return response()->json(['message' => __('messages.wrong_user')], 401);
+        return response()->json(['message' => __('messages.wrong_id')]);
     }
 }

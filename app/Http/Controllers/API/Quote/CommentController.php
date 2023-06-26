@@ -21,7 +21,7 @@ class CommentController extends Controller
         $quoteUser = User::find($quote->user_id);
         $user = auth()->user();
 
-        if($quote && $user) {
+        if($quote) {
             if($request->comment) {
                 $comment = Comment::create([
                     'text' => $request->comment,

@@ -21,7 +21,7 @@ class LikeController extends Controller
         $quoteUser = User::find($quote->user_id);
         $user = auth()->user();
 
-        if($quote && $user) {
+        if($quote) {
             $likes = Like::where('quote_id', $quote->id)->get()->toArray();
             $likesSum = count($likes);
             $liked = array_filter($likes, function ($like) use ($user) {

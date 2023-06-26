@@ -50,7 +50,6 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('genres', [GenreController::class, 'getAllGenres'])->name('genres.get_all_genres');
 
     Route::group(['controller' => UserController::class], function () {
-        Route::get('user', 'show')->name('users.show');
         Route::put('user', 'update')->name('users.update');
     });
 
