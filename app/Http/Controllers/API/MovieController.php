@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateMovieRequest;
 use App\Http\Requests\UpdateMovieRequest;
+use App\Models\Genre;
 use App\Models\Movie;
 use App\Models\MovieGenre;
 use App\Models\Quote;
@@ -64,12 +65,13 @@ class MovieController extends Controller
         return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.create_movie')])], 401);
     }
 
-    public function update(Movie $movie, UpdateMovieRequest $request): JsonResponse
+    public function update(int $id, UpdateMovieRequest $request): JsonResponse
     {
+        $movie = Movie::find($id);
         $user = auth()->user();
 
         if($movie && $user) {
-            if($user['id'] === $movie->user_id) {
+            if($user->id === $movie->user_id) {
                 if($request->name_en && $request->name_ka) {
                     $name = [
                         'en' => $request->name_en,
@@ -78,6 +80,51 @@ class MovieController extends Controller
 
                     $movie->name = $name;
                 };
+
+                if($request->director_en && $request->director_ka) {
+                    $director = [
+                        'en' => $request->director_en,
+                        'ka' => $request->director_ka
+                    ];
+
+                    $movie->director = $director;
+                };
+
+                if($request->description_en && $request->description_ka) {
+                    $description = [
+                        'en' => $request->description_en,
+                        'ka' => $request->description_ka
+                    ];
+
+                    $movie->description = $description;
+                };
+
+                if($request->genres_ids) {
+                    foreach ($request->genres_ids as $genreId) {
+                        $isSameGenre = false;
+                        foreach ($movie->genres->toArray() as $movieGenre) {
+                            $movieGenre['id'] === $genreId ? $isSameGenre = true : 0;
+                        }
+                        if(!$isSameGenre) {
+                            MovieGenre::create(['genre_id' => $genreId, 'movie_id' => $movie->id]);
+                        }
+                    }
+
+                    foreach ($movie->genres->toArray() as $movieGenre) {
+                        $isRemoved = true;
+                        foreach ($request->genres_ids as $genreId) {
+                            $movieGenre['id'] === $genreId ? $isRemoved = false : 0;
+                        }
+
+                        if($isRemoved) {
+                            MovieGenre::where('genre_id', $movieGenre['id'])->first()->delete();
+                        }
+                    }
+                }
+
+                if($request->year) {
+                    $movie->year = $request->year;
+                }
 
                 if($request->image) {
                     $image = $request->image;
@@ -95,26 +142,52 @@ class MovieController extends Controller
 
                 $movie->save();
 
-                $quotes = $movie->quotes;
-                foreach ($quotes as $quote) {
-                    $quoteModel = Quote::find($quote['id'])->getFullData();
-                    $quote['comments'] = count($quoteModel['comments']->toArray());
+                $quotesFullData = array_map(function ($quote) use ($user) {
+                    $quoteModel = Quote::find($quote['id']);
 
-                    $quote['likes'] = $quoteModel['likes'];
-                    $quote['liked'] = $quoteModel['liked'];
-                };
-                $movie['quotes'] = $quotes;
-                $movie['genres'] = $movie->genres;
+                    $likes = $quoteModel->likes->toArray();
+                    $likesSum = count($likes);
+
+                    $liked = count(array_filter($likes, function ($like) use ($user) {
+                        return $like['user_id'] === $user->id;
+                    })) ? true : false;
+
+                    $comments = $quoteModel->comments;
+                    $commentsWithUsers = $comments->map(function ($comment) {
+                        return ['user' => $comment->user, ...$comment->toArray()];
+                    });
+
+                    $quoteFullData = [...$quote];
+                    $quoteFullData['movie'] = $quoteModel->movie;
+                    $quoteFullData['author'] = $quoteModel->user;
+                    $quoteFullData['likes'] = $likesSum;
+                    $quoteFullData['liked'] = $liked;
+                    $quotesFullData['commentsTotal'] = count($quoteModel->comments->toArray());
+                    $quoteFullData['comments'] = $commentsWithUsers;
+
+                    return [...$quoteFullData, 'commentsTotal' => count($quoteModel->comments->toArray())];
+                }, $movie->quotes->toArray());
+
+                $movie = $movie->toArray();
+                $movie['quotes'] = $quotesFullData;
+                $genres = [];
+                foreach (MovieGenre::where('movie_id', $movie['id'])->get() as $movieGenre) {
+                    array_push($genres, Genre::find($movieGenre['genre_id']));
+                }
+
+                $movie['genres'] = $genres;
+                return response()->json(['movie' => $movie]);
             }
 
-            return response()->json(['movie' => $movie]);
+            return response()->json(['message' => __('messages.wrong_id')], 404);
         }
 
         return response()->json(['message' => __('messages.wrong_id')], 404);
     }
 
-    public function remove(Movie $movie): JsonResponse
+    public function remove(int $id): JsonResponse
     {
+        $movie = Movie::find($id);
         $user = auth()->user();
 
         if($user) {
@@ -139,7 +212,7 @@ class MovieController extends Controller
             $moviesFullData = [];
             foreach ($movies as $movie) {
                 $movieModel = Movie::find($movie['id']);
-                array_push($moviesFullData, [...$movie, 'genres' => $movieModel->genres, 'quotes' => $movieModel->quotes]);
+                array_push($moviesFullData, [...$movie, 'quotes' => count($movieModel->quotes->toArray())]);
             }
 
             $totalMovies = count($user->movies->toArray());
@@ -167,18 +240,28 @@ class MovieController extends Controller
         return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.get_movies')])], 401);
     }
 
-    public function getMovie(Movie $movie): JsonResponse
+    public function getMovie(int $id): JsonResponse
     {
+        $movie = Movie::find($id);
         $user = auth()->user();
         if($user) {
             if($movie) {
                 $quotes = $movie->quotes;
-                foreach ($quotes as $quote) {
-                    $quoteModel = Quote::find($quote['id'])->getFullData();
-                    $quote['comments'] = count($quoteModel['comments']->toArray());
 
-                    $quote['likes'] = $quoteModel['likes'];
-                    $quote['liked'] = $quoteModel['liked'];
+                foreach ($quotes as $quote) {
+                    $quoteModel = Quote::find($quote['id']);
+
+                    $likes = $quoteModel->likes->toArray();
+                    $likesSum = count($likes);
+
+                    $liked = count(array_filter($likes, function ($like) use ($user) {
+                        return $like['user_id'] === $user->id;
+                    })) ? true : false;
+
+                    $quote['comments'] = count($quoteModel->comments->toArray());
+
+                    $quote['likes'] = $likesSum;
+                    $quote['liked'] = $liked;
                 };
                 $movie['quotes'] = $quotes;
                 $movie['genres'] = $movie->genres;
@@ -241,7 +324,7 @@ class MovieController extends Controller
                 $updatedMovies = [];
                 foreach ($movies as $movie) {
                     $movieModel = Movie::find($movie['id']);
-                    array_push($updatedMovies, $movieModel->getFullData());
+                    array_push($updatedMovies, [...$movieModel->toArray(), $movieModel->genres, $movieModel->quotes]);
                 };
 
                 return response()->json(['movies' => $updatedMovies, 'isLastPage' => $moviesPaginate['last_page'] === $request->pageNum]);

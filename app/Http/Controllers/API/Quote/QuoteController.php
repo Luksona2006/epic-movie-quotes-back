@@ -1,21 +1,13 @@
 <?php
 
-namespace App\Http\Controllers\API;
+namespace App\Http\Controllers\API\Quote;
 
-use App\Events\CommentQuote;
-use App\Events\LikeQuote;
-use App\Events\RecieveNotification;
+use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateQuoteRequest;
 use App\Http\Requests\UpdateQuoteRequest;
-use App\Models\Comment;
-use App\Models\Like;
-use App\Models\Notification;
 use App\Models\Quote;
-use App\Models\User;
-use App\Models\UserNotification;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 
@@ -44,15 +36,20 @@ class QuoteController extends Controller
         $quote = Quote::create($attributes);
 
         if($quote) {
-            return response()->json(['quote' => $quote->getFullData()]);
+            $quote['comments'] = [];
+            $quote['liked'] = false;
+            $quote['likes'] = 0;
+            $quote['movie'] = $quote->movie;
+            $quote['user'] = $quote->user;
+            return response()->json(['quote' => $quote]);
         }
 
         return response()->json(['message', __('messages.invalid_credentials')], 401);
     }
 
-    public function update(Quote $quote, UpdateQuoteRequest $request): JsonResponse
+    public function update(int $id, UpdateQuoteRequest $request): JsonResponse
     {
-        $quoteUser = User::find($quote->user_id);
+        $quote = Quote::find($id);
         $user = auth()->user();
 
         if($quote && $user) {
@@ -83,89 +80,6 @@ class QuoteController extends Controller
                 $quote->save();
             }
 
-
-            $likes = Like::where('quote_id', $quote->id)->get()->toArray();
-            $likesSum = count($likes);
-            $liked = array_filter($likes, function ($like) use ($user) {
-                return $like['user_id'] === $user->id;
-            });
-
-            $quote['liked'] = count($liked) ? true : false;
-
-            if($request->liked !== null) {
-                if($request->liked === true) {
-                    Like::create([
-                        'user_id' => $user->id,
-                        'quote_id' => $quote->id
-                    ]);
-
-                    $likesSum = $likesSum + 1;
-                    $quote['liked'] = true;
-                }
-
-                if($request->liked === false) {
-                    $likeId = Like::where([
-                        ['user_id', '=', $user->id],
-                        ['quote_id', '=', $quote->id]
-                    ])->first()->id;
-
-                    Like::destroy($likeId);
-
-                    $likesSum = $likesSum - 1;
-                    $quote['liked'] = false;
-                }
-
-                if($user->id !== $quoteUser->id) {
-                    UserNotification::create(['from_user_id' => $user->id, 'to_user_id' => $quote->user_id]);
-                    $notification = Notification::create(['user_id' => $user->id,'quote_id' => $quote->id, 'type' => 'like']);
-                    $notificationFullData = [...$notification->toArray()];
-                    $notificationFullData['user'] = $user;
-                    event(new RecieveNotification($quoteUser->id, $notificationFullData));
-                }
-
-                $isOwnQuote = $user->id === $quote->id;
-                event(new LikeQuote($quote->id, $likesSum, $isOwnQuote));
-            }
-
-            $quote['likes'] = $likesSum;
-
-
-            if($request->comment) {
-                $comment = Comment::create([
-                    'text' => $request->comment,
-                    'quote_id' => $quote->id,
-                    'user_id' => $user->id
-                ]);
-
-                $comment->user;
-
-                if($user->id !== $quoteUser->id) {
-                    UserNotification::create(['from_user_id' => $user->id, 'to_user_id' => $quote->user_id]);
-                    $notification = Notification::create(['user_id' => $user->id,'quote_id' => $quote->id, 'type' => 'comment']);
-                    $notificationFullData = [...$notification->toArray()];
-                    $notificationFullData['user'] = $user;
-                    event(new RecieveNotification($quoteUser->id, $notificationFullData));
-                }
-
-                $isOwnQuote = $user->id === $quote->id;
-                event(new CommentQuote($quote->id, $comment, $isOwnQuote));
-            }
-
-            $quote['movie'] = $quote->movie;
-            $quote['author'] = $quoteUser;
-            $comments = Comment::where('quote_id', $quote->id)->get()->toArray();
-
-            $commentsWithUsers = [];
-
-            if(count($comments)) {
-                $commentsWithUsers = array_map(function ($comment) {
-                    $comment['user'] = User::find($comment['user_id']);
-                    return $comment;
-                }, $comments);
-            }
-
-            $quote['comments'] = $commentsWithUsers;
-
             return response()->json(['quote' => $quote]);
         }
 
@@ -194,18 +108,31 @@ class QuoteController extends Controller
         if($user) {
             $quotesPaginate = Quote::where('user_id', $user->id)->orderBy('created_at', 'desc')->paginate(10, ['*'], 'quotes-per-page', $request->pageNum)->toArray();
             $quotes = $quotesPaginate['data'];
-            $quotesFullData = array_map(function ($quote) {
+            $quotesFullData = array_map(function ($quote) use ($user) {
                 $quoteModel = Quote::find($quote['id']);
 
-                $quoteFullData = $quoteModel->getFullData();
+                $likes = $quoteModel->likes->toArray();
+                $likesSum = count($likes);
+
+                $liked = count(array_filter($likes, function ($like) use ($user) {
+                    return $like['user_id'] === $user->id;
+                })) ? true : false;
+
+                $comments = $quoteModel->comments;
+                $commentsWithUsers = $comments->map(function ($comment) {
+                    return ['user' => $comment->user, ...$comment->toArray()];
+                });
+
+                $quoteFullData = [...$quote];
+                $quoteFullData['movie'] = $quoteModel->movie;
+                $quoteFullData['author'] = $quoteModel->user;
+                $quoteFullData['likes'] = $likesSum;
+                $quoteFullData['liked'] = $liked;
                 $quotesFullData['commentsTotal'] = count($quoteModel->comments->toArray());
-                $quoteFullData['comments'] = array_slice($quoteModel->comments->toArray(), -2);
+                $quoteFullData['comments'] = $commentsWithUsers;
 
                 return [...$quoteFullData, 'commentsTotal' => count($quoteModel->comments->toArray())];
             }, $quotes);
-
-
-
 
             return response()->json(['quotes' => $quotesFullData, 'isLastPage' => $quotesPaginate['last_page'] === $request->pageNum]);
         };
@@ -213,24 +140,33 @@ class QuoteController extends Controller
         return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.get_quotes')])], 401);
     }
 
-    public function getAllComments(Quote $quote)
+    public function getQuote(int $id): JsonResponse
     {
-        $user = auth()->user();
-        if($user) {
-            $quoteFullData = $quote->getFullData();
-
-            return response()->json(['comments' => $quoteFullData['comments']]);
-        };
-
-        return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.get_comments')])], 401);
-    }
-
-    public function getQuote(Quote $quote): JsonResponse
-    {
+        $quote = Quote::find($id);
         $user = auth()->user();
         if($user) {
             if($quote) {
-                return response()->json(['quote' => $quote->getFullData()]);
+                $likes = $quote->likes->toArray();
+                $likesSum = count($likes);
+
+                $liked = count(array_filter($likes, function ($like) use ($user) {
+                    return $like['user_id'] === $user->id;
+                })) ? true : false;
+
+                $comments = $quote->comments;
+
+                $commentsWithUsers = $comments->map(function ($comment) {
+                    return ['user' => $comment->user, ...$comment->toArray()];
+                });
+
+                $quoteFullData = [...$quote->toArray()];
+                $quoteFullData['movie'] = $quote->movie;
+                $quoteFullData['author'] = $quote->user;
+                $quoteFullData['likes'] = $likesSum;
+                $quoteFullData['liked'] = $liked;
+                $quoteFullData['commentsTotal'] = count($quote->comments->toArray());
+                $quoteFullData['comments'] = $commentsWithUsers;
+                return response()->json(['quote' => $quoteFullData]);
             }
 
             return response()->json(['message' => __('messages.not_found', ['notFound' => __('messages.quote')])], 404);
@@ -255,7 +191,29 @@ class QuoteController extends Controller
                 $updatedQuotes = [];
                 foreach ($quotes as $quote) {
                     $quoteModel = Quote::find($quote['id']);
-                    array_push($updatedQuotes, $quoteModel->getFullData());
+
+                    $likes = $quoteModel->likes->toArray();
+                    $likesSum = count($likes);
+
+                    $liked = count(array_filter($likes, function ($like) use ($user) {
+                        return $like['user_id'] === $user->id;
+                    })) ? true : false;
+
+                    $comments = $quoteModel->comments;
+
+                    $commentsWithUsers = $comments->map(function ($comment) {
+                        return ['user' => $comment->user, ...$comment->toArray()];
+                    });
+
+                    $quoteFullData = [...$quote];
+                    $quoteFullData['movie'] = $quoteModel->movie;
+                    $quoteFullData['author'] = $quoteModel->user;
+                    $quoteFullData['likes'] = $likesSum;
+                    $quoteFullData['liked'] = $liked;
+                    $quotesFullData['commentsTotal'] = count($quoteModel->comments->toArray());
+                    $quoteFullData['comments'] = $commentsWithUsers;
+
+                    array_push($updatedQuotes, $quoteFullData);
                 };
 
                 return response()->json(['quotes' => $updatedQuotes, 'isLastPage' => $quotesPaginate['last_page'] === $request->pageNum]);

@@ -28,9 +28,6 @@ class UpdateQuoteRequest extends FormRequest
                 'quote_en' => ['nullable'],
                 'quote_ka' => ['nullable'],
                 'image' => ['nullable',],
-                'liked' => ['nullable'],
-                'comment' => ['nullable',],
-                'user_token' => ['required, exists:users,token'],
             ]
         ];
     }

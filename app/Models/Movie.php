@@ -35,9 +35,4 @@ class Movie extends Model
     {
         return $this->belongsToMany(Genre::class, 'movie_genre', 'movie_id', 'genre_id')->withTimestamps();
     }
-
-    public function getFullData(): SupportCollection
-    {
-        return collect([...$this->toArray() ,'genres' => $this->genres, 'quotes' => $this->quotes]);
-    }
 }

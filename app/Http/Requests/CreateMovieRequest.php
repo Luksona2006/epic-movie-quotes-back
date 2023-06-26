@@ -24,7 +24,6 @@ class CreateMovieRequest extends FormRequest
     public function rules()
     {
         return [
-            'user_token' => ['required', 'exists:users,token'],
             'genres_ids' => ['required', 'array'],
             'name_en' => ['required', 'string'],
             'name_ka' => ['required', 'string'],

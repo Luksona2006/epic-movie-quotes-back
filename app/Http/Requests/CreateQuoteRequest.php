@@ -24,7 +24,6 @@ class CreateQuoteRequest extends FormRequest
     public function rules()
     {
         return [
-            'user_token' => ['required', 'exists:users,token'],
             'quote_en' => ['required', 'string'],
             'quote_ka' => ['required', 'string'],
             'image' => ['required', 'string'],

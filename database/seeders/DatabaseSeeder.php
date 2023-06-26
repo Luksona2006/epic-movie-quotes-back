@@ -105,8 +105,8 @@ class DatabaseSeeder extends Seeder
         ]);
         Genre::factory()->create([
             'name' => [
-                'en' => 'კრიმინალური მხატვრული',
-                'ka' => 'დრამა'
+                'en' => 'Criminal fiction',
+                'ka' => 'კრიმინალური მხატვრული'
             ]
         ]);
         Genre::factory()->create([

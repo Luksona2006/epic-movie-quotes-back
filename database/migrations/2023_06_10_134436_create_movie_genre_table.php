@@ -13,6 +13,7 @@ return new class () extends Migration {
     public function up()
     {
         Schema::create('movie_genre', function (Blueprint $table) {
+            $table->id();
             $table->foreignId('genre_id')->constrained()->cascadeOnDelete();
             $table->foreignId('movie_id')->constrained()->cascadeOnDelete();
             $table->timestamps();

@@ -25,7 +25,6 @@ class UpdateMovieRequest extends FormRequest
     {
         return [
             [
-                'user_token' => ['nullable', 'exists:users,token'],
                 'genres_ids' => ['nullable'],
                 'name_en' => ['nullable'],
                 'name_ka' => ['nullable'],
