@@ -42,7 +42,7 @@ class LikeController extends Controller
                     $likeId = Like::where([
                         ['user_id', '=', $user->id],
                         ['quote_id', '=', $quote->id]
-                    ])->firstOrFail()->id;
+                    ])->first()->id;
 
                     Like::destroy($likeId);
 

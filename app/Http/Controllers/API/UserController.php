@@ -51,7 +51,7 @@ class UserController extends Controller
 
         $userWithEmail = User::where('email', $request->new_email)->count();
         if($request->new_email && !$userWithEmail) {
-            $hasChangeRequest = ChangeEmail::where('from_email', $user->email)->firstOrFail();
+            $hasChangeRequest = ChangeEmail::where('from_email', $user->email)->first();
             if($hasChangeRequest) {
                 $hasChangeRequest->delete();
             }
@@ -76,7 +76,7 @@ class UserController extends Controller
 
     public function confirmEmailChange(string $token): RedirectResponse
     {
-        $emailModel = ChangeEmail::where('email_verification_token', $token)->firstOrFail();
+        $emailModel = ChangeEmail::where('email_verification_token', $token)->first();
 
         if ($emailModel) {
             if($emailModel->expires_at > Carbon::now()) {
