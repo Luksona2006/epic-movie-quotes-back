@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Quote;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateUserRequest extends FormRequest
+class UpdateQuoteRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,11 +24,11 @@ class UpdateUserRequest extends FormRequest
     public function rules()
     {
         return [
-            'new_username' => ['nullable'],
-            'new_password' => ['nullable'],
-            'confirm_password' => ['nullable', 'same:new_password'],
-            'new_email' => ['nullable', 'unique:users,email'],
-            'image' => ['nullable']
+            [
+                'quote_en' => ['nullable'],
+                'quote_ka' => ['nullable'],
+                'image' => ['nullable',],
+            ]
         ];
     }
 }

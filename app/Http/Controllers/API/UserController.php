@@ -4,7 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Events\ChangeUserEmail;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\UpdateUserRequest;
+use App\Http\Requests\User\UpdateUserRequest;
 use App\Models\ChangeEmail;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;

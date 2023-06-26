@@ -4,8 +4,8 @@ namespace App\Http\Controllers\API\Quote;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\CreateQuoteRequest;
-use App\Http\Requests\UpdateQuoteRequest;
+use App\Http\Requests\Quote\CreateQuoteRequest;
+use App\Http\Requests\Quote\UpdateQuoteRequest;
 use App\Models\Movie;
 use App\Models\Quote;
 use Illuminate\Http\JsonResponse;
