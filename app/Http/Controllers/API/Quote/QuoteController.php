@@ -47,38 +47,34 @@ class QuoteController extends Controller
 
     public function update(int $id, UpdateQuoteRequest $request): JsonResponse
     {
-        $quote = Quote::find($id);
+        $quote = Quote::findOrFail($id);
 
-        if($quote) {
-            if($request->quote_en && $request->quote_ka) {
-                $text = [
-                    'en' => $request->quote_en ?? $quote->toArray()['text']['en'],
-                    'ka' => $request->quote_ka ?? $quote->toArray()['text']['ka'],
-                ];
+        if($request->quote_en && $request->quote_ka) {
+            $text = [
+                'en' => $request->quote_en ?? $quote->toArray()['text']['en'],
+                'ka' => $request->quote_ka ?? $quote->toArray()['text']['ka'],
+            ];
 
-                $quote->text = $text;
-            };
+            $quote->text = $text;
+        };
 
-            if($request->image) {
-                $image = $request->image;
-                $extension = explode(';', explode('/', $image)[1])[0];
-                $image = str_replace('data:image/png;base64,', '', $image);
-                $image = str_replace(' ', '+', $image);
-                $imageName = Str::random(30) . '.' . $extension;
+        if($request->image) {
+            $image = $request->image;
+            $extension = explode(';', explode('/', $image)[1])[0];
+            $image = str_replace('data:image/png;base64,', '', $image);
+            $image = str_replace(' ', '+', $image);
+            $imageName = Str::random(30) . '.' . $extension;
 
 
-                Storage::delete($quote->image);
-                Storage::put('quoteImages/' . $imageName, base64_decode($image));
+            Storage::delete($quote->image);
+            Storage::put('quoteImages/' . $imageName, base64_decode($image));
 
-                $quote->image = 'quoteImages/' .  $imageName;
-            }
-
-            $quote->save();
-
-            return response()->json(['quote' => $quote]);
+            $quote->image = 'quoteImages/' .  $imageName;
         }
 
-        return response()->json(['message' => __('messages.wrong_id')], 404);
+        $quote->save();
+
+        return response()->json(['quote' => $quote]);
     }
 
     public function destroy(Quote $quote): JsonResponse
@@ -94,7 +90,7 @@ class QuoteController extends Controller
         $quotesPaginate = Quote::where('user_id', $user->id)->orderBy('created_at', 'desc')->paginate(10, ['*'], 'quotes-per-page', $request->pageNum)->toArray();
         $quotes = $quotesPaginate['data'];
         $quotesFullData = array_map(function ($quote) use ($user) {
-            $quoteModel = Quote::find($quote['id']);
+            $quoteModel = Quote::with('movie')->find($quote['id']);
 
             $likes = $quoteModel->likes->toArray();
             $likesSum = count($likes);
@@ -109,7 +105,6 @@ class QuoteController extends Controller
             });
 
             $quoteFullData = [...$quote];
-            $quoteFullData['movie'] = $quoteModel->movie;
             $quoteFullData['author'] = $quoteModel->user;
             $quoteFullData['likes'] = $likesSum;
             $quoteFullData['liked'] = $liked;
@@ -124,34 +119,29 @@ class QuoteController extends Controller
 
     public function getQuote(int $id): JsonResponse
     {
-        $quote = Quote::find($id);
+        $quote = Quote::with('movie')->findOrFail($id);
         $user = auth()->user();
 
-        if($quote) {
-            $likes = $quote->likes->toArray();
-            $likesSum = count($likes);
+        $likes = $quote->likes->toArray();
+        $likesSum = count($likes);
 
-            $liked = count(array_filter($likes, function ($like) use ($user) {
-                return $like['user_id'] === $user->id;
-            })) ? true : false;
+        $liked = count(array_filter($likes, function ($like) use ($user) {
+            return $like['user_id'] === $user->id;
+        })) ? true : false;
 
-            $comments = $quote->comments;
+        $comments = $quote->comments;
 
-            $commentsWithUsers = $comments->map(function ($comment) {
-                return ['user' => $comment->user, ...$comment->toArray()];
-            });
+        $commentsWithUsers = $comments->map(function ($comment) {
+            return ['user' => $comment->user, ...$comment->toArray()];
+        });
 
-            $quoteFullData = [...$quote->toArray()];
-            $quoteFullData['movie'] = $quote->movie;
-            $quoteFullData['author'] = $quote->user;
-            $quoteFullData['likes'] = $likesSum;
-            $quoteFullData['liked'] = $liked;
-            $quoteFullData['commentsTotal'] = count($quote->comments->toArray());
-            $quoteFullData['comments'] = $commentsWithUsers;
-            return response()->json(['quote' => $quoteFullData]);
-        }
-
-        return response()->json(['message' => __('messages.not_found', ['notFound' => __('messages.quote')])], 404);
+        $quoteFullData = [...$quote->toArray()];
+        $quoteFullData['author'] = $quote->user;
+        $quoteFullData['likes'] = $likesSum;
+        $quoteFullData['liked'] = $liked;
+        $quoteFullData['commentsTotal'] = count($quote->comments->toArray());
+        $quoteFullData['comments'] = $commentsWithUsers;
+        return response()->json(['quote' => $quoteFullData]);
     }
 
     public function search(Request $request): JsonResponse

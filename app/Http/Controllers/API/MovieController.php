@@ -230,7 +230,7 @@ class MovieController extends Controller
 
     public function getMovie(int $id): JsonResponse
     {
-        $movie = Movie::find($id);
+        $movie = Movie::with('genres')->find($id);
         $user = auth()->user();
         if($movie) {
             $quotes = $movie->quotes;
@@ -251,7 +251,6 @@ class MovieController extends Controller
                 $quote['liked'] = $liked;
             };
             $movie['quotes'] = $quotes;
-            $movie['genres'] = $movie->genres;
 
             return response()->json(['movie' => $movie]);
         }
