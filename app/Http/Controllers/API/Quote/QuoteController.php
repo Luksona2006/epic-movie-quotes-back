@@ -104,7 +104,7 @@ class QuoteController extends Controller
                 return ['user' => $comment->user, ...$comment->toArray()];
             });
 
-            $quoteFullData = [...$quote];
+            $quoteFullData = [...$quoteModel->toArray()];
             $quoteFullData['author'] = $quoteModel->user;
             $quoteFullData['likes'] = $likesSum;
             $quoteFullData['liked'] = $liked;
@@ -129,9 +129,7 @@ class QuoteController extends Controller
             return $like['user_id'] === $user->id;
         })) ? true : false;
 
-        $comments = $quote->comments;
-
-        $commentsWithUsers = $comments->map(function ($comment) {
+        $commentsWithUsers = $quote->comments->map(function ($comment) {
             return ['user' => $comment->user, ...$comment->toArray()];
         });
 
@@ -205,7 +203,6 @@ class QuoteController extends Controller
 
             return response()->json(['movies' => $updatedMovies, 'isLastPage' => $moviesPaginate['last_page'] === $request->pageNum]);
         }
-
 
         return response()->json(['quotes' => []], 204);
     }
