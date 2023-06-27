@@ -1,0 +1,29 @@
+openapi: 3.0.0
+info:
+  title: Epic Movie Quotes API
+  description: Here goes description
+  version: 0.1.9
+
+servers:
+  - url: http://localhost:8000/api
+    description: local server
+  - url: "https://epic-movie-quotes-api.luka-bakuridze.redberryinternship.ge"
+    description: production server
+
+paths:
+  /login:
+    $ref: "./_swagger/paths/auth.yaml#/paths/~1login"
+  /signup:
+    $ref: "./_swagger/paths/auth.yaml#/paths/~1signup"
+  /logout:
+    $ref: "./_swagger/paths/auth.yaml#/paths/~1logout"
+
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: epicmoviequotes_session
+  schemas:
+    User:
+      $ref: "./_swagger/schemas/user.yaml#/components/schemas/User"

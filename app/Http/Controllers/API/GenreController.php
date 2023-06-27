@@ -10,12 +10,7 @@ class GenreController extends Controller
 {
     public function getAllGenres(): JsonResponse
     {
-        $user = auth()->user();
-        if($user) {
-            $genres = Genre::all();
-            return response()->json(['genres' => $genres]);
-        }
-
-        return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.get_genres')])], 401);
+        $genres = Genre::all();
+        return response()->json(['genres' => $genres]);
     }
 }

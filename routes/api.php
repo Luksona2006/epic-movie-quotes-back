@@ -1,10 +1,12 @@
 <?php
 
+use App\Http\Controllers\API\Quote\QuoteController;
+use App\Http\Controllers\API\Quote\CommentController;
+use App\Http\Controllers\API\Quote\LikeController;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\GenreController;
 use App\Http\Controllers\API\MovieController;
-use App\Http\Controllers\API\NotificationsController;
-use App\Http\Controllers\API\QuoteController;
+use App\Http\Controllers\API\NotificationController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\LocalizationController;
 use App\Http\Controllers\SocialiteController;
@@ -29,47 +31,60 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::post('locale', [LocalizationController::class, 'setLocale']);
 
 Route::group(['middleware' => 'guest:sanctum'], function () {
-    Route::post('login', [AuthController::class, 'login'])->name('login');
-    Route::post('signup', [AuthController::class, 'register'])->name('signup.register');
-    Route::get('verify/{token}', [AuthController::class, 'verifyEmail'])->name('verify.verify-email');
-    Route::post('forgot-password', [AuthController::class, 'sendPasswordResetRequest'])->name('forgot-password.send-password-reset-request');
-    Route::get('reset-password/redirect/{token}', [AuthController::class, 'redirectToPasswordReset'])->name('reset.redirect-to-password-reset');
-    Route::post('reset-password/{token}', [AuthController::class, 'resetPassword'])->name('reset-password');
+    Route::group(['controller' => AuthController::class], function () {
+        Route::post('login', 'login')->name('login');
+        Route::post('signup', 'register')->name('signup.register');
+        Route::get('verify/{token}', 'verifyEmail')->name('verify.verify_email');
+        Route::post('forgot-password', 'sendPasswordResetRequest')->name('forgot_password.send_password_reset_request');
+        Route::get('reset-password/redirect/{token}', 'redirectToPasswordReset')->name('reset.redirect_to_password_reset');
+        Route::post('reset-password/{token}', 'resetPassword')->name('reset_password');
 
-    Route::get('change-email/{token}', [UserController::class, 'confirmEmailChange'])->name('change-email.confirm-email-change');
+        Route::get('change-email/{token}', [UserController::class, 'confirmEmailChange'])->name('change_email.confirm_email_change');
+    });
+
+    Route::get('change-email/{token}', [UserController::class, 'confirmEmailChange'])->name('change_email.confirm_email_change');
 });
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('logout', [AuthController::class, 'logout'])->name('logout');
+    Route::get('genres', [GenreController::class, 'getAllGenres'])->name('genres.get_all_genres');
 
-    Route::get('user/details', [UserController::class, 'show'])->name('users.show');
-    Route::put('user/details', [UserController::class, 'update'])->name('users.update');
+    Route::group(['controller' => UserController::class], function () {
+        Route::put('user', 'update')->name('users.update');
+    });
 
-    Route::post('quote/create', [QuoteController::class, 'create'])->name('quote.create');
-    Route::put('quote/update/{id}', [QuoteController::class, 'update'])->name('quote.update');
-    Route::post('quote/remove/{id}', [QuoteController::class, 'remove'])->name('quote.remove');
-    Route::post('quotes/search', [QuoteController::class, 'filterQuotes'])->name('quotes.filter-quotes');
-    Route::post('quotes/page', [QuoteController::class, 'paginateQuotes'])->name('quotes.paginate-quotes');
-    Route::get('quotes/{id}/comments', [QuoteController::class, 'getAllComments'])->name('quotes.get-all-comments');
-    Route::get('quotes/{id}', [QuoteController::class, 'getQuote'])->name('quotes.get-quote');
+    Route::group(['controller' => QuoteController::class], function () {
+        Route::post('quotes/all', 'getQuotes')->name('quotes.get_quotes');
+        Route::post('quotes', 'create')->name('quotes.create');
+        Route::get('quotes/{id}', 'getQuote')->name('quotes.get_quote');
+        Route::put('quotes/{id}', 'update')->name('quotes.update');
+        Route::delete('quotes/{id}', 'destroy')->name('quotes.destroy');
 
-    Route::post('movie/create', [MovieController::class, 'create'])->name('movie.create');
-    Route::put('movie/update/{id}', [MovieController::class, 'update'])->name('movie.update');
-    Route::post('movie/remove/{id}', [MovieController::class, 'remove'])->name('movie.remove');
-    Route::post('my-movies/search', [MovieController::class, 'filterMyMovies'])->name('my-movies.filter-my-movies');
-    Route::post('movies/search', [MovieController::class, 'filterMovies'])->name('movies.filter-movies');
-    Route::get('movies', [MovieController::class, 'getAllMovies'])->name('movies.get-all-movies');
-    Route::post('movies/page', [MovieController::class, 'paginateMovies'])->name('movies.paginate-movies');
-    Route::get('movies/{id}', [MovieController::class, 'getMovie'])->name('movies.get-movie');
+        Route::post('quotes/search', 'search')->name('quotes.search');
+    });
 
-    Route::get('genres', [GenreController::class, 'getAllGenres'])->name('genres.get-all-genres');
+    Route::post('quotes/{id}/like', [LikeController::class, 'like'])->name('quote.like');
+    Route::post('quotes/{id}/comment', [CommentController::class, 'comment'])->name('quote.comment');
 
-    Route::get('notifications', [NotificationsController::class, 'getAllNotifications'])->name('notifications.get-all-notifications');
-    Route::post('notification/update/{id}', [NotificationsController::class, 'update'])->name('notification.update');
-    Route::post('notifications/update', [NotificationsController::class, 'updateAll'])->name('notifications.update-all');
+    Route::group(['controller' => MovieController::class], function () {
+        Route::get('movies/all', 'getMovies')->name('movies.get_movies');
+        Route::post('movies/page', 'paginateMovies')->name('movies.paginate_movies');
+        Route::post('movies', 'create')->name('movies.create');
+        Route::get('movies/{id}', 'getMovie')->name('movies.get_movie');
+        Route::put('movies/{id}', 'update')->name('movies.update');
+        Route::delete('movies/{id}', 'destroy')->name('movies.destroy');
+
+        Route::post('movies/search', 'search')->name('movies.search');
+    });
+
+    Route::group(['controller' => NotificationController::class], function () {
+        Route::get('notifications', 'getAllNotifications')->name('notifications.get_all_notifications');
+        Route::post('notification/update/{id}', 'update')->name('notification.update');
+        Route::post('notifications/update', 'updateAll')->name('notifications.update_all');
+    });
 });
 
-Route::group(['middleware' => 'web'], function () {
-    Route::get('auth/google/redirect', [SocialiteController::class, 'socialiteRedirect'])->name('auth-google.socialite-redirect');
-    Route::get('auth/google/callback', [SocialiteController::class, 'socialiteCreateUser'])->name('auth-google.socialite-create-user');
+Route::group(['middleware' => 'web', 'controller' => SocialiteController::class], function () {
+    Route::get('auth/google/redirect', 'socialiteRedirect')->name('auth_google.socialite_redirect');
+    Route::get('auth/google/callback', 'socialiteCreateUser')->name('auth_google.socialite_create_user');
 });

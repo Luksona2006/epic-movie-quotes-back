@@ -1,0 +1,82 @@
+paths:
+  /login:
+    post:
+      tags:
+        - Auth
+      summary: Logins user and returns authenticated user as a JSON response
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: johndoe@example.com
+                password:
+                  type: string
+                  example: password123
+      responses:
+        200:
+          $ref: "../responses/user.yaml#/components/responses/user/200"
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: epicmoviequotes_session=abcde12345; path=/;
+            Set-Cookie:
+              schema:
+                type: string
+                example: XSRF-TOKEN=abcde12345; path=/;
+        401:
+          $ref: "../responses/user.yaml#/components/responses/user/401"
+  /signup:
+    post:
+      tags:
+        - Auth
+      summary: Registers user, sends email verification and returns user as a JSON response
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: john doe
+                email:
+                  type: string
+                  example: johndoe@example.com
+                password:
+                  type: string
+                  example: password123
+                confirm_password:
+                  type: string
+                  example: password123
+      responses:
+        200:
+          $ref: "../responses/user.yaml#/components/responses/user/200"
+        401:
+          $ref: "../responses/user.yaml#/components/responses/user/401"
+  /logout:
+    post:
+      security:
+        - sessionCookie: []
+      tags:
+        - Auth
+      summary: Logouts user and returns message as a JSON response
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    default: User logged out
+        401:
+          $ref: "../common.yaml#/components/responses/401"
