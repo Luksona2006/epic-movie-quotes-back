@@ -7,6 +7,7 @@ use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\PasswordResetEmailRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\ResetPasswordRequest;
+use App\Http\Resources\UserResource;
 use App\Models\ChangePassword;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -31,7 +32,9 @@ class AuthController extends Controller
 
         $remember = $request->remember ? true : false;
         if(Auth::guard()->attempt($credentials, $remember)) {
-            return response()->json(['user' => $user]);
+            $userResource = (new UserResource($user))->toArray('get');
+
+            return response()->json(['user' => $userResource]);
         };
         return response()->json(['message' => __('messages.invalid_credentials')], 401);
     }
@@ -60,7 +63,10 @@ class AuthController extends Controller
             Mail::send('email.verification', ['data' => $data], function ($message) use ($data) {
                 $message->to($data['email'])->subject('Please verify your email address');
             });
-            return response()->json(['user' => $user]);
+
+            $userResource = (new UserResource($user))->toArray('get');
+
+            return response()->json(['user' => $userResource]);
         }
 
         return response()->json(['message' => __('messages.invalid_credentials')], 401);
@@ -123,7 +129,10 @@ class AuthController extends Controller
                 $user = User::where('email', $changePasswordModel->email)->firstOrFail();
                 $user->update(['password' => bcrypt($request->password)]);
                 $changePasswordModel->delete();
-                return response()->json(['user' => $user]);
+
+                $userResource = (new UserResource($user))->toArray('get');
+
+                return response()->json(['user' => $userResource]);
             }
             $changePasswordModel->delete();
             return redirect()->away(env('FRONTEND_URL').'/expired');

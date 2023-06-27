@@ -40,8 +40,8 @@ class LikeController extends Controller
 
                 if($request->liked === false) {
                     $likeId = Like::where([
-                        ['user_id', '=', $user->id],
-                        ['quote_id', '=', $quote->id]
+                        ['user_id', $user->id],
+                        ['quote_id', $quote->id]
                     ])->first()->id;
 
                     Like::destroy($likeId);

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Events\ChangeUserEmail;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\UpdateUserRequest;
+use App\Http\Resources\UserResource;
 use App\Models\ChangeEmail;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -71,6 +72,9 @@ class UserController extends Controller
         }
 
         $user->save();
+
+        $user = (new UserResource($user))->toArray('get');
+
         return response()->json(['user' => $user]);
     }
 

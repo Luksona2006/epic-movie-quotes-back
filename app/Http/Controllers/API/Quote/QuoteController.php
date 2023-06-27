@@ -6,6 +6,10 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Quote\CreateQuoteRequest;
 use App\Http\Requests\Quote\UpdateQuoteRequest;
+use App\Http\Resources\CommentResource;
+use App\Http\Resources\MovieResource;
+use App\Http\Resources\QuoteResource;
+use App\Http\Resources\UserResource;
 use App\Models\Movie;
 use App\Models\Quote;
 use Illuminate\Http\JsonResponse;
@@ -34,13 +38,11 @@ class QuoteController extends Controller
 
         $attributes['image'] = 'quoteImages/' .  $imageName;
 
-        $quote = Quote::create($attributes);
+        $newQuote = Quote::create($attributes);
 
-        $quote['comments'] = [];
-        $quote['liked'] = false;
-        $quote['likes'] = 0;
-        $quote['movie'] = $quote->movie;
-        $quote['user'] = $quote->user;
+        $quote = (new QuoteResource($newQuote))->toArray('get');
+        $quote['movie'] = (new MovieResource($newQuote->movie))->toArray('get');
+        $quote['author'] = (new UserResource($newQuote->user))->toArray('get');
         return response()->json(['quote' => $quote]);
 
     }
@@ -74,6 +76,8 @@ class QuoteController extends Controller
 
         $quote->save();
 
+        $quote = (new QuoteResource($quote))->toArray('get');
+
         return response()->json(['quote' => $quote]);
     }
 
@@ -87,103 +91,57 @@ class QuoteController extends Controller
     {
         $user = auth()->user();
 
-        $quotesPaginate = Quote::where('user_id', $user->id)->orderBy('created_at', 'desc')->paginate(10, ['*'], 'quotes-per-page', $request->pageNum)->toArray();
-        $quotes = $quotesPaginate['data'];
-        $quotesFullData = array_map(function ($quote) use ($user) {
-            $quoteModel = Quote::with('movie')->find($quote['id']);
+        $quotesPaginate = Quote::where('user_id', $user->id)->orderBy('created_at', 'desc')->paginate(10, ['*'], 'quotes-per-page', $request->pageNum);
 
-            $likes = $quoteModel->likes->toArray();
-            $likesSum = count($likes);
+        $quotes = QuoteResource::collection(collect($quotesPaginate->items()))->toArray('get');
 
-            $liked = count(array_filter($likes, function ($like) use ($user) {
-                return $like['user_id'] === $user->id;
-            })) ? true : false;
+        $quotesFullData = array_map(function ($quote) {
+            $quoteModel = Quote::find($quote['id']);
 
-            $comments = $quoteModel->comments;
-            $commentsWithUsers = $comments->map(function ($comment) {
-                return ['user' => $comment->user, ...$comment->toArray()];
-            });
+            $quote['movie'] = (new MovieResource($quoteModel->movie))->toArray('get');
+            $quote['author'] = (new UserResource($quoteModel->user))->toArray('get');
+            $quote['comments'] = CommentResource::collection($quoteModel->comments)->toArray('get');
 
-            $quoteFullData = [...$quoteModel->toArray()];
-            $quoteFullData['author'] = $quoteModel->user;
-            $quoteFullData['likes'] = $likesSum;
-            $quoteFullData['liked'] = $liked;
-            $quotesFullData['commentsTotal'] = count($quoteModel->comments->toArray());
-            $quoteFullData['comments'] = $commentsWithUsers;
-
-            return [...$quoteFullData, 'commentsTotal' => count($quoteModel->comments->toArray())];
+            return $quote;
         }, $quotes);
 
-        return response()->json(['quotes' => $quotesFullData, 'isLastPage' => $quotesPaginate['last_page'] === $request->pageNum]);
+        return response()->json(['quotes' => $quotesFullData, 'isLastPage' => $quotesPaginate->toArray()['last_page'] === $request->pageNum]);
     }
 
     public function getQuote(int $id): JsonResponse
     {
-        $quote = Quote::with('movie')->findOrFail($id);
-        $user = auth()->user();
+        $quoteModel = Quote::findOrFail($id);
 
-        $likes = $quote->likes->toArray();
-        $likesSum = count($likes);
+        $quote = (new QuoteResource($quoteModel))->toArray('get');
+        $quote['author'] =  (new UserResource($quoteModel->user))->toArray('get');
+        $quote['comments'] = CommentResource::collection($quoteModel->comments)->toArray('get');
 
-        $liked = count(array_filter($likes, function ($like) use ($user) {
-            return $like['user_id'] === $user->id;
-        })) ? true : false;
-
-        $commentsWithUsers = $quote->comments->map(function ($comment) {
-            return ['user' => $comment->user, ...$comment->toArray()];
-        });
-
-        $quoteFullData = [...$quote->toArray()];
-        $quoteFullData['author'] = $quote->user;
-        $quoteFullData['likes'] = $likesSum;
-        $quoteFullData['liked'] = $liked;
-        $quoteFullData['commentsTotal'] = count($quote->comments->toArray());
-        $quoteFullData['comments'] = $commentsWithUsers;
-        return response()->json(['quote' => $quoteFullData]);
+        return response()->json(['quote' => $quote]);
     }
 
     public function search(Request $request): JsonResponse
     {
-        $user = auth()->user();
-
         $search = $request->searchBy;
+
         if($search[0] === '#') {
             $search = ltrim($search, '#');
             $quotesPaginate = Quote::whereRaw('LOWER(JSON_EXTRACT(text, "$.en")) like ?', '%'.strtolower($search).'%')
             ->orWhereRaw('LOWER(JSON_EXTRACT(text, "$.ka")) like ?', '%'.strtolower($search).'%')
-            ->orderBy('created_at', 'desc')->paginate(10, ['*'], 'quotes-per-page', $request->pageNum)->toArray();
+            ->orderBy('created_at', 'desc')->paginate(10, ['*'], 'quotes-per-page', $request->pageNum);
 
-            $quotes = $quotesPaginate['data'];
+            $quotes = QuoteResource::collection(collect($quotesPaginate->items()))->toArray('get');
 
-            $updatedQuotes = [];
-            foreach ($quotes as $quote) {
+            $quotesFullData = array_map(function ($quote) {
                 $quoteModel = Quote::find($quote['id']);
 
-                $likes = $quoteModel->likes->toArray();
-                $likesSum = count($likes);
+                $quote['movie'] = (new MovieResource($quoteModel->movie))->toArray('get');
+                $quote['author'] =  (new UserResource($quoteModel->user))->toArray('get');
+                $quote['comments'] = CommentResource::collection($quoteModel->comments)->toArray('get');
 
-                $liked = count(array_filter($likes, function ($like) use ($user) {
-                    return $like['user_id'] === $user->id;
-                })) ? true : false;
+                return $quote;
+            }, $quotes);
 
-                $comments = $quoteModel->comments;
-
-                $commentsWithUsers = $comments->map(function ($comment) {
-                    return ['user' => $comment->user, ...$comment->toArray()];
-                });
-
-                $quoteFullData = [...$quote];
-                $quoteFullData['movie'] = $quoteModel->movie;
-                $quoteFullData['author'] = $quoteModel->user;
-                $quoteFullData['likes'] = $likesSum;
-                $quoteFullData['liked'] = $liked;
-                $quoteFullData['commentsTotal'] = count($quoteModel->comments->toArray());
-                $quoteFullData['comments'] = $commentsWithUsers;
-
-                array_push($updatedQuotes, $quoteFullData);
-            };
-
-            return response()->json(['quotes' => $updatedQuotes, 'isLastPage' => $quotesPaginate['last_page'] === $request->pageNum]);
+            return response()->json(['quotes' => $quotesFullData, 'isLastPage' => $quotesPaginate['last_page'] === $request->pageNum]);
         }
 
         if($search[0] === '@') {
@@ -191,17 +149,11 @@ class QuoteController extends Controller
             $moviesPaginate = Movie::whereRaw('LOWER(JSON_EXTRACT(name, "$.en")) like ?', '%'.strtolower($search).'%')
             ->orWhereRaw('LOWER(JSON_EXTRACT(name, "$.ka")) like ?', '%'.strtolower($search).'%')
             ->orderBy('created_at', 'desc')
-            ->paginate(10, ['*'], 'movies-per-page', $request->pageNum)->toArray();
+            ->paginate(10, ['*'], 'movies-per-page', $request->pageNum);
 
-            $movies = $moviesPaginate['data'];
+            $movies = MovieResource::collection(collect($moviesPaginate->items()))->toArray('get');
 
-            $updatedMovies = [];
-            foreach ($movies as $movie) {
-                $movieModel = Movie::find($movie['id']);
-                array_push($updatedMovies, [...$movieModel->toArray(), 'quotes' => count($movieModel->quotes->toArray())]);
-            };
-
-            return response()->json(['movies' => $updatedMovies, 'isLastPage' => $moviesPaginate['last_page'] === $request->pageNum]);
+            return response()->json(['movies' => $movies, 'isLastPage' => $moviesPaginate['last_page'] === $request->pageNum]);
         }
 
         return response()->json(['quotes' => []], 204);
