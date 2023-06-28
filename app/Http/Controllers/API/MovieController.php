@@ -178,7 +178,7 @@ class MovieController extends Controller
     {
         $user = auth()->user();
 
-        $moviesPaginate = Movie::where('user_id', $user->id)->orderBy('created_at', 'DESC')->paginate(6, ['*'], 'movies-per-page', $request->pageNum);
+        $moviesPaginate = Movie::where('user_id', $user->id)->latest()->paginate(6, ['*'], 'movies-per-page', $request->pageNum);
 
         $movies = MovieResource::collection(collect($moviesPaginate->items()))->toArray('get');
 

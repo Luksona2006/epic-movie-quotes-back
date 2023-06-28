@@ -89,9 +89,7 @@ class QuoteController extends Controller
 
     public function getQuotes(Request $request): JsonResponse
     {
-        $user = auth()->user();
-
-        $quotesPaginate = Quote::where('user_id', $user->id)->orderBy('created_at', 'desc')->paginate(10, ['*'], 'quotes-per-page', $request->pageNum);
+        $quotesPaginate = Quote::latest()->paginate(10, ['*'], 'quotes-per-page', $request->pageNum);
 
         $quotes = QuoteResource::collection(collect($quotesPaginate->items()))->toArray('get');
 
@@ -127,7 +125,7 @@ class QuoteController extends Controller
             $search = ltrim($search, '#');
             $quotesPaginate = Quote::whereRaw('LOWER(JSON_EXTRACT(text, "$.en")) like ?', '%'.strtolower($search).'%')
             ->orWhereRaw('LOWER(JSON_EXTRACT(text, "$.ka")) like ?', '%'.strtolower($search).'%')
-            ->orderBy('created_at', 'desc')->paginate(10, ['*'], 'quotes-per-page', $request->pageNum);
+            ->latest()->paginate(10, ['*'], 'quotes-per-page', $request->pageNum);
 
             $quotes = QuoteResource::collection(collect($quotesPaginate->items()))->toArray('get');
 
@@ -148,8 +146,7 @@ class QuoteController extends Controller
             $search = ltrim($search, '@');
             $moviesPaginate = Movie::whereRaw('LOWER(JSON_EXTRACT(name, "$.en")) like ?', '%'.strtolower($search).'%')
             ->orWhereRaw('LOWER(JSON_EXTRACT(name, "$.ka")) like ?', '%'.strtolower($search).'%')
-            ->orderBy('created_at', 'desc')
-            ->paginate(10, ['*'], 'movies-per-page', $request->pageNum);
+            ->latest()->paginate(10, ['*'], 'movies-per-page', $request->pageNum);
 
             $movies = MovieResource::collection(collect($moviesPaginate->items()))->toArray('get');
 
