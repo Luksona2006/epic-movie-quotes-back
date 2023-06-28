@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    public function login(LoginRequest $request): JsonResponse
+    public function login(LoginRequest $request)
     {
         $credentials = $request->only(['email', 'password']);
 
@@ -32,9 +32,7 @@ class AuthController extends Controller
 
         $remember = $request->remember ? true : false;
         if(Auth::guard()->attempt($credentials, $remember)) {
-            $userResource = (new UserResource($user))->toArray('get');
-
-            return response()->json(['user' => $userResource]);
+            return new UserResource($user);
         };
         return response()->json(['message' => __('messages.invalid_credentials')], 401);
     }
@@ -46,7 +44,7 @@ class AuthController extends Controller
         return response()->json(['message' => __('messages.user_logged_out')]);
     }
 
-    public function register(RegisterRequest $request): JsonResponse
+    public function register(RegisterRequest $request)
     {
         $attributes = $request->validated();
         $attributes['password'] = bcrypt($attributes['password']);
@@ -64,9 +62,7 @@ class AuthController extends Controller
                 $message->to($data['email'])->subject('Please verify your email address');
             });
 
-            $userResource = (new UserResource($user))->toArray('get');
-
-            return response()->json(['user' => $userResource]);
+            return new UserResource($user);
         }
 
         return response()->json(['message' => __('messages.invalid_credentials')], 401);
@@ -121,7 +117,7 @@ class AuthController extends Controller
         return redirect()->away(env('FRONTEND_URL').'/404');
     }
 
-    public function resetPassword(ResetPasswordRequest $request): JsonResponse
+    public function resetPassword(ResetPasswordRequest $request)
     {
         $changePasswordModel = ChangePassword::where('token', $request->token)->first();
         if($changePasswordModel) {
@@ -130,9 +126,7 @@ class AuthController extends Controller
                 $user->update(['password' => bcrypt($request->password)]);
                 $changePasswordModel->delete();
 
-                $userResource = (new UserResource($user))->toArray('get');
-
-                return response()->json(['user' => $userResource]);
+                return new UserResource($user);
             }
             $changePasswordModel->delete();
             return redirect()->away(env('FRONTEND_URL').'/expired');

@@ -13,6 +13,7 @@ class MovieResource extends JsonResource
      * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
      */
     public $preserveKeys = true;
+    public static $wrap = 'movie';
 
     public function toArray($request): array
     {
