@@ -15,6 +15,7 @@ use App\Models\MovieGenre;
 use App\Models\Quote;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 
@@ -195,14 +196,12 @@ class MovieController extends Controller
     }
 
 
-    public function getMovies(): JsonResponse
+    public function getMovies(): JsonResource
     {
         $user = auth()->user();
 
-        $movies = Movie::where('user_id', $user->id)->orderBy('created_at', 'DESC')->get();
-        $movies = MovieResource::collection($movies)->toArray('get');
-
-        return response()->json(['movies' => $movies]);
+        $movies = Movie::where('user_id', $user->id)->latest()->get();
+        return MovieResource::collection($movies);
     }
 
     public function getMovie(int $id): JsonResponse
@@ -211,6 +210,7 @@ class MovieController extends Controller
 
         $movieResource = (new MovieResource($movie))->toArray('get');
         $movieResource['quotes'] = QuoteResource::collection($movie->quotes)->toArray('get');
+        $movieResource['genres'] = GenreResource::collection($movie->genres)->toArray('get');
 
         return response()->json(['movie' => $movieResource]);
     }
@@ -224,7 +224,7 @@ class MovieController extends Controller
             $searchedMovies = Movie::where('user_id', $user->id)
             ->whereRaw('LOWER(JSON_EXTRACT(name, "$.en")) like ?', '%'.strtolower($search).'%')
             ->orWhereRaw('LOWER(JSON_EXTRACT(name, "$.ka")) like ?', '%'.strtolower($search).'%')
-            ->orderBy('created_at', 'desc');
+            ->latest();
 
             $moviesPaginate = $searchedMovies->paginate(10, ['*'], 'movies-per-page', $request->pageNum);
 
