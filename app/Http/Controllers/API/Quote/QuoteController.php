@@ -42,7 +42,7 @@ class QuoteController extends Controller
 
         $quote = (new QuoteResource($newQuote))->toArray('get');
         $quote['movie'] = (new MovieResource($newQuote->movie))->toArray('get');
-        $quote['author'] = (new UserResource($newQuote->user))->toArray('get');
+        $quote['user'] = (new UserResource($newQuote->user))->toArray('get');
         return response()->json(['quote' => $quote]);
 
     }
@@ -99,7 +99,7 @@ class QuoteController extends Controller
             $quoteModel = Quote::find($quote['id']);
 
             $quote['movie'] = (new MovieResource($quoteModel->movie))->toArray('get');
-            $quote['author'] = (new UserResource($quoteModel->user))->toArray('get');
+            $quote['user'] = (new UserResource($quoteModel->user))->toArray('get');
             $quote['comments'] = CommentResource::collection($quoteModel->comments)->toArray('get');
 
             return $quote;
@@ -113,7 +113,7 @@ class QuoteController extends Controller
         $quoteModel = Quote::findOrFail($id);
 
         $quote = (new QuoteResource($quoteModel))->toArray('get');
-        $quote['author'] =  (new UserResource($quoteModel->user))->toArray('get');
+        $quote['user'] =  (new UserResource($quoteModel->user))->toArray('get');
         $quote['comments'] = CommentResource::collection($quoteModel->comments)->toArray('get');
 
         return response()->json(['quote' => $quote]);
@@ -135,7 +135,7 @@ class QuoteController extends Controller
                 $quoteModel = Quote::find($quote['id']);
 
                 $quote['movie'] = (new MovieResource($quoteModel->movie))->toArray('get');
-                $quote['author'] =  (new UserResource($quoteModel->user))->toArray('get');
+                $quote['user'] =  (new UserResource($quoteModel->user))->toArray('get');
                 $quote['comments'] = CommentResource::collection($quoteModel->comments)->toArray('get');
 
                 return $quote;

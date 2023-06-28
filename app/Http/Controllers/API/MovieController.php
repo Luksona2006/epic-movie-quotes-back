@@ -150,7 +150,7 @@ class MovieController extends Controller
                 $quoteModel = Quote::find($quote['id']);
 
                 $quote['movie'] = (new MovieResource($quoteModel->movie))->toArray('get');
-                $quote['author'] = (new UserResource($quoteModel->user))->toArray('get');
+                $quote['user'] = (new UserResource($quoteModel->user))->toArray('get');
                 $quote['comments'] = CommentResource::collection($quoteModel->comments)->toArray('get');
 
                 return $quote;

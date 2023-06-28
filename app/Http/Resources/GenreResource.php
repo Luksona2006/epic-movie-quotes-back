@@ -16,14 +16,9 @@ class GenreResource extends JsonResource
 
     public function toArray($request): array
     {
-        $model = $this->find($this->id)->toArray();
-
         return [
             'id' => $this->id,
-            'name' => [
-                'en' => $model['name']['en'],
-                'ka' => $model['name']['ka']
-            ]
+            'name' => $this->getTranslations('name'),
         ];
     }
 }

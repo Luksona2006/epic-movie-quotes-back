@@ -3,9 +3,6 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
-use App\Http\Resources\UserResource;
-use App\Http\Resources\QuoteResource;
-use App\Http\Resources\GenreResource;
 
 class MovieResource extends JsonResource
 {
@@ -19,22 +16,11 @@ class MovieResource extends JsonResource
 
     public function toArray($request): array
     {
-        $model = $this->find($this->id)->toArray();
-
         return [
             'id' => $this->id,
-            'name' => [
-                'en' => $model['name']['en'],
-                'ka' => $model['name']['ka']
-            ],
-            'director' => [
-                'en' => $model['director']['en'],
-                'ka' => $model['director']['ka']
-            ],
-            'description' => [
-                'en' => $model['description']['en'],
-                'ka' => $model['description']['ka']
-            ],
+            'name' => $this->getTranslations('name'),
+            'director' => $this->getTranslations('director'),
+            'description' => $this->getTranslations('description'),
             'year' => $this->year,
             'image' => $this->image,
         ];
