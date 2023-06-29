@@ -22,6 +22,12 @@ class SocialiteController extends Controller
         $googleUser = Socialite::driver('google')->stateless()->user();
 
         if(!User::where('email', $googleUser->email)->count()) {
+
+            if(!Storage::get('userImages/DefaultProfile.png')) {
+                $image = public_path('assets/images/DefaultProfile.png');
+                Storage::put('userImages/DefaultProfile.png', file_get_contents($image));
+            }
+
             $user = User::updateOrCreate(
                 ['email' => $googleUser->email],
                 [

@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class AuthController extends Controller
 {
@@ -54,6 +55,10 @@ class AuthController extends Controller
         $user = User::create($attributes);
 
         if($user) {
+            if(!Storage::get('userImages/DefaultProfile.png')) {
+                $image = public_path('assets/images/DefaultProfile.png');
+                Storage::put('userImages/DefaultProfile.png', file_get_contents($image));
+            }
             $data['token'] = $emailVerificationToken;
             $data['email'] = $user->email;
             $data['name'] = $user->name;
@@ -71,13 +76,17 @@ class AuthController extends Controller
     public function verifyEmail(string $token): RedirectResponse
     {
         $user = User::where('email_verification_token', $token)->first();
-        if (!$user->email_verified_at) {
-            $user->update([
-                'email_verified_at' => Carbon::now(),
-                'email_verification_token' => null
-            ]);
+        if ($user) {
+            if(!$user->email_verified_at) {
+                $user->update([
+                    'email_verified_at' => Carbon::now(),
+                    'email_verification_token' => null
+                ]);
 
-            return redirect(env('FRONTEND_URL').`/verified/$token`);
+                return redirect(env('FRONTEND_URL')."/verified/$token");
+            }
+
+            return redirect(env('FRONTEND_URL')."/expired");
         };
 
         return redirect(env('FRONTEND_URL')."/404");
