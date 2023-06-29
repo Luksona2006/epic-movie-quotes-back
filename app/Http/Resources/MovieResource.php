@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Http\Resources\GenreResource;
 
 class MovieResource extends JsonResource
 {
@@ -24,6 +25,9 @@ class MovieResource extends JsonResource
             'description' => $this->getTranslations('description'),
             'year' => $this->year,
             'image' => $this->image,
+            'genres' => GenreResource::collection($this->whenLoaded('genres')),
+            'quotes' => QuoteResource::collection($this->whenLoaded('quotes')),
+            'quotesTotal' => $this->quotes->count(),
         ];
     }
 }

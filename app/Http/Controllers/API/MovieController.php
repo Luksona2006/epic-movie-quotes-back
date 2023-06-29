@@ -5,14 +5,9 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Movie\CreateMovieRequest;
 use App\Http\Requests\Movie\UpdateMovieRequest;
-use App\Http\Resources\CommentResource;
-use App\Http\Resources\GenreResource;
 use App\Http\Resources\MovieResource;
-use App\Http\Resources\QuoteResource;
-use App\Http\Resources\UserResource;
 use App\Models\Movie;
 use App\Models\MovieGenre;
-use App\Models\Quote;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -21,7 +16,7 @@ use Illuminate\Support\Facades\Storage;
 
 class MovieController extends Controller
 {
-    public function create(CreateMovieRequest $request): JsonResponse
+    public function create(CreateMovieRequest $request): JsonResource|JsonResponse
     {
         $user = auth()->user();
 
@@ -55,23 +50,21 @@ class MovieController extends Controller
 
             $movie['image'] = 'movieImages/' .  $imageName;
 
-            $newMovie = Movie::create($movie);
+            $movie = Movie::create($movie);
 
             foreach ($request->genres_ids as $genre_id) {
-                MovieGenre::create(['movie_id' => $newMovie->id, 'genre_id' => $genre_id]);
+                MovieGenre::create(['movie_id' => $movie->id, 'genre_id' => $genre_id]);
             }
 
-            $movie = (new MovieResource($newMovie))->toArray('get');
-            $movie['quotes'] = MovieResource::collection($newMovie->quotes)->toArray('get');
-            $movie['genres'] = GenreResource::collection($newMovie->quotes)->toArray('get');
+            $movieModel = Movie::with('quotes', 'genres')->find($movie->id);
 
-            return response()->json(['movie' => $movie]);
+            return new MovieResource($movieModel);
         }
 
         return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.create_movie')])], 401);
     }
 
-    public function update(int $id, UpdateMovieRequest $request): JsonResponse
+    public function update(int $id, UpdateMovieRequest $request): JsonResource|JsonResponse
     {
         $movie = Movie::findOrFail($id);
         $user = auth()->user();
@@ -147,21 +140,9 @@ class MovieController extends Controller
 
             $movie->save();
 
-            $quotesFullData = array_map(function ($quote) {
-                $quoteModel = Quote::find($quote['id']);
+            $movieModel = Movie::with('quotes', 'genres')->find($movie->id);
 
-                $quote['movie'] = (new MovieResource($quoteModel->movie))->toArray('get');
-                $quote['user'] = (new UserResource($quoteModel->user))->toArray('get');
-                $quote['comments'] = CommentResource::collection($quoteModel->comments)->toArray('get');
-
-                return $quote;
-            }, QuoteResource::collection($movie->quotes)->toArray('get'));
-
-            $movieResource = (new MovieResource($movie))->toArray('get');
-            $movieResource['quotes'] = $quotesFullData;
-            $movieResource['genres'] = GenreResource::collection($movie->genres)->toArray('get');
-
-            return response()->json(['movie' => $movieResource]);
+            return new MovieResource($movieModel);
         }
 
         return response()->json(['message' => __('messages.wrong_id')], 404);
@@ -181,18 +162,10 @@ class MovieController extends Controller
 
         $moviesPaginate = Movie::where('user_id', $user->id)->latest()->paginate(6, ['*'], 'movies-per-page', $request->pageNum);
 
-        $movies = MovieResource::collection(collect($moviesPaginate->items()))->toArray('get');
+        $movies = MovieResource::collection($moviesPaginate->items());
 
-        $moviesFullData = array_map(function ($movie) {
-            $movieModel = Movie::find($movie['id']);
-
-            $movie['quotes'] = $movieModel->quotes->count();
-
-            return $movie;
-        }, $movies);
-
-        $totalMovies = count($user->movies->toArray());
-        return response()->json(['movies' => $moviesFullData, 'isLastPage' => $moviesPaginate['last_page'] === $request->pageNum, 'total' => $totalMovies]);
+        $totalMovies = count($movies);
+        return response()->json(['movies' => $movies, 'isLastPage' => $moviesPaginate['last_page'] === $request->pageNum, 'total' => $totalMovies]);
     }
 
 
@@ -204,15 +177,11 @@ class MovieController extends Controller
         return MovieResource::collection($movies);
     }
 
-    public function getMovie(int $id): JsonResponse
+    public function getMovie(int $id): JsonResource
     {
-        $movie = Movie::findOrFail($id);
+        $movie = Movie::with('quotes', 'genres')->findOrFail($id);
 
-        $movieResource = (new MovieResource($movie))->toArray('get');
-        $movieResource['quotes'] = QuoteResource::collection($movie->quotes)->toArray('get');
-        $movieResource['genres'] = GenreResource::collection($movie->genres)->toArray('get');
-
-        return response()->json(['movie' => $movieResource]);
+        return new MovieResource($movie);
     }
 
     public function search(Request $request): JsonResponse
@@ -220,7 +189,6 @@ class MovieController extends Controller
         $user = auth()->user();
         $search = $request->searchBy;
         if($search) {
-            $search = ltrim($search, '@');
             $searchedMovies = Movie::where('user_id', $user->id)
             ->whereRaw('LOWER(JSON_EXTRACT(name, "$.en")) like ?', '%'.strtolower($search).'%')
             ->orWhereRaw('LOWER(JSON_EXTRACT(name, "$.ka")) like ?', '%'.strtolower($search).'%')
@@ -228,18 +196,10 @@ class MovieController extends Controller
 
             $moviesPaginate = $searchedMovies->paginate(10, ['*'], 'movies-per-page', $request->pageNum);
 
-            $movies = MovieResource::collection(collect($moviesPaginate->items()))->toArray('get');
-
-            $moviesFullData = array_map(function ($movie) {
-                $movieModel = Movie::find($movie['id']);
-
-                $movie['quotes'] = $movieModel->quotes->count();
-
-                return $movie;
-            }, $movies);
+            $movies = MovieResource::collection($moviesPaginate->items());
 
             $totalMovies = $searchedMovies->count();
-            return response()->json(['movies' => $moviesFullData, 'isLastPage' => $moviesPaginate['last_page'] === $request->pageNum, 'total' => $totalMovies]);
+            return response()->json(['movies' => $movies, 'isLastPage' => $moviesPaginate['last_page'] === $request->pageNum, 'total' => $totalMovies]);
         }
 
         return response()->json(['message' => __('messages.enter_movie_name_to_search_movie'), 'movies' => []], 204);

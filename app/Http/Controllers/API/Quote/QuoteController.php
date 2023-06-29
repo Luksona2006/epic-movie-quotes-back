@@ -6,19 +6,18 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Quote\CreateQuoteRequest;
 use App\Http\Requests\Quote\UpdateQuoteRequest;
-use App\Http\Resources\CommentResource;
 use App\Http\Resources\MovieResource;
 use App\Http\Resources\QuoteResource;
-use App\Http\Resources\UserResource;
 use App\Models\Movie;
 use App\Models\Quote;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 
 class QuoteController extends Controller
 {
-    public function create(CreateQuoteRequest $request): JsonResponse
+    public function create(CreateQuoteRequest $request): JsonResource
     {
         $attributes['movie_id'] = $request->movie_id;
         $user = auth()->user();
@@ -38,16 +37,14 @@ class QuoteController extends Controller
 
         $attributes['image'] = 'quoteImages/' .  $imageName;
 
-        $newQuote = Quote::create($attributes);
+        $quote = Quote::create($attributes);
 
-        $quote = (new QuoteResource($newQuote))->toArray('get');
-        $quote['movie'] = (new MovieResource($newQuote->movie))->toArray('get');
-        $quote['user'] = (new UserResource($newQuote->user))->toArray('get');
-        return response()->json(['quote' => $quote]);
+        $quoteModel = Quote::with('movie', 'user')->find($quote->id);
 
+        return new QuoteResource($quoteModel);
     }
 
-    public function update(int $id, UpdateQuoteRequest $request): JsonResponse
+    public function update(int $id, UpdateQuoteRequest $request): JsonResource
     {
         $quote = Quote::findOrFail($id);
 
@@ -76,9 +73,7 @@ class QuoteController extends Controller
 
         $quote->save();
 
-        $quote = (new QuoteResource($quote))->toArray('get');
-
-        return response()->json(['quote' => $quote]);
+        return new QuoteResource($quote);
     }
 
     public function destroy(Quote $quote): JsonResponse
@@ -89,32 +84,18 @@ class QuoteController extends Controller
 
     public function getQuotes(Request $request): JsonResponse
     {
-        $quotesPaginate = Quote::latest()->paginate(10, ['*'], 'quotes-per-page', $request->pageNum);
+        $quotesPaginate = Quote::with('comments', 'user', 'movie')->latest()->paginate(10, ['*'], 'quotes-per-page', $request->pageNum);
 
-        $quotes = QuoteResource::collection(collect($quotesPaginate->items()))->toArray('get');
+        $quotes = QuoteResource::collection($quotesPaginate->items());
 
-        $quotesFullData = array_map(function ($quote) {
-            $quoteModel = Quote::find($quote['id']);
-
-            $quote['movie'] = (new MovieResource($quoteModel->movie))->toArray('get');
-            $quote['user'] = (new UserResource($quoteModel->user))->toArray('get');
-            $quote['comments'] = CommentResource::collection($quoteModel->comments)->toArray('get');
-
-            return $quote;
-        }, $quotes);
-
-        return response()->json(['quotes' => $quotesFullData, 'isLastPage' => $quotesPaginate->toArray()['last_page'] === $request->pageNum]);
+        return response()->json(['quotes' => $quotes, 'isLastPage' => $quotesPaginate->toArray()['last_page'] === $request->pageNum]);
     }
 
-    public function getQuote(int $id): JsonResponse
+    public function getQuote(int $id): JsonResource
     {
-        $quoteModel = Quote::findOrFail($id);
+        $quote = Quote::with('user', 'comments')->findOrFail($id);
 
-        $quote = (new QuoteResource($quoteModel))->toArray('get');
-        $quote['user'] =  (new UserResource($quoteModel->user))->toArray('get');
-        $quote['comments'] = CommentResource::collection($quoteModel->comments)->toArray('get');
-
-        return response()->json(['quote' => $quote]);
+        return new QuoteResource($quote);
     }
 
     public function search(Request $request): JsonResponse
@@ -123,23 +104,13 @@ class QuoteController extends Controller
 
         if($search[0] === '#') {
             $search = ltrim($search, '#');
-            $quotesPaginate = Quote::whereRaw('LOWER(JSON_EXTRACT(text, "$.en")) like ?', '%'.strtolower($search).'%')
+            $quotesPaginate = Quote::with('movie', 'user', 'comments')->whereRaw('LOWER(JSON_EXTRACT(text, "$.en")) like ?', '%'.strtolower($search).'%')
             ->orWhereRaw('LOWER(JSON_EXTRACT(text, "$.ka")) like ?', '%'.strtolower($search).'%')
             ->latest()->paginate(10, ['*'], 'quotes-per-page', $request->pageNum);
 
-            $quotes = QuoteResource::collection(collect($quotesPaginate->items()))->toArray('get');
+            $quotes = QuoteResource::collection($quotesPaginate->items());
 
-            $quotesFullData = array_map(function ($quote) {
-                $quoteModel = Quote::find($quote['id']);
-
-                $quote['movie'] = (new MovieResource($quoteModel->movie))->toArray('get');
-                $quote['user'] =  (new UserResource($quoteModel->user))->toArray('get');
-                $quote['comments'] = CommentResource::collection($quoteModel->comments)->toArray('get');
-
-                return $quote;
-            }, $quotes);
-
-            return response()->json(['quotes' => $quotesFullData, 'isLastPage' => $quotesPaginate['last_page'] === $request->pageNum]);
+            return response()->json(['quotes' => $quotes, 'isLastPage' => $quotesPaginate['last_page'] === $request->pageNum]);
         }
 
         if($search[0] === '@') {
@@ -148,7 +119,7 @@ class QuoteController extends Controller
             ->orWhereRaw('LOWER(JSON_EXTRACT(name, "$.ka")) like ?', '%'.strtolower($search).'%')
             ->latest()->paginate(10, ['*'], 'movies-per-page', $request->pageNum);
 
-            $movies = MovieResource::collection(collect($moviesPaginate->items()))->toArray('get');
+            $movies = MovieResource::collection($moviesPaginate->items());
 
             return response()->json(['movies' => $movies, 'isLastPage' => $moviesPaginate['last_page'] === $request->pageNum]);
         }
