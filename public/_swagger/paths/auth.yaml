@@ -19,18 +19,14 @@ paths:
                   example: password123
       responses:
         200:
-          $ref: "../responses/user.yaml#/components/responses/user/200"
+          $ref: "../responses/user.yaml#/components/responses/200"
           headers:
             Set-Cookie:
               schema:
                 type: string
                 example: epicmoviequotes_session=abcde12345; path=/;
-            Set-Cookie:
-              schema:
-                type: string
-                example: XSRF-TOKEN=abcde12345; path=/;
         401:
-          $ref: "../responses/user.yaml#/components/responses/user/401"
+          $ref: "../responses/user.yaml#/components/responses/401"
   /signup:
     post:
       tags:
@@ -57,9 +53,9 @@ paths:
                   example: password123
       responses:
         200:
-          $ref: "../responses/user.yaml#/components/responses/user/200"
+          $ref: "../responses/user.yaml#/components/responses/200"
         401:
-          $ref: "../responses/user.yaml#/components/responses/user/401"
+          $ref: "../responses/user.yaml#/components/responses/401"
   /logout:
     post:
       security:

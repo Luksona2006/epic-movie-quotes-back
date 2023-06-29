@@ -1,0 +1,13 @@
+components:
+  schemas:
+    MovieGenre:
+      allOf:
+        - $ref: "../common.yaml#/components/schemas/Id"
+        - $ref: "../common.yaml#/components/schemas/MovieId"
+        - type: object
+          properties:
+            genre_id:
+              type: integer
+              minimum: 1
+              example: 1
+        - $ref: "../common.yaml#/components/schemas/TimeStamps"

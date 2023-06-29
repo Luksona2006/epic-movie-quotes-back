@@ -1,0 +1,20 @@
+components:
+  schemas:
+    ChangeEmail:
+      allOf:
+        - $ref: "../common.yaml#/components/schemas/Id"
+        - type: object
+          properties:
+            genre_id:
+              type: integer
+              minimum: 1
+              example: 1
+            from_email:
+              type: string
+              example: JohnDoe@example.com
+            to_email:
+              type: string
+              example: John_Doe123@example.com
+        - $ref: "../common.yaml#/components/schemas/EmailVerificationToken"
+        - $ref: "../common.yaml#/components/schemas/ExpiresAt"
+        - $ref: "../common.yaml#/components/schemas/TimeStamps"
