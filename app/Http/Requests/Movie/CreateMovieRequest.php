@@ -27,6 +27,7 @@ class CreateMovieRequest extends FormRequest
             'genres_ids' => ['required', 'array'],
             'name_en' => ['required', 'string'],
             'name_ka' => ['required', 'string'],
+            'year' => ['nullable'],
             'director_en' => ['required', 'string'],
             'director_ka' => ['required', 'string'],
             'description_en' => ['required', 'string'],

@@ -28,6 +28,7 @@ class UpdateMovieRequest extends FormRequest
                 'genres_ids' => ['nullable'],
                 'name_en' => ['nullable'],
                 'name_ka' => ['nullable'],
+                'year' => ['nullable'],
                 'director_en' => ['nullable'],
                 'director_ka' => ['nullable'],
                 'description_en' => ['nullable'],
