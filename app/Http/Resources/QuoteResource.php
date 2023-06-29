@@ -23,14 +23,15 @@ class QuoteResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'movie_id' => $this->movie_id,
             'text' =>  $this->getTranslations('text'),
             'image' => $this->image,
             'likes' => $this->likes->count(),
             'liked' => Like::where([['user_id', $this->user->id],['quote_id', $this->id]])->count() > 0,
-            'commentsTotal' => $this->comments->count(),
             'comments' => CommentResource::collection($this->whenLoaded('comments')),
             'user' => new UserResource($this->whenLoaded('user')),
-            'movie' => new MovieResource($this->whenLoaded('movie'))
+            'movie' => new MovieResource($this->whenLoaded('movie')),
+            'commentsTotal' => $this->comments->count(),
         ];
     }
 }

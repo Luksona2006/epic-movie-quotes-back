@@ -76,9 +76,9 @@ class QuoteController extends Controller
         return new QuoteResource($quote);
     }
 
-    public function destroy(Quote $quote): JsonResponse
+    public function destroy(int $id): JsonResponse
     {
-        $quote->delete();
+        Quote::findOrFail($id)->delete();
         return response()->json(['message' => __('messages.deleted_successfully', ['deleted' => __('messages.quote')])]);
     }
 

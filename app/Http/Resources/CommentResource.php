@@ -20,7 +20,7 @@ class CommentResource extends JsonResource
         return [
             'id' => $this->id,
             'text' => $this->text,
-            'user' => (new UserResource($this->user))->toArray('get')
+            'user' => new UserResource($this->user)
         ];
     }
 }
