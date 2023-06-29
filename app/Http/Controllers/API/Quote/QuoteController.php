@@ -39,9 +39,9 @@ class QuoteController extends Controller
 
         $quote = Quote::create($attributes);
 
-        $quoteModel = Quote::with('movie', 'user')->find($quote->id);
+        $quote = Quote::with('movie', 'user')->find($quote->id);
 
-        return new QuoteResource($quoteModel);
+        return new QuoteResource($quote);
     }
 
     public function update(int $id, UpdateQuoteRequest $request): JsonResource
@@ -76,9 +76,9 @@ class QuoteController extends Controller
         return new QuoteResource($quote);
     }
 
-    public function destroy(Quote $quote): JsonResponse
+    public function destroy(int $id): JsonResponse
     {
-        $quote->delete();
+        Quote::findOrFail($id)->delete();
         return response()->json(['message' => __('messages.deleted_successfully', ['deleted' => __('messages.quote')])]);
     }
 

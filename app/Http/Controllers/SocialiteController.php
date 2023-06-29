@@ -21,38 +21,41 @@ class SocialiteController extends Controller
     {
         $googleUser = Socialite::driver('google')->stateless()->user();
 
-        $user = User::updateOrCreate(
-            ['email' => $googleUser->email],
-            [
-            'name' => $googleUser->name,
-            'email' => $googleUser->email,
-            'google_id' => $googleUser->id
-            ]
-        );
+        if(!User::where('email', $googleUser->email)->count()) {
+            $user = User::updateOrCreate(
+                ['email' => $googleUser->email],
+                [
+                'name' => $googleUser->name,
+                'email' => $googleUser->email,
+                'google_id' => $googleUser->id
+                ]
+            );
 
-        if(!$user->email_verified_at) {
-            $user->email_verified_at = Carbon::now();
-        };
+            if(!$user->email_verified_at) {
+                $user->email_verified_at = Carbon::now();
+            };
 
-        if($user->image) {
-            Storage::delete($user->image);
+            if($user->image) {
+                Storage::delete($user->image);
+            }
+
+            $url = $googleUser->avatar;
+            $imageBase64 = 'data:image/jpg;base64,'.base64_encode(file_get_contents($url));
+
+            $imageName = Str::random(30) . '.jpg';
+            Storage::put('userImages/' . $imageName, base64_decode($imageBase64));
+
+            $user->image = 'userImages/'.$imageName;
+
+            $user->save();
+
+            Auth::guard()->login($user);
+            session()->regenerate();
+
+            return redirect(env('FRONTEND_URL').'/news-feed');
         }
 
-        $url = $googleUser->avatar;
-        $imageBase64 = 'data:image/jpg;base64,'.base64_encode(file_get_contents($url));
-
-        $imageName = Str::random(30) . '.jpg';
-        Storage::put('userImages/' . $imageName, base64_decode($imageBase64));
-
-        $user->image = 'userImages/'.$imageName;
-
-        $user->save();
-
-
-        Auth::guard()->login($user);
-        session()->regenerate();
-
-        return redirect(env('FRONTEND_URL').'/news-feed');
+        return redirect(env('FRONTEND_URL'));
     }
 
 }

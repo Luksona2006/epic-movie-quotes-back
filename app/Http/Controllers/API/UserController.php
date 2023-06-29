@@ -42,7 +42,7 @@ class UserController extends Controller
             $image = str_replace('data:image/png;base64,', '', $image);
             $image = str_replace(' ', '+', $image);
             $imageName = Str::random(30) . '.' . $extension;
-            if($user->image) {
+            if($user->image && $user->image !== 'userImages/DefaultProfile.png') {
                 Storage::delete($user->image);
             }
             Storage::put('userImages/' . $imageName, base64_decode($image));

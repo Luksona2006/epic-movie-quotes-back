@@ -56,9 +56,9 @@ class MovieController extends Controller
                 MovieGenre::create(['movie_id' => $movie->id, 'genre_id' => $genre_id]);
             }
 
-            $movieModel = Movie::with('quotes', 'genres')->find($movie->id);
+            $movie = Movie::with('quotes', 'genres')->find($movie->id);
 
-            return new MovieResource($movieModel);
+            return new MovieResource($movie);
         }
 
         return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.create_movie')])], 401);
@@ -140,9 +140,9 @@ class MovieController extends Controller
 
             $movie->save();
 
-            $movieModel = Movie::with('quotes', 'genres')->find($movie->id);
+            $movie = Movie::with('quotes', 'genres')->find($movie->id);
 
-            return new MovieResource($movieModel);
+            return new MovieResource($movie);
         }
 
         return response()->json(['message' => __('messages.wrong_id')], 404);
@@ -169,12 +169,12 @@ class MovieController extends Controller
     }
 
 
-    public function getMovies(): JsonResource
+    public function getMovies(): JsonResponse
     {
         $user = auth()->user();
 
         $movies = Movie::where('user_id', $user->id)->latest()->get();
-        return MovieResource::collection($movies);
+        return response()->json(['movies' => MovieResource::collection($movies)]);
     }
 
     public function getMovie(int $id): JsonResource
