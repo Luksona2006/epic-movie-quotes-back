@@ -169,12 +169,12 @@ class MovieController extends Controller
     }
 
 
-    public function getMovies(): JsonResource
+    public function getMovies(): JsonResponse
     {
         $user = auth()->user();
 
         $movies = Movie::where('user_id', $user->id)->latest()->get();
-        return MovieResource::collection($movies);
+        return response()->json(['movies' => MovieResource::collection($movies)]);
     }
 
     public function getMovie(int $id): JsonResource

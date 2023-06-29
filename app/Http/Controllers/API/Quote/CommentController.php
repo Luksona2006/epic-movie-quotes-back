@@ -35,11 +35,11 @@ class CommentController extends Controller
                 event(new RecieveNotification($quote->user_id, $notificationFullData));
             }
 
-            $isOwnQuote = $user->id === $quote->id;
+            $isOwnQuote = $user->id === $quote->user_id;
             event(new CommentQuote($quote->id, $comment, $isOwnQuote));
         }
 
-        $comment = CommentResource::collection(collect([$comment]))->toArray('get')[0];
+        $comment = new CommentResource($comment);
         return response()->json(['quote_id' => $quote->id , 'comment' => $comment]);
     }
 }
