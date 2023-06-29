@@ -39,9 +39,9 @@ class QuoteController extends Controller
 
         $quote = Quote::create($attributes);
 
-        $quoteModel = Quote::with('movie', 'user')->find($quote->id);
+        $quote = Quote::with('movie', 'user')->find($quote->id);
 
-        return new QuoteResource($quoteModel);
+        return new QuoteResource($quote);
     }
 
     public function update(int $id, UpdateQuoteRequest $request): JsonResource
