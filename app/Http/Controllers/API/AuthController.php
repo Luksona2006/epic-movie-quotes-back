@@ -7,6 +7,7 @@ use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\PasswordResetEmailRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\ResetPasswordRequest;
+use App\Http\Resources\UserResource;
 use App\Models\ChangePassword;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -20,7 +21,7 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    public function login(LoginRequest $request): JsonResponse
+    public function login(LoginRequest $request)
     {
         $credentials = $request->only(['email', 'password']);
 
@@ -31,7 +32,7 @@ class AuthController extends Controller
 
         $remember = $request->remember ? true : false;
         if(Auth::guard()->attempt($credentials, $remember)) {
-            return response()->json(['user' => $user]);
+            return new UserResource($user);
         };
         return response()->json(['message' => __('messages.invalid_credentials')], 401);
     }
@@ -43,7 +44,7 @@ class AuthController extends Controller
         return response()->json(['message' => __('messages.user_logged_out')]);
     }
 
-    public function register(RegisterRequest $request): JsonResponse
+    public function register(RegisterRequest $request)
     {
         $attributes = $request->validated();
         $attributes['password'] = bcrypt($attributes['password']);
@@ -60,7 +61,8 @@ class AuthController extends Controller
             Mail::send('email.verification', ['data' => $data], function ($message) use ($data) {
                 $message->to($data['email'])->subject('Please verify your email address');
             });
-            return response()->json(['user' => $user]);
+
+            return new UserResource($user);
         }
 
         return response()->json(['message' => __('messages.invalid_credentials')], 401);
@@ -115,7 +117,7 @@ class AuthController extends Controller
         return redirect()->away(env('FRONTEND_URL').'/404');
     }
 
-    public function resetPassword(ResetPasswordRequest $request): JsonResponse
+    public function resetPassword(ResetPasswordRequest $request)
     {
         $changePasswordModel = ChangePassword::where('token', $request->token)->first();
         if($changePasswordModel) {
@@ -123,7 +125,8 @@ class AuthController extends Controller
                 $user = User::where('email', $changePasswordModel->email)->firstOrFail();
                 $user->update(['password' => bcrypt($request->password)]);
                 $changePasswordModel->delete();
-                return response()->json(['user' => $user]);
+
+                return new UserResource($user);
             }
             $changePasswordModel->delete();
             return redirect()->away(env('FRONTEND_URL').'/expired');

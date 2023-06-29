@@ -5,10 +5,11 @@ namespace App\Http\Controllers\API;
 use App\Events\ChangeUserEmail;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\UpdateUserRequest;
+use App\Http\Resources\UserResource;
 use App\Models\ChangeEmail;
 use App\Models\User;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
@@ -23,7 +24,7 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateUserRequest $request): JsonResponse
+    public function update(UpdateUserRequest $request): JsonResource
     {
         $user = User::find(auth()->user()->id);
 
@@ -71,7 +72,8 @@ class UserController extends Controller
         }
 
         $user->save();
-        return response()->json(['user' => $user]);
+
+        return new UserResource($user);
     }
 
     public function confirmEmailChange(string $token): RedirectResponse

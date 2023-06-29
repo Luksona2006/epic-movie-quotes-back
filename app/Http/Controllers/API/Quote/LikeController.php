@@ -15,55 +15,52 @@ class LikeController extends Controller
 {
     public function like(int $id, Request $request): JsonResponse
     {
-        $quote = Quote::find($id);
+        $quote = Quote::findOrFail($id);
         $user = auth()->user();
 
-        if($quote) {
-            $likes = Like::where('quote_id', $quote->id)->get()->toArray();
-            $likesSum = count($likes);
-            $liked = array_filter($likes, function ($like) use ($user) {
-                return $like['user_id'] === $user->id;
-            });
 
-            $liked = count($liked) ? true : false;
+        $likes = Like::where('quote_id', $quote->id)->get()->toArray();
+        $likesSum = count($likes);
+        $liked = array_filter($likes, function ($like) use ($user) {
+            return $like['user_id'] === $user->id;
+        });
 
-            if($request->liked !== null) {
-                if($request->liked === true) {
-                    Like::create([
-                        'user_id' => $user->id,
-                        'quote_id' => $quote->id
-                    ]);
+        $liked = count($liked) ? true : false;
 
-                    $likesSum = $likesSum + 1;
-                    $liked = true;
-                }
+        if($request->liked !== null) {
+            if($request->liked === true) {
+                Like::create([
+                    'user_id' => $user->id,
+                    'quote_id' => $quote->id
+                ]);
 
-                if($request->liked === false) {
-                    $likeId = Like::where([
-                        ['user_id', '=', $user->id],
-                        ['quote_id', '=', $quote->id]
-                    ])->first()->id;
-
-                    Like::destroy($likeId);
-
-                    $likesSum = $likesSum - 1;
-                    $liked = false;
-                }
-
-                if($user->id !== $quote->user_id) {
-                    $notification = Notification::create(['from_user' => $user->id, 'to_user' => $quote->user_id, 'quote_id' => $quote->id, 'type' => 'like']);
-                    $notificationFullData = [...$notification->toArray()];
-                    $notificationFullData['user'] = $user;
-                    event(new RecieveNotification($quote->user_id, $notificationFullData));
-                }
-
-                $isOwnQuote = $user->id === $quote->id;
-                event(new LikeQuote($quote->id, $likesSum, $isOwnQuote));
+                $likesSum = $likesSum + 1;
+                $liked = true;
             }
 
-            return response()->json(['liked' => $liked]);
+            if($request->liked === false) {
+                $likeId = Like::where([
+                    ['user_id', $user->id],
+                    ['quote_id', $quote->id]
+                ])->first()->id;
+
+                Like::destroy($likeId);
+
+                $likesSum = $likesSum - 1;
+                $liked = false;
+            }
+
+            if($user->id !== $quote->user_id) {
+                $notification = Notification::create(['from_user' => $user->id, 'to_user' => $quote->user_id, 'quote_id' => $quote->id, 'type' => 'like']);
+                $notificationFullData = [...$notification->toArray()];
+                $notificationFullData['user'] = $user;
+                event(new RecieveNotification($quote->user_id, $notificationFullData));
+            }
+
+            $isOwnQuote = $user->id === $quote->id;
+            event(new LikeQuote($quote->id, $likesSum, $isOwnQuote));
         }
 
-        return response()->json(['message' => __('messages.wrong_id')], 404);
+        return response()->json(['liked' => $liked]);
     }
 }
