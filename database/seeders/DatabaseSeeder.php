@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Genre;
 use App\Models\Movie;
-use App\Models\MovieGenre;
+use App\Models\GenreMovie;
 use App\Models\Quote;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -286,6 +286,6 @@ class DatabaseSeeder extends Seeder
         ]);
         Movie::factory()->create();
         Quote::factory()->create();
-        MovieGenre::create(['movie_id' => 1, 'genre_id' => 1]);
+        GenreMovie::create(['movie_id' => 1, 'genre_id' => 1]);
     }
 }
