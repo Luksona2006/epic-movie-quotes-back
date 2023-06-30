@@ -163,7 +163,7 @@ class MovieController extends Controller
         $movies = MovieResource::collection($moviesPaginate->items());
 
         $totalMovies = count($movies);
-        return response()->json(['movies' => $movies, 'isLastPage' => $moviesPaginate['last_page'] === $request->pageNum, 'total' => $totalMovies]);
+        return response()->json(['movies' => $movies, 'isLastPage' => $moviesPaginate->toArray()['last_page'] === $request->pageNum, 'total' => $totalMovies]);
     }
 
 
