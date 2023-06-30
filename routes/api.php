@@ -38,8 +38,6 @@ Route::group(['middleware' => 'guest:sanctum'], function () {
         Route::post('forgot-password', 'sendPasswordResetRequest')->name('forgot_password.send_password_reset_request');
         Route::get('reset-password/redirect/{token}', 'redirectToPasswordReset')->name('reset.redirect_to_password_reset');
         Route::post('reset-password/{token}', 'resetPassword')->name('reset_password');
-
-        Route::get('change-email/{token}', [UserController::class, 'confirmEmailChange'])->name('change_email.confirm_email_change');
     });
 
     Route::get('change-email/{token}', [UserController::class, 'confirmEmailChange'])->name('change_email.confirm_email_change');
@@ -50,7 +48,8 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('genres', [GenreController::class, 'index'])->name('genres.index');
 
     Route::group(['controller' => UserController::class], function () {
-        Route::put('user', 'update')->name('users.update');
+        Route::get('user/{user}', 'show')->name('user.show');
+        Route::put('user', 'update')->name('user.update');
     });
 
     Route::group(['controller' => QuoteController::class], function () {

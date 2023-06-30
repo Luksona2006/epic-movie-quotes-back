@@ -6,6 +6,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
@@ -20,9 +21,12 @@ class SocialiteController extends Controller
     public function socialiteCreateUser(): RedirectResponse
     {
         $googleUser = Socialite::driver('google')->stateless()->user();
-
-        if(!User::where('email', $googleUser->email)->count()) {
-
+        $existingUser = User::where('email', $googleUser->email)->first();
+        $existingUserGoogleId = null;
+        if($existingUser) {
+            $existingUserGoogleId = $existingUser->google_id;
+        }
+        if(($existingUser && $existingUserGoogleId !== null) || !$existingUser) {
             if(!Storage::get('userImages/DefaultProfile.png')) {
                 $image = public_path('assets/images/DefaultProfile.png');
                 Storage::put('userImages/DefaultProfile.png', file_get_contents($image));
@@ -46,19 +50,17 @@ class SocialiteController extends Controller
             }
 
             $url = $googleUser->avatar;
-            $imageBase64 = 'data:image/jpg;base64,'.base64_encode(file_get_contents($url));
 
             $imageName = Str::random(30) . '.jpg';
-            Storage::put('userImages/' . $imageName, base64_decode($imageBase64));
+            Storage::put('userImages/' . $imageName, file_get_contents($url));
 
             $user->image = 'userImages/'.$imageName;
 
             $user->save();
 
-            Auth::guard()->login($user);
-            session()->regenerate();
+            Auth::guard()->login($user, true);
 
-            return redirect(env('FRONTEND_URL').'/news-feed');
+            return redirect(env('FRONTEND_URL')."/user/$user->id");
         }
 
         return redirect(env('FRONTEND_URL'));
