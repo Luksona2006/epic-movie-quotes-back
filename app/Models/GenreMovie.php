@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
-class MovieGenre extends Pivot
+class GenreMovie extends Pivot
 {
     /**
     * Indicates if the IDs are auto-incrementing.

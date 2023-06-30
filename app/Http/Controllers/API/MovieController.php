@@ -7,7 +7,7 @@ use App\Http\Requests\Movie\CreateMovieRequest;
 use App\Http\Requests\Movie\UpdateMovieRequest;
 use App\Http\Resources\MovieResource;
 use App\Models\Movie;
-use App\Models\MovieGenre;
+use App\Models\GenreMovie;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -53,7 +53,7 @@ class MovieController extends Controller
             $movie = Movie::create($movie);
 
             foreach ($request->genres_ids as $genre_id) {
-                MovieGenre::create(['movie_id' => $movie->id, 'genre_id' => $genre_id]);
+                GenreMovie::create(['movie_id' => $movie->id, 'genre_id' => $genre_id]);
             }
 
             $movie = Movie::with('quotes', 'genres')->find($movie->id);
@@ -100,22 +100,22 @@ class MovieController extends Controller
             if($request->genres_ids) {
                 foreach ($request->genres_ids as $genreId) {
                     $isSameGenre = false;
-                    foreach ($movie->genres->toArray() as $movieGenre) {
-                        $movieGenre['id'] === $genreId ? $isSameGenre = true : 0;
+                    foreach ($movie->genres->toArray() as $GenreMovie) {
+                        $GenreMovie['id'] === $genreId ? $isSameGenre = true : 0;
                     }
                     if(!$isSameGenre) {
-                        MovieGenre::create(['genre_id' => $genreId, 'movie_id' => $movie->id]);
+                        GenreMovie::create(['genre_id' => $genreId, 'movie_id' => $movie->id]);
                     }
                 }
 
-                foreach ($movie->genres->toArray() as $movieGenre) {
+                foreach ($movie->genres->toArray() as $GenreMovie) {
                     $isRemoved = true;
                     foreach ($request->genres_ids as $genreId) {
-                        $movieGenre['id'] === $genreId ? $isRemoved = false : 0;
+                        $GenreMovie['id'] === $genreId ? $isRemoved = false : 0;
                     }
 
                     if($isRemoved) {
-                        MovieGenre::where('genre_id', $movieGenre['id'])->first()->delete();
+                        GenreMovie::where('genre_id', $GenreMovie['id'])->first()->delete();
                     }
                 }
             }
@@ -148,10 +148,8 @@ class MovieController extends Controller
         return response()->json(['message' => __('messages.wrong_id')], 404);
     }
 
-    public function destroy(int $id): JsonResponse
+    public function destroy(Movie $movie): JsonResponse
     {
-        $movie = Movie::findOrFail($id);
-
         $movie->delete();
         return response()->json(['message' => __('messages.deleted_successfully', ['deleted' => __('messages.movie')])]);
     }
@@ -169,7 +167,7 @@ class MovieController extends Controller
     }
 
 
-    public function getMovies(): JsonResponse
+    public function index(): JsonResponse
     {
         $user = auth()->user();
 
@@ -177,7 +175,7 @@ class MovieController extends Controller
         return response()->json(['movies' => MovieResource::collection($movies)]);
     }
 
-    public function getMovie(int $id): JsonResource
+    public function showMovie(int $id): JsonResource
     {
         $movie = Movie::with('quotes', 'genres')->findOrFail($id);
 

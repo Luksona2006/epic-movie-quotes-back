@@ -9,7 +9,7 @@ use Illuminate\Http\JsonResponse;
 
 class GenreController extends Controller
 {
-    public function getAllGenres(): JsonResponse
+    public function index(): JsonResponse
     {
         $genres = GenreResource::collection(Genre::all())->toArray('get');
         return response()->json(['genres' => $genres]);

@@ -44,10 +44,8 @@ class QuoteController extends Controller
         return new QuoteResource($quote);
     }
 
-    public function update(int $id, UpdateQuoteRequest $request): JsonResource
+    public function update(Quote $quote, UpdateQuoteRequest $request): JsonResource
     {
-        $quote = Quote::findOrFail($id);
-
         if($request->quote_en && $request->quote_ka) {
             $text = [
                 'en' => $request->quote_en ?? $quote->toArray()['text']['en'],
@@ -76,13 +74,13 @@ class QuoteController extends Controller
         return new QuoteResource($quote);
     }
 
-    public function destroy(int $id): JsonResponse
+    public function destroy(Quote $quote): JsonResponse
     {
-        Quote::findOrFail($id)->delete();
+        $quote->delete();
         return response()->json(['message' => __('messages.deleted_successfully', ['deleted' => __('messages.quote')])]);
     }
 
-    public function getQuotes(Request $request): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         $quotesPaginate = Quote::with('comments', 'user', 'movie')->latest()->paginate(10, ['*'], 'quotes-per-page', $request->pageNum);
 

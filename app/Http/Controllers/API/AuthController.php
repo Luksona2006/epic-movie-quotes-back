@@ -13,6 +13,7 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -22,7 +23,7 @@ use Illuminate\Support\Facades\Storage;
 
 class AuthController extends Controller
 {
-    public function login(LoginRequest $request)
+    public function login(LoginRequest $request): JsonResponse|JsonResource
     {
         $credentials = $request->only(['email', 'password']);
 
@@ -45,7 +46,7 @@ class AuthController extends Controller
         return response()->json(['message' => __('messages.user_logged_out')]);
     }
 
-    public function register(RegisterRequest $request)
+    public function register(RegisterRequest $request): JsonResponse|JsonResource
     {
         $attributes = $request->validated();
         $attributes['password'] = bcrypt($attributes['password']);
@@ -126,7 +127,7 @@ class AuthController extends Controller
         return redirect()->away(env('FRONTEND_URL').'/404');
     }
 
-    public function resetPassword(ResetPasswordRequest $request)
+    public function resetPassword(ResetPasswordRequest $request): RedirectResponse|JsonResource
     {
         $changePasswordModel = ChangePassword::where('token', $request->token)->first();
         if($changePasswordModel) {
