@@ -78,9 +78,9 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     });
 
     Route::group(['controller' => NotificationController::class], function () {
-        Route::get('notifications', 'getAllNotifications')->name('notifications.get_all_notifications');
-        Route::post('notification/update/{id}', 'update')->name('notification.update');
-        Route::post('notifications/update', 'updateAll')->name('notifications.update_all');
+        Route::get('notifications', 'index')->name('notifications.index');
+        Route::put('notifications/{id}', 'update')->name('notification.update');
+        Route::put('notifications', 'updateAll')->name('notifications.update_all');
     });
 });
 

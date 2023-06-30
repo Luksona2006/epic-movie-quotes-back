@@ -100,22 +100,22 @@ class MovieController extends Controller
             if($request->genres_ids) {
                 foreach ($request->genres_ids as $genreId) {
                     $isSameGenre = false;
-                    foreach ($movie->genres->toArray() as $GenreMovie) {
-                        $GenreMovie['id'] === $genreId ? $isSameGenre = true : 0;
+                    foreach ($movie->genres->toArray() as $genreMovie) {
+                        $genreMovie['id'] === $genreId ? $isSameGenre = true : 0;
                     }
                     if(!$isSameGenre) {
                         GenreMovie::create(['genre_id' => $genreId, 'movie_id' => $movie->id]);
                     }
                 }
 
-                foreach ($movie->genres->toArray() as $GenreMovie) {
+                foreach ($movie->genres->toArray() as $genreMovie) {
                     $isRemoved = true;
                     foreach ($request->genres_ids as $genreId) {
-                        $GenreMovie['id'] === $genreId ? $isRemoved = false : 0;
+                        $genreMovie['id'] === $genreId ? $isRemoved = false : 0;
                     }
 
                     if($isRemoved) {
-                        GenreMovie::where('genre_id', $GenreMovie['id'])->first()->delete();
+                        GenreMovie::where('genre_id', $genreMovie['id'])->first()->delete();
                     }
                 }
             }
