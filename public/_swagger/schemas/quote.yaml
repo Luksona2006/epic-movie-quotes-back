@@ -1,0 +1,22 @@
+components:
+  schemas:
+    Quote:
+      allOf:
+        - $ref: "../common.yaml#/components/schemas/Id"
+        - $ref: "../common.yaml#/components/schemas/MovieId"
+        - $ref: "../common.yaml#/components/schemas/QuoteId"
+        - type: object
+          properties:
+            text:
+              type: object
+              properties:
+                en:
+                  type: string
+                  example: It's only after we've lost everything that we're free to do anything."
+                ka:
+                  type: string
+                  example: მხოლოდ მას შემდეგ, რაც ყველაფერი დავკარგეთ, თავისუფლები ვართ ვაკეთოთ რაც გვინდა"
+            image:
+              type: string
+              example: quoteImages/e6RHNcGs8DGtjjTQdBhMhD5XTBhGc8.jpg
+        - $ref: "../common.yaml#/components/schemas/TimeStamps"

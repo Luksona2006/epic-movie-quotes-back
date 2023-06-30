@@ -13,11 +13,9 @@ use App\Events\RecieveNotification;
 
 class LikeController extends Controller
 {
-    public function like(int $id, Request $request): JsonResponse
+    public function like(Quote $quote, Request $request): JsonResponse
     {
-        $quote = Quote::findOrFail($id);
         $user = auth()->user();
-
 
         $likes = Like::where('quote_id', $quote->id)->get()->toArray();
         $likesSum = count($likes);
@@ -50,14 +48,15 @@ class LikeController extends Controller
                 $liked = false;
             }
 
-            if($user->id !== $quote->user_id) {
+            $isOwnQuote = $user->id === $quote->id;
+
+            if(!$isOwnQuote) {
                 $notification = Notification::create(['from_user' => $user->id, 'to_user' => $quote->user_id, 'quote_id' => $quote->id, 'type' => 'like']);
                 $notificationFullData = [...$notification->toArray()];
                 $notificationFullData['user'] = $user;
                 event(new RecieveNotification($quote->user_id, $notificationFullData));
             }
 
-            $isOwnQuote = $user->id === $quote->id;
             event(new LikeQuote($quote->id, $likesSum, $isOwnQuote));
         }
 

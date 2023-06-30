@@ -18,15 +18,61 @@ components:
           type: integer
           minimum: 1
           example: 1
+    MovieId:
+      type: object
+      properties:
+        movie_id:
+          type: integer
+          minimum: 1
+          example: 1
+    QuoteId:
+      type: object
+      properties:
+        quote_id:
+          type: integer
+          minimum: 1
+          example: 1
+    GenreId:
+      type: object
+      properties:
+        genre_id:
+          type: integer
+          minimum: 1
+          example: 1
+    UserId:
+      type: object
+      properties:
+        user_id:
+          type: integer
+          minimum: 1
+          example: 1
     TimeStamps:
       type: object
       properties:
         created_at:
           type: string
-          example: "2023-06-25T12:05:09.000000Z"
+          example: "2023-06-29 22:13:08"
         updated_at:
           type: string
-          example: "2023-06-25T12:05:09.000000Z"
+          example: "2023-06-29 22:13:08"
+    ExpiresAt:
+      type: object
+      properties:
+        expires_at:
+          type: string,
+          example: "2023-07-06"
+    EmailVerificationToken:
+      type: object
+      properties:
+        email_verification_token:
+          type: string
+          example: Xdd2kZ0FNLYh5bNm1ow4NwcPsnN9cuMCklnqxw9KeLRba8CC0w5wevau9zp7J2W4LuUI7DokoeJlJ6Ez89sjpBlZb6UzKi8Ud8Jp
+    Email:
+      type: object
+      properties:
+        email:
+          type: string
+          example: JohnDoe@example.com
 
   responses:
     401:

@@ -1,0 +1,13 @@
+components:
+  schemas:
+    Comment:
+      allOf:
+        - $ref: "../common.yaml#/components/schemas/Id"
+        - $ref: "../common.yaml#/components/schemas/UserId"
+        - $ref: "../common.yaml#/components/schemas/QuoteId"
+        - type: object
+          properties:
+            text:
+              type: string
+              example: This quote makes you to think about life
+        - $ref: "../common.yaml#/components/schemas/TimeStamps"

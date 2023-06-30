@@ -47,16 +47,16 @@ Route::group(['middleware' => 'guest:sanctum'], function () {
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('logout', [AuthController::class, 'logout'])->name('logout');
-    Route::get('genres', [GenreController::class, 'getAllGenres'])->name('genres.get_all_genres');
+    Route::get('genres', [GenreController::class, 'index'])->name('genres.index');
 
     Route::group(['controller' => UserController::class], function () {
         Route::put('user', 'update')->name('users.update');
     });
 
     Route::group(['controller' => QuoteController::class], function () {
-        Route::post('quotes/all', 'getQuotes')->name('quotes.get_quotes');
+        Route::post('quotes/all', 'index')->name('quotes.index');
         Route::post('quotes', 'create')->name('quotes.create');
-        Route::get('quotes/{id}', 'getQuote')->name('quotes.get_quote');
+        Route::get('quotes/{id}', 'show')->name('quotes.show');
         Route::put('quotes/{id}', 'update')->name('quotes.update');
         Route::delete('quotes/{id}', 'destroy')->name('quotes.destroy');
 
@@ -67,10 +67,10 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('quotes/{id}/comment', [CommentController::class, 'comment'])->name('quote.comment');
 
     Route::group(['controller' => MovieController::class], function () {
-        Route::get('movies/all', 'getMovies')->name('movies.get_movies');
+        Route::get('movies/all', 'index')->name('movies.index');
         Route::post('movies/page', 'paginateMovies')->name('movies.paginate_movies');
         Route::post('movies', 'create')->name('movies.create');
-        Route::get('movies/{id}', 'getMovie')->name('movies.get_movie');
+        Route::get('movies/{id}', 'show')->name('movies.show');
         Route::put('movies/{id}', 'update')->name('movies.update');
         Route::delete('movies/{id}', 'destroy')->name('movies.destroy');
 

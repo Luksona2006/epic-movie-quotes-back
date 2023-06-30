@@ -14,32 +14,30 @@ use App\Http\Resources\CommentResource;
 
 class CommentController extends Controller
 {
-    public function comment(int $id, Request $request): JsonResponse
+    public function comment(Quote $quote, Request $request): JsonResponse
     {
-        $quote = Quote::findOrFail($id);
         $user = auth()->user();
 
-        if($request->comment) {
-            $comment = Comment::create([
-                'text' => $request->comment,
-                'quote_id' => $quote->id,
-                'user_id' => $user->id
-            ]);
-
-            $comment['user'] = $comment->user;
-
-            if($user->id !== $quote->user_id) {
-                $notification = Notification::create(['from_user' => $user->id, 'to_user' => $quote->user_id ,'quote_id' => $quote->id, 'type' => 'comment']);
-                $notificationFullData = [...$notification->toArray()];
-                $notificationFullData['user'] = $user;
-                event(new RecieveNotification($quote->user_id, $notificationFullData));
-            }
-
-            $isOwnQuote = $user->id === $quote->user_id;
-            event(new CommentQuote($quote->id, $comment, $isOwnQuote));
-        }
+        $comment = Comment::create([
+            'text' => $request->comment,
+            'quote_id' => $request->quote_id,
+            'user_id' => $request->user_id
+        ]);
 
         $comment = new CommentResource($comment);
+
+        $isOwnQuote = $user->id === $quote->user_id;
+
+        if(!$isOwnQuote) {
+            $notification = Notification::create(['from_user' => $user->id, 'to_user' => $quote->user_id ,'quote_id' => $quote->id, 'type' => 'comment']);
+            $notificationFullData = [...$notification->toArray()];
+            $notificationFullData['user'] = $user;
+            event(new RecieveNotification($quote->user_id, $notificationFullData));
+        }
+
+        event(new CommentQuote($quote->id, $comment, $isOwnQuote));
+
+
         return response()->json(['quote_id' => $quote->id , 'comment' => $comment]);
     }
 }

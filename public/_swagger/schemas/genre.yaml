@@ -1,0 +1,17 @@
+components:
+  schemas:
+    Genre:
+      allOf:
+        - $ref: "../common.yaml#/components/schemas/Id"
+        - type: object
+          properties:
+            name:
+              type: object
+              properties:
+                en:
+                  type: string
+                  example: Drama
+                ka:
+                  type: string
+                  example: დრამა
+        - $ref: "../common.yaml#/components/schemas/TimeStamps"

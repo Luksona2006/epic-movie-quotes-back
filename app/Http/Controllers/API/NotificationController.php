@@ -10,7 +10,7 @@ use Illuminate\Http\JsonResponse;
 
 class NotificationController extends Controller
 {
-    public function getAllNotifications(): JsonResponse
+    public function index(): JsonResponse
     {
         $user = auth()->user();
 

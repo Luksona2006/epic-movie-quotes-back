@@ -1,0 +1,39 @@
+components:
+  schemas:
+    Movie:
+      allOf:
+        - $ref: "../common.yaml#/components/schemas/Id"
+        - $ref: "../common.yaml#/components/schemas/UserId"
+        - type: object
+          properties:
+            name:
+              type: object
+              properties:
+                en:
+                  type: string
+                  example: Fight Club
+                ka:
+                  type: string
+                  example: მებრძოლთა კლუბი
+            description:
+              type: object
+              properties:
+                en:
+                  type: string
+                  example: Unhappy with his capitalistic lifestyle, a white-collared insomniac forms an underground fight club with Tyler, a careless soap salesman. Soon, their venture spirals down into something sinister.
+                ka:
+                  type: string
+                  example: თავისი კაპიტალისტური ცხოვრების წესით უკმაყოფილო, თეთრსაყელოიანი გამოუძინებელი აყალიბებს მიწისქვეშა საბრძოლო კლუბს ტაილერთან, უყურადღებო საპნის გამყიდველთან. მალე მათი წამოწყება რაღაც საშინელებად გადაიქცევა.
+            director:
+              type: object
+              properties:
+                en:
+                  type: string
+                  example: David Fincher
+                ka:
+                  type: string
+                  example: დევიდ ფინჩერი
+            image:
+              type: string
+              example: movieImages/Z68DGtjjRG3TQdBd5ZDTshVHL0NFhK.jpg
+        - $ref: "../common.yaml#/components/schemas/TimeStamps"
