@@ -48,7 +48,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('genres', [GenreController::class, 'index'])->name('genres.index');
 
     Route::group(['controller' => UserController::class], function () {
-        Route::get('user/{user}', 'show')->name('user.show');
+        Route::get('user/auth', 'getAuthUser')->name('user.get_auth_user');
         Route::put('user', 'update')->name('user.update');
     });
 

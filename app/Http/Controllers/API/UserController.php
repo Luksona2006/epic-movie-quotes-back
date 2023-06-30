@@ -77,9 +77,9 @@ class UserController extends Controller
         return new UserResource($user);
     }
 
-    public function show(User $user): JsonResource
+    public function getAuthUser(): JsonResource
     {
-        return new UserResource($user);
+        return new UserResource(auth()->user());
     }
 
     public function confirmEmailChange(string $token): RedirectResponse

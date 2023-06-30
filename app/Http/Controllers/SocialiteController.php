@@ -60,7 +60,7 @@ class SocialiteController extends Controller
 
             Auth::guard()->login($user, true);
 
-            return redirect(env('FRONTEND_URL')."/user/$user->id");
+            return redirect(env('FRONTEND_URL')."/auth/user");
         }
 
         return redirect(env('FRONTEND_URL'));
