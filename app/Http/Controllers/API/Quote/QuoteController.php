@@ -89,7 +89,7 @@ class QuoteController extends Controller
         return response()->json(['quotes' => $quotes, 'isLastPage' => $quotesPaginate->toArray()['last_page'] === $request->pageNum]);
     }
 
-    public function getQuote(int $id): JsonResource
+    public function show(int $id): JsonResource
     {
         $quote = Quote::with('user', 'comments')->findOrFail($id);
 

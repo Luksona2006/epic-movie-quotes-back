@@ -175,7 +175,7 @@ class MovieController extends Controller
         return response()->json(['movies' => MovieResource::collection($movies)]);
     }
 
-    public function showMovie(int $id): JsonResource
+    public function show(int $id): JsonResource
     {
         $movie = Movie::with('quotes', 'genres')->findOrFail($id);
 
