@@ -64,9 +64,8 @@ class MovieController extends Controller
         return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.create_movie')])], 401);
     }
 
-    public function update(int $id, UpdateMovieRequest $request): JsonResource|JsonResponse
+    public function update(Movie $movie, UpdateMovieRequest $request): JsonResource|JsonResponse
     {
-        $movie = Movie::findOrFail($id);
         $user = auth()->user();
 
         if($user->id === $movie->user_id) {
@@ -158,7 +157,7 @@ class MovieController extends Controller
     {
         $user = auth()->user();
 
-        $moviesPaginate = Movie::where('user_id', $user->id)->latest()->paginate(6, ['*'], 'movies-per-page', $request->pageNum);
+        $moviesPaginate = Movie::where('user_id', $user->id)->paginate(6, ['*'], 'movies-per-page', $request->pageNum);
 
         $movies = MovieResource::collection($moviesPaginate->items());
 
@@ -189,8 +188,7 @@ class MovieController extends Controller
         if($search) {
             $searchedMovies = Movie::where('user_id', $user->id)
             ->whereRaw('LOWER(JSON_EXTRACT(name, "$.en")) like ?', '%'.strtolower($search).'%')
-            ->orWhereRaw('LOWER(JSON_EXTRACT(name, "$.ka")) like ?', '%'.strtolower($search).'%')
-            ->latest();
+            ->orWhereRaw('LOWER(JSON_EXTRACT(name, "$.ka")) like ?', '%'.strtolower($search).'%');
 
             $moviesPaginate = $searchedMovies->paginate(10, ['*'], 'movies-per-page', $request->pageNum);
 

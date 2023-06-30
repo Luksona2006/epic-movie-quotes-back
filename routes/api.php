@@ -56,30 +56,30 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::group(['controller' => QuoteController::class], function () {
         Route::post('quotes/all', 'index')->name('quotes.index');
         Route::post('quotes', 'create')->name('quotes.create');
-        Route::get('quotes/{id}', 'show')->name('quotes.show');
-        Route::put('quotes/{id}', 'update')->name('quotes.update');
-        Route::delete('quotes/{id}', 'destroy')->name('quotes.destroy');
+        Route::get('quotes/{quote}', 'show')->name('quotes.show');
+        Route::put('quotes/{quote}', 'update')->name('quotes.update');
+        Route::delete('quotes/{quote}', 'destroy')->name('quotes.destroy');
 
         Route::post('quotes/search', 'search')->name('quotes.search');
     });
 
-    Route::post('quotes/{id}/like', [LikeController::class, 'like'])->name('quote.like');
-    Route::post('quotes/{id}/comment', [CommentController::class, 'comment'])->name('quote.comment');
+    Route::post('quotes/{quote}/like', [LikeController::class, 'like'])->name('quote.like');
+    Route::post('quotes/{quote}/comment', [CommentController::class, 'comment'])->name('quote.comment');
 
     Route::group(['controller' => MovieController::class], function () {
         Route::get('movies/all', 'index')->name('movies.index');
         Route::post('movies/page', 'paginateMovies')->name('movies.paginate_movies');
         Route::post('movies', 'create')->name('movies.create');
-        Route::get('movies/{id}', 'show')->name('movies.show');
-        Route::put('movies/{id}', 'update')->name('movies.update');
-        Route::delete('movies/{id}', 'destroy')->name('movies.destroy');
+        Route::get('movies/{movie}', 'show')->name('movies.show');
+        Route::put('movies/{movie}', 'update')->name('movies.update');
+        Route::delete('movies/{movie}', 'destroy')->name('movies.destroy');
 
         Route::post('movies/search', 'search')->name('movies.search');
     });
 
     Route::group(['controller' => NotificationController::class], function () {
         Route::get('notifications', 'index')->name('notifications.index');
-        Route::put('notifications/{id}', 'update')->name('notification.update');
+        Route::put('notifications/{notification}', 'update')->name('notification.update');
         Route::put('notifications', 'updateAll')->name('notifications.update_all');
     });
 });

@@ -32,7 +32,7 @@ class UserController extends Controller
             $user->name = $request->new_username;
         }
 
-        if($request->new_password) {
+        if($request->new_password && !password_verify($request->new_password, $user->password)) {
             $user->name = $request->new_password;
         }
 
