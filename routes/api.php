@@ -38,8 +38,6 @@ Route::group(['middleware' => 'guest:sanctum'], function () {
         Route::post('forgot-password', 'sendPasswordResetRequest')->name('forgot_password.send_password_reset_request');
         Route::get('reset-password/redirect/{token}', 'redirectToPasswordReset')->name('reset.redirect_to_password_reset');
         Route::post('reset-password/{token}', 'resetPassword')->name('reset_password');
-
-        Route::get('change-email/{token}', [UserController::class, 'confirmEmailChange'])->name('change_email.confirm_email_change');
     });
 
     Route::get('change-email/{token}', [UserController::class, 'confirmEmailChange'])->name('change_email.confirm_email_change');
@@ -50,37 +48,38 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('genres', [GenreController::class, 'index'])->name('genres.index');
 
     Route::group(['controller' => UserController::class], function () {
-        Route::put('user', 'update')->name('users.update');
+        Route::get('user/auth', 'getAuthUser')->name('user.get_auth_user');
+        Route::put('user', 'update')->name('user.update');
     });
 
     Route::group(['controller' => QuoteController::class], function () {
         Route::post('quotes/all', 'index')->name('quotes.index');
         Route::post('quotes', 'create')->name('quotes.create');
-        Route::get('quotes/{id}', 'show')->name('quotes.show');
-        Route::put('quotes/{id}', 'update')->name('quotes.update');
-        Route::delete('quotes/{id}', 'destroy')->name('quotes.destroy');
+        Route::get('quotes/{quote}', 'show')->name('quotes.show');
+        Route::put('quotes/{quote}', 'update')->name('quotes.update');
+        Route::delete('quotes/{quote}', 'destroy')->name('quotes.destroy');
 
         Route::post('quotes/search', 'search')->name('quotes.search');
     });
 
-    Route::post('quotes/{id}/like', [LikeController::class, 'like'])->name('quote.like');
-    Route::post('quotes/{id}/comment', [CommentController::class, 'comment'])->name('quote.comment');
+    Route::post('quotes/{quote}/like', [LikeController::class, 'like'])->name('quote.like');
+    Route::post('quotes/{quote}/comment', [CommentController::class, 'comment'])->name('quote.comment');
 
     Route::group(['controller' => MovieController::class], function () {
         Route::get('movies/all', 'index')->name('movies.index');
         Route::post('movies/page', 'paginateMovies')->name('movies.paginate_movies');
         Route::post('movies', 'create')->name('movies.create');
-        Route::get('movies/{id}', 'show')->name('movies.show');
-        Route::put('movies/{id}', 'update')->name('movies.update');
-        Route::delete('movies/{id}', 'destroy')->name('movies.destroy');
+        Route::get('movies/{movie}', 'show')->name('movies.show');
+        Route::put('movies/{movie}', 'update')->name('movies.update');
+        Route::delete('movies/{movie}', 'destroy')->name('movies.destroy');
 
         Route::post('movies/search', 'search')->name('movies.search');
     });
 
     Route::group(['controller' => NotificationController::class], function () {
-        Route::get('notifications', 'getAllNotifications')->name('notifications.get_all_notifications');
-        Route::post('notification/update/{id}', 'update')->name('notification.update');
-        Route::post('notifications/update', 'updateAll')->name('notifications.update_all');
+        Route::get('notifications', 'index')->name('notifications.index');
+        Route::put('notifications/{notification}', 'update')->name('notification.update');
+        Route::put('notifications', 'updateAll')->name('notifications.update_all');
     });
 });
 

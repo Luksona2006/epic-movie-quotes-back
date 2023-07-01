@@ -8,6 +8,7 @@ use App\Http\Requests\User\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\ChangeEmail;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Str;
@@ -32,7 +33,7 @@ class UserController extends Controller
             $user->name = $request->new_username;
         }
 
-        if($request->new_password) {
+        if($request->new_password && !password_verify($request->new_password, $user->password)) {
             $user->name = $request->new_password;
         }
 
@@ -74,6 +75,11 @@ class UserController extends Controller
         $user->save();
 
         return new UserResource($user);
+    }
+
+    public function getAuthUser(): JsonResource
+    {
+        return new UserResource(auth()->user());
     }
 
     public function confirmEmailChange(string $token): RedirectResponse

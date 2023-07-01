@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Spatie\Translatable\HasTranslations;
 use App\Models\Movie;
-use App\Models\MovieGenre;
+use App\Models\GenreMovie;
 
 class Genre extends Model
 {
@@ -20,6 +20,6 @@ class Genre extends Model
 
     public function movies(): BelongsToMany
     {
-        return $this->belongsToMany(Movie::class)->using(MovieGenre::class);
+        return $this->belongsToMany(Movie::class)->using(GenreMovie::class);
     }
 }

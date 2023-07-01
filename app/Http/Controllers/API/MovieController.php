@@ -64,9 +64,8 @@ class MovieController extends Controller
         return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.create_movie')])], 401);
     }
 
-    public function update(int $id, UpdateMovieRequest $request): JsonResource|JsonResponse
+    public function update(Movie $movie, UpdateMovieRequest $request): JsonResource|JsonResponse
     {
-        $movie = Movie::findOrFail($id);
         $user = auth()->user();
 
         if($user->id === $movie->user_id) {
@@ -100,22 +99,22 @@ class MovieController extends Controller
             if($request->genres_ids) {
                 foreach ($request->genres_ids as $genreId) {
                     $isSameGenre = false;
-                    foreach ($movie->genres->toArray() as $GenreMovie) {
-                        $GenreMovie['id'] === $genreId ? $isSameGenre = true : 0;
+                    foreach ($movie->genres->toArray() as $genreMovie) {
+                        $genreMovie['id'] === $genreId ? $isSameGenre = true : 0;
                     }
                     if(!$isSameGenre) {
                         GenreMovie::create(['genre_id' => $genreId, 'movie_id' => $movie->id]);
                     }
                 }
 
-                foreach ($movie->genres->toArray() as $GenreMovie) {
+                foreach ($movie->genres->toArray() as $genreMovie) {
                     $isRemoved = true;
                     foreach ($request->genres_ids as $genreId) {
-                        $GenreMovie['id'] === $genreId ? $isRemoved = false : 0;
+                        $genreMovie['id'] === $genreId ? $isRemoved = false : 0;
                     }
 
                     if($isRemoved) {
-                        GenreMovie::where('genre_id', $GenreMovie['id'])->first()->delete();
+                        GenreMovie::where('genre_id', $genreMovie['id'])->first()->delete();
                     }
                 }
             }
@@ -158,12 +157,12 @@ class MovieController extends Controller
     {
         $user = auth()->user();
 
-        $moviesPaginate = Movie::where('user_id', $user->id)->latest()->paginate(6, ['*'], 'movies-per-page', $request->pageNum);
+        $moviesPaginate = Movie::where('user_id', $user->id)->paginate(6, ['*'], 'movies-per-page', $request->pageNum);
 
         $movies = MovieResource::collection($moviesPaginate->items());
 
         $totalMovies = count($movies);
-        return response()->json(['movies' => $movies, 'isLastPage' => $moviesPaginate['last_page'] === $request->pageNum, 'total' => $totalMovies]);
+        return response()->json(['movies' => $movies, 'isLastPage' => $moviesPaginate->toArray()['last_page'] === $request->pageNum, 'total' => $totalMovies]);
     }
 
 
@@ -189,8 +188,7 @@ class MovieController extends Controller
         if($search) {
             $searchedMovies = Movie::where('user_id', $user->id)
             ->whereRaw('LOWER(JSON_EXTRACT(name, "$.en")) like ?', '%'.strtolower($search).'%')
-            ->orWhereRaw('LOWER(JSON_EXTRACT(name, "$.ka")) like ?', '%'.strtolower($search).'%')
-            ->latest();
+            ->orWhereRaw('LOWER(JSON_EXTRACT(name, "$.ka")) like ?', '%'.strtolower($search).'%');
 
             $moviesPaginate = $searchedMovies->paginate(10, ['*'], 'movies-per-page', $request->pageNum);
 
