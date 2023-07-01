@@ -11,6 +11,8 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
+      - name: copy env file
+        run: cp .env.example .env
       - name: install npm dependencies
         run: |
           if [ -e yarn.lock ]; then
