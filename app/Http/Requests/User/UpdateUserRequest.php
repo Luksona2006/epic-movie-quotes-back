@@ -31,4 +31,11 @@ class UpdateUserRequest extends FormRequest
             'image' => ['nullable']
         ];
     }
+
+    public function messages()
+    {
+        return [
+            'new_email.unique' => __('validation.unique'),
+        ];
+    }
 }

@@ -27,4 +27,11 @@ class PasswordResetEmailRequest extends FormRequest
             'email' => ['required', 'exists:users,email']
         ];
     }
+
+    public function messages()
+    {
+        return [
+            'email.exists' => __('validation.exists'),
+        ];
+    }
 }

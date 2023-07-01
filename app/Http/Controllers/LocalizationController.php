@@ -14,6 +14,6 @@ class LocalizationController extends Controller
         $locale = $request->locale;
         App::setLocale($locale);
         Session::put('locale', $locale);
-        return response()->json($request->validated());
+        return response()->json(['locale' => $locale]);
     }
 }

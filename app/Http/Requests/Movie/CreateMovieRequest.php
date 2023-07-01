@@ -25,14 +25,22 @@ class CreateMovieRequest extends FormRequest
     {
         return [
             'genres_ids' => ['required', 'array'],
-            'name_en' => ['required', 'string'],
-            'name_ka' => ['required', 'string'],
+            'name_en' => ['required'],
+            'name_ka' => ['required'],
             'year' => ['nullable'],
-            'director_en' => ['required', 'string'],
-            'director_ka' => ['required', 'string'],
-            'description_en' => ['required', 'string'],
-            'description_ka' => ['required', 'string'],
-            'image' => ['required', 'string']
+            'director_en' => ['required'],
+            'director_ka' => ['required'],
+            'description_en' => ['required'],
+            'description_ka' => ['required'],
+            'image' => ['required']
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'genres_ids.required' => __('validation.required'),
+            'genres_ids.array' => __('validation.array'),
         ];
     }
 }

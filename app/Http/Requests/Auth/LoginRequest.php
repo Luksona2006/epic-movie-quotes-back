@@ -29,4 +29,11 @@ class LoginRequest extends FormRequest
             'remember_token' => ['nullable']
         ];
     }
+
+    public function messages()
+    {
+        return [
+            'email.exists' => __('validation.exists'),
+        ];
+    }
 }
