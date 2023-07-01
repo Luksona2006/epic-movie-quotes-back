@@ -3,7 +3,7 @@ paths:
     post:
       tags:
         - Auth
-      summary: Logins user and returns authenticated user as a JSON response
+      summary: Logins user
       requestBody:
         required: true
         content:
@@ -27,11 +27,12 @@ paths:
                 example: epicmoviequotes_session=abcde12345; path=/;
         401:
           $ref: "../responses/user.yaml#/components/responses/401"
+
   /signup:
     post:
       tags:
         - Auth
-      summary: Registers user, sends email verification and returns user as a JSON response
+      summary: Registers user and sends email verification
       requestBody:
         required: true
         content:
@@ -56,13 +57,21 @@ paths:
           $ref: "../responses/user.yaml#/components/responses/200"
         401:
           $ref: "../responses/user.yaml#/components/responses/401"
+  /verify/{token}:
+    get:
+      tags:
+        - Auth
+      summary: Verifies email if token is not expired or invalid otherwise it redirects user to individual paths
+      parameters:
+        - $ref: "../parameters/token.yaml#/components/parameters/email_verification"
+
   /logout:
     post:
       security:
         - sessionCookie: []
       tags:
         - Auth
-      summary: Logouts user and returns message as a JSON response
+      summary: Logouts user
       responses:
         200:
           description: OK
@@ -76,3 +85,60 @@ paths:
                     default: User logged out
         401:
           $ref: "../common.yaml#/components/responses/401"
+
+  /forgot-password:
+    post:
+      tags:
+        - Auth
+      summary: Sends email confirmations for password recovery
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: johndoe@example.com
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    default: Email confirmation sent for password reset
+
+  /reset-password/{token}:
+    post:
+      tags:
+        - Auth
+      summary: Resets password if token is not expired or invalid otherwise it redirects user to individual paths
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+                  example: password123
+                password_confirmation:
+                  type: string
+                  example: password123
+      parameters:
+        - $ref: "../parameters/token.yaml#/components/parameters/password_reset"
+      responses:
+        200:
+          $ref: "../responses/user.yaml#/components/responses/200"
+    get:
+      tags:
+        - Auth
+      summary: Redirects user to password recovery page if token is not expired or invalid otherwise it redirects user to individual paths
+      parameters:
+        - $ref: "../parameters/token.yaml#/components/parameters/password_reset"

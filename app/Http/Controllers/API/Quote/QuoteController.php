@@ -11,13 +11,12 @@ use App\Http\Resources\QuoteResource;
 use App\Models\Movie;
 use App\Models\Quote;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 
 class QuoteController extends Controller
 {
-    public function create(CreateQuoteRequest $request): JsonResource
+    public function create(CreateQuoteRequest $request): JsonResponse
     {
         $attributes['movie_id'] = $request->movie_id;
         $user = auth()->user();
@@ -41,10 +40,10 @@ class QuoteController extends Controller
 
         $quote = Quote::with('movie', 'user', 'comments')->find($quote->id);
 
-        return new QuoteResource($quote);
+        return (new QuoteResource($quote))->response()->setStatusCode(200);
     }
 
-    public function update(Quote $quote, UpdateQuoteRequest $request): JsonResource
+    public function update(Quote $quote, UpdateQuoteRequest $request): JsonResponse
     {
         if($request->quote_en && $request->quote_ka) {
             $text = [
@@ -71,7 +70,7 @@ class QuoteController extends Controller
 
         $quote->save();
 
-        return new QuoteResource($quote);
+        return (new QuoteResource($quote))->response()->setStatusCode(200);
     }
 
     public function destroy(Quote $quote): JsonResponse
@@ -89,11 +88,11 @@ class QuoteController extends Controller
         return response()->json(['quotes' => $quotes, 'isLastPage' => $quotesPaginate->toArray()['last_page'] === $request->pageNum]);
     }
 
-    public function show(int $id): JsonResource
+    public function show(int $id): JsonResponse
     {
         $quote = Quote::with('user', 'comments')->findOrFail($id);
 
-        return new QuoteResource($quote);
+        return (new QuoteResource($quote))->response()->setStatusCode(200);
     }
 
     public function search(Request $request): JsonResponse

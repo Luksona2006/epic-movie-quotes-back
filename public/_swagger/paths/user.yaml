@@ -1,0 +1,57 @@
+paths:
+  /user:
+    put:
+      tags:
+        - User
+      summary: Updates user details
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                new_username:
+                  type: string
+                  example: Jonny Doe
+                new_email:
+                  type: string
+                  example: jonnydoe@example.com
+                new_password:
+                  type: string
+                  example: password321
+                confirm_password:
+                  type: string
+                  example: password321
+                image:
+                  type: string
+                  example: data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAALCAYAAABCm8wlAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4QoPAxIb88htFgAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAACxSURBVBjTdY6xasJgGEXP/RvoonvAd8hDyD84+BZBEMSxL9GtQ8Fis7i6BkGI4DP4CA4dnQON3g6WNjb2wLd8nAsHWsR3D7JXt18kALFwz2dGmPVhJt0IcenUDVsgu91eCRZ9IOMfAnBvSCz8I3QYL0yV6zfyL+VUxKWfMJuOEFd+dE3pC1Finwj0HfGBeKGmblcFTIN4U2C4m+hZAaTrASSGox6YV7k+ARAp4gIIOH0BmuY1E5TjCIUAAAAASUVORK5CYII
+      responses:
+        200:
+          $ref: "../responses/user.yaml#/components/responses/200"
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: epicmoviequotes_session=abcde12345; path=/;
+        401:
+          $ref: "../responses/user.yaml#/components/responses/401"
+
+  /user/auth:
+    get:
+      tags:
+        - User
+      summary: Returns authenticated user
+      responses:
+        200:
+          $ref: "../responses/user.yaml#/components/responses/200"
+        401:
+          $ref: "../common.yaml#/components/responses/401"
+
+  /change-email/{token}:
+    get:
+      tags:
+        - User
+      summary: Sets new email for user and redirects to home page if token is not expired or invalid otherwise it redirects user to individual paths
+      parameters:
+        - $ref: "../parameters/token.yaml#/components/parameters/email_verification"

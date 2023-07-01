@@ -15,8 +15,24 @@ paths:
     $ref: "./_swagger/paths/auth.yaml#/paths/~1login"
   /signup:
     $ref: "./_swagger/paths/auth.yaml#/paths/~1signup"
+  /verify/{token}:
+    $ref: "./_swagger/paths/auth.yaml#/paths/~1verify~1{token}"
   /logout:
     $ref: "./_swagger/paths/auth.yaml#/paths/~1logout"
+  /forgot-password:
+    $ref: "./_swagger/paths/auth.yaml#/paths/~1forgot-password"
+  /reset-password/{token}:
+    $ref: "./_swagger/paths/auth.yaml#/paths/~1reset-password~1{token}"
+  /user:
+    $ref: "./_swagger/paths/user.yaml#/paths/~1user"
+  /user/auth:
+    $ref: "./_swagger/paths/user.yaml#/paths/~1user~1auth"
+  /change-email/{token}:
+    $ref: "./_swagger/paths/user.yaml#/paths/~1change-email~1{token}"
+  /auth/google/redirect:
+    $ref: "./_swagger/paths/socialite.yaml#/paths/~1auth~1google~1redirect"
+  /auth/google/callback:
+    $ref: "./_swagger/paths/socialite.yaml#/paths/~1auth~1google~1callback"
 
 components:
   securitySchemes:
@@ -33,14 +49,14 @@ components:
       $ref: "./_swagger/schemas/movie.yaml#/components/schemas/Movie"
     Notification:
       $ref: "./_swagger/schemas/notification.yaml#/components/schemas/Notification"
-    Like:
-      $ref: "./_swagger/schemas/like.yaml#/components/schemas/Like"
+    QuoteUser:
+      $ref: "./_swagger/schemas/quote_user.yaml#/components/schemas/QuoteUser"
     Comment:
       $ref: "./_swagger/schemas/comment.yaml#/components/schemas/Comment"
     Genre:
       $ref: "./_swagger/schemas/genre.yaml#/components/schemas/Genre"
-    MovieGenre:
-      $ref: "./_swagger/schemas/movie_genre.yaml#/components/schemas/MovieGenre"
+    GenreMovie:
+      $ref: "./_swagger/schemas/genre_movie.yaml#/components/schemas/GenreMovie"
     ChangeEmail:
       $ref: "./_swagger/schemas/change_email.yaml#/components/schemas/ChangeEmail"
     ChangePassword:

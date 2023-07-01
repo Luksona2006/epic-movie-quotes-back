@@ -1,0 +1,16 @@
+components:
+  parameters:
+    password_reset:
+      in: path
+      name: token
+      required: true
+      schema:
+        type: string
+      description: Password reset token
+    email_verification:
+      in: path
+      name: token
+      required: true
+      schema:
+        type: string
+      description: Password reset token

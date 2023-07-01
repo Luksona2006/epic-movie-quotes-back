@@ -13,7 +13,6 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -23,7 +22,7 @@ use Illuminate\Support\Facades\Storage;
 
 class AuthController extends Controller
 {
-    public function login(LoginRequest $request): JsonResponse|JsonResource
+    public function login(LoginRequest $request): JsonResponse
     {
         $credentials = $request->only(['email', 'password']);
 
@@ -34,7 +33,7 @@ class AuthController extends Controller
 
         $remember = $request->remember ? true : false;
         if(Auth::guard()->attempt($credentials, $remember)) {
-            return new UserResource($user);
+            return (new UserResource($user))->response()->setStatusCode(200);
         };
         return response()->json(['message' => __('messages.invalid_credentials')], 401);
     }
@@ -46,7 +45,7 @@ class AuthController extends Controller
         return response()->json(['message' => __('messages.user_logged_out')]);
     }
 
-    public function register(RegisterRequest $request): JsonResponse|JsonResource
+    public function register(RegisterRequest $request): JsonResponse
     {
         $attributes = $request->validated();
         $attributes['password'] = bcrypt($attributes['password']);
@@ -68,7 +67,7 @@ class AuthController extends Controller
                 $message->to($data['email'])->subject('Please verify your email address');
             });
 
-            return new UserResource($user);
+            return (new UserResource($user))->response()->setStatusCode(200);
         }
 
         return response()->json(['message' => __('messages.invalid_credentials')], 401);
@@ -127,7 +126,7 @@ class AuthController extends Controller
         return redirect()->away(env('FRONTEND_URL').'/404');
     }
 
-    public function resetPassword(ResetPasswordRequest $request): RedirectResponse|JsonResource
+    public function resetPassword(ResetPasswordRequest $request): RedirectResponse|JsonResponse
     {
         $changePasswordModel = ChangePassword::where('token', $request->token)->first();
         if($changePasswordModel) {
@@ -136,7 +135,7 @@ class AuthController extends Controller
                 $user->update(['password' => bcrypt($request->password)]);
                 $changePasswordModel->delete();
 
-                return new UserResource($user);
+                return (new UserResource($user))->response()->setStatusCode(200);
             }
             $changePasswordModel->delete();
             return redirect()->away(env('FRONTEND_URL').'/expired');
