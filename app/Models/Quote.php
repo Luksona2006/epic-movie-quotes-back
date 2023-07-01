@@ -8,10 +8,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\Translatable\HasTranslations;
 use App\Models\Movie;
 use App\Models\User;
-use App\Models\Like;
 use App\Models\Comment;
+use App\Models\QuoteUser;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Collection as SupportCollection;
 
 class Quote extends Model
 {
@@ -32,9 +32,9 @@ class Quote extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function likes(): HasMany
+    public function likes(): BelongsToMany
     {
-        return $this->hasMany(Like::class);
+        return $this->belongsToMany(User::class)->using(QuoteUser::class);
     }
 
     public function comments(): HasMany

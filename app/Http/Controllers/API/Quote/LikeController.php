@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\API\Quote;
 
 use App\Http\Controllers\Controller;
-use App\Models\Like;
 use App\Models\Notification;
 use App\Models\Quote;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Events\LikeQuote;
 use App\Events\RecieveNotification;
+use App\Models\QuoteUser;
 
 class LikeController extends Controller
 {
@@ -17,17 +17,12 @@ class LikeController extends Controller
     {
         $user = auth()->user();
 
-        $likes = Like::where('quote_id', $quote->id)->get()->toArray();
+        $likes = QuoteUser::where('quote_id', $quote->id)->get()->toArray();
         $likesSum = count($likes);
-        $liked = array_filter($likes, function ($like) use ($user) {
-            return $like['user_id'] === $user->id;
-        });
-
-        $liked = count($liked) ? true : false;
-
+        $liked = QuoteUser::where('quote_id', $quote->id)->where('user_id', $user->id)->count() > 0;
         if($request->liked !== null) {
             if($request->liked === true) {
-                Like::create([
+                QuoteUser::create([
                     'user_id' => $user->id,
                     'quote_id' => $quote->id
                 ]);
@@ -37,12 +32,10 @@ class LikeController extends Controller
             }
 
             if($request->liked === false) {
-                $likeId = Like::where([
+                QuoteUser::where([
                     ['user_id', $user->id],
                     ['quote_id', $quote->id]
-                ])->first()->id;
-
-                Like::destroy($likeId);
+                ])->first()->delete();
 
                 $likesSum = $likesSum - 1;
                 $liked = false;

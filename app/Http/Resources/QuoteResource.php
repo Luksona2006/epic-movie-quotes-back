@@ -7,6 +7,7 @@ use App\Models\Like;
 use App\Http\Resources\MovieResource;
 use App\Http\Resources\UserResource;
 use App\Http\Resources\CommentResource;
+use App\Models\QuoteUser;
 
 class QuoteResource extends JsonResource
 {
@@ -27,7 +28,7 @@ class QuoteResource extends JsonResource
             'text' =>  $this->getTranslations('text'),
             'image' => $this->image,
             'likes' => $this->likes->count(),
-            'liked' => Like::where([['user_id', $this->user->id],['quote_id', $this->id]])->count() > 0,
+            'liked' => QuoteUser::where([['user_id', $this->user->id],['quote_id', $this->id]])->count() > 0,
             'comments' => CommentResource::collection($this->whenLoaded('comments')),
             'user' => new UserResource($this->whenLoaded('user')),
             'movie' => new MovieResource($this->whenLoaded('movie')),

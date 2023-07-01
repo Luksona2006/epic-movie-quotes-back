@@ -7,9 +7,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Models\Quote;
-use App\Models\Like;
 use App\Models\Notification;
 use App\Models\Comment;
+use App\Models\QuoteUser;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class User extends Authenticatable
 {
@@ -57,9 +58,9 @@ class User extends Authenticatable
         return $this->hasMany(Comment::class);
     }
 
-    public function likes(): HasMany
+    public function likes(): BelongsToMany
     {
-        return $this->hasMany(Like::class);
+        return $this->belongsToMany(Quote::class)->using(QuoteUser::class);
     }
 
     public function notifications(): HasMany
