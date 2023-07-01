@@ -93,6 +93,7 @@ class UserController extends Controller
                 $user->save();
 
                 event(new ChangeUserEmail($user->id, $emailModel->to_email));
+                auth()->logout();
 
                 return redirect(env('FRONTEND_URL'));
             }
