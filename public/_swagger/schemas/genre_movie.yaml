@@ -1,6 +1,6 @@
 components:
   schemas:
-    MovieGenre:
+    GenreMovie:
       allOf:
         - $ref: "../common.yaml#/components/schemas/Id"
         - $ref: "../common.yaml#/components/schemas/MovieId"

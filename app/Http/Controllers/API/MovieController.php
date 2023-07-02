@@ -10,13 +10,12 @@ use App\Models\Movie;
 use App\Models\GenreMovie;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 
 class MovieController extends Controller
 {
-    public function create(CreateMovieRequest $request): JsonResource|JsonResponse
+    public function create(CreateMovieRequest $request): JsonResponse
     {
         $user = auth()->user();
 
@@ -58,13 +57,13 @@ class MovieController extends Controller
 
             $movie = Movie::with('quotes', 'genres')->find($movie->id);
 
-            return new MovieResource($movie);
+            return (new MovieResource($movie))->response()->setStatusCode(200);
         }
 
         return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.create_movie')])], 401);
     }
 
-    public function update(Movie $movie, UpdateMovieRequest $request): JsonResource|JsonResponse
+    public function update(Movie $movie, UpdateMovieRequest $request): JsonResponse
     {
         $user = auth()->user();
 
@@ -141,7 +140,7 @@ class MovieController extends Controller
 
             $movie = Movie::with('quotes', 'genres')->find($movie->id);
 
-            return new MovieResource($movie);
+            return (new MovieResource($movie))->response()->setStatusCode(200);
         }
 
         return response()->json(['message' => __('messages.wrong_id')], 404);
@@ -174,11 +173,11 @@ class MovieController extends Controller
         return response()->json(['movies' => MovieResource::collection($movies)]);
     }
 
-    public function show(int $id): JsonResource
+    public function show(int $id): JsonResponse
     {
         $movie = Movie::with('quotes', 'genres')->findOrFail($id);
 
-        return new MovieResource($movie);
+        return (new MovieResource($movie))->response()->setStatusCode(200);
     }
 
     public function search(Request $request): JsonResponse

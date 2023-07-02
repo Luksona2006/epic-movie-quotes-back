@@ -28,7 +28,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::post('locale', [LocalizationController::class, 'setLocale']);
+Route::post('locale', [LocalizationController::class, 'setLocale'])->name('locale.set_locale');
 
 Route::group(['middleware' => 'guest:sanctum'], function () {
     Route::group(['controller' => AuthController::class], function () {
@@ -36,7 +36,7 @@ Route::group(['middleware' => 'guest:sanctum'], function () {
         Route::post('signup', 'register')->name('signup.register');
         Route::get('verify/{token}', 'verifyEmail')->name('verify.verify_email');
         Route::post('forgot-password', 'sendPasswordResetRequest')->name('forgot_password.send_password_reset_request');
-        Route::get('reset-password/redirect/{token}', 'redirectToPasswordReset')->name('reset.redirect_to_password_reset');
+        Route::get('reset-password/{token}', 'redirectToPasswordReset')->name('reset.redirect_to_password_reset');
         Route::post('reset-password/{token}', 'resetPassword')->name('reset_password');
     });
 

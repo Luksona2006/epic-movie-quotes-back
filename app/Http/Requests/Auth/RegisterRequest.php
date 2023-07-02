@@ -30,4 +30,11 @@ class RegisterRequest extends FormRequest
             'confirm_password' => ['required'],
         ];
     }
+
+    public function messages()
+    {
+        return [
+            'email.unique' => __('validation.required'),
+        ];
+    }
 }

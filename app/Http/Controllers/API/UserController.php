@@ -10,7 +10,6 @@ use App\Models\ChangeEmail;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
@@ -25,7 +24,7 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateUserRequest $request): JsonResource
+    public function update(UpdateUserRequest $request): JsonResponse
     {
         $user = User::find(auth()->user()->id);
 
@@ -74,12 +73,12 @@ class UserController extends Controller
 
         $user->save();
 
-        return new UserResource($user);
+        return (new UserResource($user))->response()->setStatusCode(200);
     }
 
-    public function getAuthUser(): JsonResource
+    public function getAuthUser(): JsonResponse
     {
-        return new UserResource(auth()->user());
+        return (new UserResource(auth()->user()))->response()->setStatusCode(200);
     }
 
     public function confirmEmailChange(string $token): RedirectResponse
@@ -93,6 +92,7 @@ class UserController extends Controller
                 $user->save();
 
                 event(new ChangeUserEmail($user->id, $emailModel->to_email));
+                auth()->logout();
 
                 return redirect(env('FRONTEND_URL'));
             }

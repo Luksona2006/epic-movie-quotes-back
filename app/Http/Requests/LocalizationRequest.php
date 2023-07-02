@@ -24,7 +24,7 @@ class LocalizationRequest extends FormRequest
     public function rules()
     {
         return [
-            'locale' => ['required', 'string']
+            'locale' => ['required']
         ];
     }
 }

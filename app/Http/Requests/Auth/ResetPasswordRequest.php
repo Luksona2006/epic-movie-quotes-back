@@ -29,4 +29,11 @@ class ResetPasswordRequest extends FormRequest
             'token' => ['required', 'exists:users,password_reset_token']
         ];
     }
+
+    public function messages()
+    {
+        return [
+            'token.exists' => __('validation.exists'),
+        ];
+    }
 }

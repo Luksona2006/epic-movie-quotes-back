@@ -24,10 +24,10 @@ class CreateQuoteRequest extends FormRequest
     public function rules()
     {
         return [
-            'quote_en' => ['required', 'string'],
-            'quote_ka' => ['required', 'string'],
-            'image' => ['required', 'string'],
-            'movie_id' => ['required', 'numeric'],
+            'quote_en' => ['required'],
+            'quote_ka' => ['required'],
+            'image' => ['required'],
+            'movie_id' => ['required'],
         ];
     }
 }
