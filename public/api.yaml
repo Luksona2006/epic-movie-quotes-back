@@ -36,28 +36,59 @@ paths:
 
 components:
   securitySchemes:
+    sanctum:
+      type: apiKey
+      in: cookie
+      name: XSRF-TOKEN
     sessionCookie:
       type: apiKey
       in: cookie
       name: epicmoviequotes_session
   schemas:
     User:
-      $ref: "./_swagger/schemas/user.yaml#/components/schemas/User"
+      allOf:
+        - $ref: "./_swagger/schemas/user.yaml#/components/schemas/User"
+        - $ref: "./_swagger/common.yaml#/components/schemas/EmailVerificationToken"
+        - type: object
+          properties:
+            email_verified_at:
+              type: string
+              example: "2023-07-01 21:48:10"
+            remember_token:
+              type: string
+              example: CmIQYfM2Udx0d8qxsgWjcX6VloLmutO24mFsCtJ48j3Z794P1XVjI6LBcW3G
+        - $ref: "./_swagger/common.yaml#/components/schemas/TimeStamps"
     Quote:
-      $ref: "./_swagger/schemas/quote.yaml#/components/schemas/Quote"
+      allOf:
+        - $ref: "./_swagger/schemas/quote.yaml#/components/schemas/Quote"
+        - $ref: "./_swagger/common.yaml#/components/schemas/UserId"
+        - $ref: "./_swagger/common.yaml#/components/schemas/TimeStamps"
     Movie:
-      $ref: "./_swagger/schemas/movie.yaml#/components/schemas/Movie"
+      allOf:
+        - $ref: "./_swagger/schemas/movie.yaml#/components/schemas/Movie"
+        - $ref: "./_swagger/common.yaml#/components/schemas/UserId"
+        - $ref: "./_swagger/common.yaml#/components/schemas/TimeStamps"
     Notification:
-      $ref: "./_swagger/schemas/notification.yaml#/components/schemas/Notification"
+      allOf:
+        - $ref: "./_swagger/schemas/notification.yaml#/components/schemas/Notification"
+        - $ref: "./_swagger/common.yaml#/components/schemas/TimeStamps"
     QuoteUser:
-      $ref: "./_swagger/schemas/quote_user.yaml#/components/schemas/QuoteUser"
+      allOf:
+        - $ref: "./_swagger/schemas/quote_user.yaml#/components/schemas/QuoteUser"
     Comment:
-      $ref: "./_swagger/schemas/comment.yaml#/components/schemas/Comment"
+      allOf:
+        - $ref: "./_swagger/schemas/comment.yaml#/components/schemas/Comment"
+        - $ref: "./_swagger/common.yaml#/components/schemas/TimeStamps"
     Genre:
-      $ref: "./_swagger/schemas/genre.yaml#/components/schemas/Genre"
+      allOf:
+        - $ref: "./_swagger/schemas/genre.yaml#/components/schemas/Genre"
+        - $ref: "./_swagger/common.yaml#/components/schemas/TimeStamps"
     GenreMovie:
-      $ref: "./_swagger/schemas/genre_movie.yaml#/components/schemas/GenreMovie"
+      allOf:
+        - $ref: "./_swagger/schemas/genre_movie.yaml#/components/schemas/GenreMovie"
     ChangeEmail:
-      $ref: "./_swagger/schemas/change_email.yaml#/components/schemas/ChangeEmail"
+      allOf:
+        - $ref: "./_swagger/schemas/change_email.yaml#/components/schemas/ChangeEmail"
     ChangePassword:
-      $ref: "./_swagger/schemas/change_password.yaml#/components/schemas/ChangePassword"
+      allOf:
+        - $ref: "./_swagger/schemas/change_password.yaml#/components/schemas/ChangePassword"

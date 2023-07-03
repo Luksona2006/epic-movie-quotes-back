@@ -1,0 +1,14 @@
+components:
+  schemas:
+    Expired:
+      value: https://<UIEndpoint>/expired
+      description: Redirect URI if token|link is expired
+    NotFound:
+      value: https://<UIEndpoint>/404
+      description: Redirect URI if token|link does not exist
+    Home:
+      value: https://<UIEndpoint>
+      description: Redirect URI home page
+    Auth:
+      value: https://<UIEndpoint>/auth-user
+      description: Redirect URI if user has been logged in with google signin

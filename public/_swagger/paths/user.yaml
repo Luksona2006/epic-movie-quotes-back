@@ -4,6 +4,8 @@ paths:
       tags:
         - User
       summary: Updates user details
+      security:
+        - sanctum: []
       requestBody:
         required: false
         content:
@@ -41,6 +43,8 @@ paths:
     get:
       tags:
         - User
+      security:
+        - sanctum: []
       summary: Returns authenticated user
       responses:
         200:
@@ -55,3 +59,19 @@ paths:
       summary: Sets new email for user and redirects to home page if token is not expired or invalid otherwise it redirects user to individual paths
       parameters:
         - $ref: "../parameters/token.yaml#/components/parameters/email_verification"
+      responses:
+        200:
+          description: redirect response, see Home & Expired & NotFound schemas for reference
+          headers:
+            Location:
+              description: URIs to which the client will be redirected depending on the scenario
+              schema:
+                type: string
+                format: uri
+              examples:
+                Expired:
+                  - $ref: "../schemas/redirect.yaml#/components/schemas/Expired"
+                Home:
+                  - $ref: "../schemas/redirect.yaml#/components/schemas/Home"
+                NotFound:
+                  - $ref: "../schemas/redirect.yaml#/components/schemas/NotFound"

@@ -3,6 +3,7 @@ components:
     User:
       allOf:
         - $ref: "../common.yaml#/components/schemas/Id"
+        - $ref: "../common.yaml#/components/schemas/Email"
         - type: object
           properties:
             google_id:
@@ -14,9 +15,3 @@ components:
             image:
               type: string
               example: userImages/Hycv3H2eVGKDZG1akEOZ0UyVJLgedzC.jpg
-            email_verified_at:
-              type: string
-              example: "2023-06-25T19:05:53.000000Z"
-        - $ref: "../common.yaml#/components/schemas/Email"
-        - $ref: "../common.yaml#/components/schemas/EmailVerificationToken"
-        - $ref: "../common.yaml#/components/schemas/TimeStamps"
