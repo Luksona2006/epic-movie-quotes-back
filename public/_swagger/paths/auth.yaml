@@ -153,18 +153,19 @@ paths:
         - $ref: "../parameters/token.yaml#/components/parameters/password_reset"
       responses:
         200:
-          $ref: "../responses/user.yaml#/components/responses/200"
-          headers:
-            Location:
-              description: URIs where the client will be redirected depending on scenarios
-              schema:
-                type: string
-                format: uri
-              examples:
-                Expired:
-                  - $ref: "../schemas/redirect.yaml#/components/schemas/Expired"
-                NotFound:
-                  - $ref: "../schemas/redirect.yaml#/components/schemas/NotFound"
+          allOf:
+            - $ref: "../responses/user.yaml#/components/responses/200"
+            - headers:
+                Location:
+                  description: URIs where the client will be redirected depending on scenarios
+                  schema:
+                    type: string
+                    format: uri
+                  examples:
+                    Expired:
+                      - $ref: "../schemas/redirect.yaml#/components/schemas/Expired"
+                    NotFound:
+                      - $ref: "../schemas/redirect.yaml#/components/schemas/NotFound"
     get:
       tags:
         - Auth
