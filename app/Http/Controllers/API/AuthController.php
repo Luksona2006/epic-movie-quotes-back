@@ -31,7 +31,7 @@ class AuthController extends Controller
             return response()->json(['message' => __('messages.account_is_not_verified_yet')]);
         }
 
-        if(Auth::guard()->attempt($credentials, $request->remember)) {
+        if(Auth::guard()->attempt($credentials, $request->has('remember_me'))) {
             return (new UserResource($user))->response()->setStatusCode(200);
         };
         return response()->json(['message' => __('messages.invalid_credentials')], 401);
