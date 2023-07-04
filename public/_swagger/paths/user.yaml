@@ -60,8 +60,7 @@ paths:
       parameters:
         - $ref: "../parameters/token.yaml#/components/parameters/email_verification"
       responses:
-        200:
-          description: redirect response, see Home & Expired & NotFound schemas for reference
+        301:
           headers:
             Location:
               description: URIs to which the client will be redirected depending on the scenario

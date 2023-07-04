@@ -14,7 +14,7 @@ class NotificationController extends Controller
     {
         $user = auth()->user();
 
-        $notifications = Notification::where('to_user', $user->id)->orderBy('created_at', 'desc')->get()->toArray();
+        $notifications = Notification::where('to_user', $user->id)->latest()->toArray();
 
         if(count($notifications)) {
             $notificationsWithUsers = [];
@@ -55,11 +55,7 @@ class NotificationController extends Controller
 
         $notifications = $user->notifications->get()->toArray();
         if($notifications) {
-            foreach ($notifications as $notification) {
-                $notificationData = Notification::find($notification['id']);
-                $notificationData->seen = true;
-                $notificationData->save();
-            };
+            Notification::all()->update(['seen' => true]);
             return response()->json(['message' => __('messages.all_notifications_marked')]);
         }
 

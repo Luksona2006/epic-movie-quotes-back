@@ -31,8 +31,7 @@ class AuthController extends Controller
             return response()->json(['message' => __('messages.account_is_not_verified_yet')]);
         }
 
-        $remember = $request->remember ? true : false;
-        if(Auth::guard()->attempt($credentials, $remember)) {
+        if(Auth::guard()->attempt($credentials, $request->remember)) {
             return (new UserResource($user))->response()->setStatusCode(200);
         };
         return response()->json(['message' => __('messages.invalid_credentials')], 401);
@@ -48,11 +47,11 @@ class AuthController extends Controller
     public function register(RegisterRequest $request): JsonResponse
     {
         $attributes = $request->validated();
-        $attributes['password'] = bcrypt($attributes['password']);
         $emailVerificationToken = Str::random(100);
         $attributes['email_verification_token'] = $emailVerificationToken;
 
         $user = User::create($attributes);
+        $user->setPasswordAttribute($request->password);
 
         if($user) {
             if(!Storage::get('userImages/DefaultProfile.png')) {
@@ -132,7 +131,7 @@ class AuthController extends Controller
         if($changePasswordModel) {
             if($changePasswordModel->expires_at > Carbon::now()) {
                 $user = User::where('email', $changePasswordModel->email)->firstOrFail();
-                $user->update(['password' => bcrypt($request->password)]);
+                $user->setPasswordAttribute($request->password);
                 $changePasswordModel->delete();
 
                 return (new UserResource($user))->response()->setStatusCode(200);

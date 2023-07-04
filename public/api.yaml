@@ -73,8 +73,7 @@ components:
         - $ref: "./_swagger/schemas/notification.yaml#/components/schemas/Notification"
         - $ref: "./_swagger/common.yaml#/components/schemas/TimeStamps"
     QuoteUser:
-      allOf:
-        - $ref: "./_swagger/schemas/quote_user.yaml#/components/schemas/QuoteUser"
+      $ref: "./_swagger/schemas/quote_user.yaml#/components/schemas/QuoteUser"
     Comment:
       allOf:
         - $ref: "./_swagger/schemas/comment.yaml#/components/schemas/Comment"
@@ -84,11 +83,8 @@ components:
         - $ref: "./_swagger/schemas/genre.yaml#/components/schemas/Genre"
         - $ref: "./_swagger/common.yaml#/components/schemas/TimeStamps"
     GenreMovie:
-      allOf:
-        - $ref: "./_swagger/schemas/genre_movie.yaml#/components/schemas/GenreMovie"
+      $ref: "./_swagger/schemas/genre_movie.yaml#/components/schemas/GenreMovie"
     ChangeEmail:
-      allOf:
-        - $ref: "./_swagger/schemas/change_email.yaml#/components/schemas/ChangeEmail"
+      $ref: "./_swagger/schemas/change_email.yaml#/components/schemas/ChangeEmail"
     ChangePassword:
-      allOf:
-        - $ref: "./_swagger/schemas/change_password.yaml#/components/schemas/ChangePassword"
+      $ref: "./_swagger/schemas/change_password.yaml#/components/schemas/ChangePassword"

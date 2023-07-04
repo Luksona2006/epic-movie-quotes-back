@@ -10,12 +10,16 @@ paths:
       tags:
         - Socialite
       summary: Creates new user depending on recieved data from socialite, then redirects to user/auth page if user has been created or updated otherwise it redirects to home page
-      headers:
-        Location:
-          description: home page URI
-          schema:
-            type: string
-            format: uri
-          examples:
-            Home:
-              - $ref: "../schemas/redirect.yaml#/components/schemas/Home"
+      responses:
+        301:
+          headers:
+            Location:
+              description: URIs to which the client will be redirected depending on the scenario
+              schema:
+                type: string
+                format: uri
+              examples:
+                Home:
+                  - $ref: "../schemas/redirect.yaml#/components/schemas/Home"
+                Auth:
+                  - $ref: "../schemas/redirect.yaml#/components/schemas/Auth"

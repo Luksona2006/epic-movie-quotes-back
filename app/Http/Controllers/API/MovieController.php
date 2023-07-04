@@ -55,7 +55,7 @@ class MovieController extends Controller
                 GenreMovie::create(['movie_id' => $movie->id, 'genre_id' => $genre_id]);
             }
 
-            $movie = Movie::with('quotes', 'genres')->find($movie->id);
+            $movie = $movie->with('quotes', 'genres');
 
             return (new MovieResource($movie))->response()->setStatusCode(200);
         }
@@ -137,8 +137,7 @@ class MovieController extends Controller
             }
 
             $movie->save();
-
-            $movie = Movie::with('quotes', 'genres')->find($movie->id);
+            $movie = $movie->with('quotes', 'genres');
 
             return (new MovieResource($movie))->response()->setStatusCode(200);
         }
@@ -154,9 +153,7 @@ class MovieController extends Controller
 
     public function paginateMovies(Request $request): JsonResponse
     {
-        $user = auth()->user();
-
-        $moviesPaginate = Movie::where('user_id', $user->id)->paginate(6, ['*'], 'movies-per-page', $request->pageNum);
+        $moviesPaginate = Movie::where('user_id', auth()->id)->paginate(6, ['*'], 'movies-per-page', $request->pageNum);
 
         $movies = MovieResource::collection($moviesPaginate->items());
 
@@ -167,9 +164,7 @@ class MovieController extends Controller
 
     public function index(): JsonResponse
     {
-        $user = auth()->user();
-
-        $movies = Movie::where('user_id', $user->id)->latest()->get();
+        $movies = Movie::where('user_id', auth()->id)->latest()->get();
         return response()->json(['movies' => MovieResource::collection($movies)]);
     }
 
@@ -182,10 +177,9 @@ class MovieController extends Controller
 
     public function search(Request $request): JsonResponse
     {
-        $user = auth()->user();
         $search = $request->searchBy;
         if($search) {
-            $searchedMovies = Movie::where('user_id', $user->id)
+            $searchedMovies = Movie::where('user_id', auth()->id)
             ->whereRaw('LOWER(JSON_EXTRACT(name, "$.en")) like ?', '%'.strtolower($search).'%')
             ->orWhereRaw('LOWER(JSON_EXTRACT(name, "$.ka")) like ?', '%'.strtolower($search).'%');
 

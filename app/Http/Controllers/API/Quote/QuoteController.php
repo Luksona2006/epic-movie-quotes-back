@@ -38,7 +38,7 @@ class QuoteController extends Controller
 
         $quote = Quote::create($attributes);
 
-        $quote = Quote::with('movie', 'user', 'comments')->find($quote->id);
+        $quote = $quote->with('movie', 'user', 'comments');
 
         return (new QuoteResource($quote))->response()->setStatusCode(200);
     }
