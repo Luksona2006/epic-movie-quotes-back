@@ -28,7 +28,7 @@ class QuoteResource extends JsonResource
             'text' =>  $this->getTranslations('text'),
             'image' => $this->image,
             'likes' => $this->likes->count(),
-            'liked' => QuoteUser::where([['user_id', $this->user->id],['quote_id', $this->id]])->count() > 0,
+            'liked' => QuoteUser::where('quote_id', $this->id)->where('user_id', auth()->id())->get()->count() > 0,
             'comments' => CommentResource::collection($this->whenLoaded('comments')),
             'user' => new UserResource($this->whenLoaded('user')),
             'movie' => new MovieResource($this->whenLoaded('movie')),

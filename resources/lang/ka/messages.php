@@ -26,4 +26,5 @@ return [
     "movie" => "ფილმი",
     "quote" => "ციტატა",
     "all_notifications_marked" => "ყველა ნოტიფიკაცია მოინიშნა როგორც წაკითხული",
+    "no_notifications_yet" => "ჯერ არ არის შეტყობინებები"
 ];
