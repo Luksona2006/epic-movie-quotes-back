@@ -12,9 +12,9 @@ class NotificationController extends Controller
 {
     public function index(): JsonResponse
     {
-        $notifications = Notification::where('to_user', auth()->id())->latest();
+        $notifications = Notification::where('to_user', auth()->id())->latest()->get()->toArray();
 
-        if($notifications->count()) {
+        if(count($notifications)) {
             $notificationsWithUsers = [];
             $newsSum = 0;
 
@@ -25,7 +25,7 @@ class NotificationController extends Controller
                     $newsSum = $newsSum + 1;
                 }
                 return $notification;
-            }, $notifications->toArray());
+            }, $notifications);
 
             $newsSum = count(array_filter($notifications, function ($notification) {
                 return $notification['seen'] === 0;
