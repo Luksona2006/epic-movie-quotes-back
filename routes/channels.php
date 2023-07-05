@@ -16,3 +16,7 @@ use Illuminate\Support\Facades\Broadcast;
 Broadcast::channel('notifications.{id}', function ($user, $id) {
     return $user->id === (int) $id;
 });
+
+Broadcast::channel('change-email.{id}', function ($user, $id) {
+    return $user->id === (int) $id;
+});
