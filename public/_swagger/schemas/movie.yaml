@@ -3,7 +3,6 @@ components:
     Movie:
       allOf:
         - $ref: "../common.yaml#/components/schemas/Id"
-        - $ref: "../common.yaml#/components/schemas/UserId"
         - type: object
           properties:
             name:
@@ -36,4 +35,3 @@ components:
             image:
               type: string
               example: movieImages/Z68DGtjjRG3TQdBd5ZDTshVHL0NFhK.jpg
-        - $ref: "../common.yaml#/components/schemas/TimeStamps"

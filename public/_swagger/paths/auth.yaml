@@ -19,12 +19,19 @@ paths:
                   example: password123
       responses:
         200:
-          $ref: "../responses/user.yaml#/components/responses/200"
-          headers:
-            Set-Cookie:
-              schema:
-                type: string
-                example: epicmoviequotes_session=abcde12345; path=/;
+          allOf:
+            - $ref: "../responses/user.yaml#/components/responses/200"
+            - headers:
+                Set-Cookie:
+                  description: Session Cookie
+                  schema:
+                    type: string
+                    example: epicmoviequotes_session=abcde12345; Path=/
+                "\0Set-Cookie":
+                  description: CSRF token
+                  schema:
+                    type: string
+                    example: XSRF-TOKEN=abcde12345; Path=/; HttpOnly
         401:
           $ref: "../responses/user.yaml#/components/responses/401"
 
@@ -64,11 +71,24 @@ paths:
       summary: Verifies email if token is not expired or invalid otherwise it redirects user to individual paths
       parameters:
         - $ref: "../parameters/token.yaml#/components/parameters/email_verification"
+      responses:
+        301:
+          headers:
+            Location:
+              description: URIs where the client will be redirected depending on scenarios
+              schema:
+                type: string
+                format: uri
+              examples:
+                Expired:
+                  - $ref: "../schemas/redirect.yaml#/components/schemas/Expired"
+                NotFound:
+                  - $ref: "../schemas/redirect.yaml#/components/schemas/NotFound"
 
   /logout:
     post:
       security:
-        - sessionCookie: []
+        - sanctum: []
       tags:
         - Auth
       summary: Logouts user
@@ -136,9 +156,36 @@ paths:
       responses:
         200:
           $ref: "../responses/user.yaml#/components/responses/200"
+        301:
+          headers:
+            Location:
+              description: URIs where the client will be redirected depending on scenarios
+              schema:
+                type: string
+                format: uri
+              examples:
+                Expired:
+                  - $ref: "../schemas/redirect.yaml#/components/schemas/Expired"
+                NotFound:
+                  - $ref: "../schemas/redirect.yaml#/components/schemas/NotFound"
     get:
       tags:
         - Auth
       summary: Redirects user to password recovery page if token is not expired or invalid otherwise it redirects user to individual paths
       parameters:
         - $ref: "../parameters/token.yaml#/components/parameters/password_reset"
+      responses:
+        301:
+          headers:
+            Location:
+              description: URIs where the client will be redirected depending on scenarios
+              schema:
+                type: string
+                format: uri
+              examples:
+                Home:
+                  - $ref: "../schemas/redirect.yaml#/components/schemas/Home"
+                Expired:
+                  - $ref: "../schemas/redirect.yaml#/components/schemas/Expired"
+                NotFound:
+                  - $ref: "../schemas/redirect.yaml#/components/schemas/NotFound"

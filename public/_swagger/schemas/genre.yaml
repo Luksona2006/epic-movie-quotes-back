@@ -14,4 +14,3 @@ components:
                 ka:
                   type: string
                   example: დრამა
-        - $ref: "../common.yaml#/components/schemas/TimeStamps"

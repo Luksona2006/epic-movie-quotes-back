@@ -26,7 +26,7 @@ class LoginRequest extends FormRequest
         return [
             'email' => ['required', 'exists:users,email'],
             'password' => ['required'],
-            'remember_token' => ['nullable']
+            'remember_me' => ['nullable']
         ];
     }
 

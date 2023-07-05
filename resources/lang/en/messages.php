@@ -26,4 +26,5 @@ return [
     "movie" => "Movie",
     "quote" => "Quote",
     "all_notifications_marked" => "All notifications has been marked as read",
+    "no_notifications_yet" => "No notifications yet"
 ];

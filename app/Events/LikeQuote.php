@@ -16,18 +16,18 @@ class LikeQuote implements ShouldBroadcast
 
     public $quoteId;
     public $likes;
-    public $isOwnQuote;
+    public $userId;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct($quoteId, $likes, $isOwnQuote)
+    public function __construct($quoteId, $likes, $userId)
     {
         $this->quoteId = $quoteId;
         $this->likes = $likes;
-        $this->isOwnQuote = $isOwnQuote;
+        $this->userId = $userId;
     }
 
     /**

@@ -12,9 +12,7 @@ class NotificationController extends Controller
 {
     public function index(): JsonResponse
     {
-        $user = auth()->user();
-
-        $notifications = Notification::where('to_user', $user->id)->orderBy('created_at', 'desc')->get()->toArray();
+        $notifications = Notification::where('to_user', auth()->id())->latest()->get()->toArray();
 
         if(count($notifications)) {
             $notificationsWithUsers = [];
@@ -36,7 +34,7 @@ class NotificationController extends Controller
             return response()->json(['notifications' => $notificationsWithUsers, 'newsSum' => $newsSum]);
         }
 
-        return response()->json(['message' => __('messages.wrong_user')], 204);
+        return response()->json(['message' => __('messages.no_notifications_yet')], 204);
     }
 
     public function update(Notification $notification): JsonResponse
@@ -51,18 +49,7 @@ class NotificationController extends Controller
 
     public function updateAll(): JsonResponse
     {
-        $user = auth()->user();
-
-        $notifications = $user->notifications->get()->toArray();
-        if($notifications) {
-            foreach ($notifications as $notification) {
-                $notificationData = Notification::find($notification['id']);
-                $notificationData->seen = true;
-                $notificationData->save();
-            };
-            return response()->json(['message' => __('messages.all_notifications_marked')]);
-        }
-
-        return response()->json(['message' => __('messages.wrong_id')]);
+        Notification::where('to_user', auth()->id())->update(['seen' => true]);
+        return response()->json(['message' => __('messages.all_notifications_marked')]);
     }
 }

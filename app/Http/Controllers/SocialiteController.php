@@ -21,11 +21,10 @@ class SocialiteController extends Controller
     {
         $googleUser = Socialite::driver('google')->stateless()->user();
         $existingUser = User::where('email', $googleUser->email)->first();
-        $existingUserGoogleId = null;
         if($existingUser) {
             $existingUserGoogleId = $existingUser->google_id;
         }
-        if(($existingUser && $existingUserGoogleId !== null) || !$existingUser) {
+        if(($existingUser && $existingUserGoogleId) || !$existingUser) {
             if(!Storage::get('userImages/DefaultProfile.png')) {
                 $image = public_path('assets/images/DefaultProfile.png');
                 Storage::put('userImages/DefaultProfile.png', file_get_contents($image));

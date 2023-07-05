@@ -31,8 +31,7 @@ class AuthController extends Controller
             return response()->json(['message' => __('messages.account_is_not_verified_yet')]);
         }
 
-        $remember = $request->remember ? true : false;
-        if(Auth::guard()->attempt($credentials, $remember)) {
+        if(Auth::guard()->attempt($credentials, $request->has('remember_me'))) {
             return (new UserResource($user))->response()->setStatusCode(200);
         };
         return response()->json(['message' => __('messages.invalid_credentials')], 401);
@@ -48,11 +47,11 @@ class AuthController extends Controller
     public function register(RegisterRequest $request): JsonResponse
     {
         $attributes = $request->validated();
-        $attributes['password'] = bcrypt($attributes['password']);
         $emailVerificationToken = Str::random(100);
         $attributes['email_verification_token'] = $emailVerificationToken;
 
         $user = User::create($attributes);
+        $user->setPasswordAttribute($request->password);
 
         if($user) {
             if(!Storage::get('userImages/DefaultProfile.png')) {
@@ -94,21 +93,25 @@ class AuthController extends Controller
 
     public function sendPasswordResetRequest(PasswordResetEmailRequest $request): JsonResponse
     {
-        $token = Str::random(40);
-        $data['token'] = $token;
-        $data['email'] = $request->email;
+        if(User::where('email', $request->email)->firstOrFail()->google_id) {
+            $token = Str::random(40);
+            $data['token'] = $token;
+            $data['email'] = $request->email;
 
-        Mail::send('email.password-reset', ['data' => $data], function ($message) use ($data) {
-            $message->to($data['email'])->subject('Reset Password');
-        });
+            Mail::send('email.password-reset', ['data' => $data], function ($message) use ($data) {
+                $message->to($data['email'])->subject('Reset Password');
+            });
 
-        if(ChangePassword::where('email', $request->email)->first()) {
-            ChangePassword::where('email', $request->email)->first()->delete();
+            if(ChangePassword::where('email', $request->email)->first()) {
+                ChangePassword::where('email', $request->email)->first()->delete();
+            }
+
+            ChangePassword::create(['email' => $request->email, 'token' => $token]);
+
+            return response()->json(['message' => __('messages.email_confirmation_sent_for_reset_password')]);
         }
 
-        ChangePassword::create(['email' => $request->email, 'token' => $token]);
-
-        return response()->json(['message' => __('messages.email_confirmation_sent_for_reset_password')]);
+        return response()->json(['message' => __('messages.invalid_credentials')]);
     }
 
 
@@ -117,7 +120,7 @@ class AuthController extends Controller
         $changePasswordModel = ChangePassword::where('token', $request->token)->first();
         if($changePasswordModel) {
             if($changePasswordModel->expires_at > Carbon::now()) {
-                return redirect()->away(env('FRONTEND_URL').`/reset-password/$request->token`);
+                return redirect()->away(env('FRONTEND_URL')."/reset-password/$request->token");
             }
             $changePasswordModel->delete();
             return redirect()->away(env('FRONTEND_URL').'/expired');
@@ -132,7 +135,7 @@ class AuthController extends Controller
         if($changePasswordModel) {
             if($changePasswordModel->expires_at > Carbon::now()) {
                 $user = User::where('email', $changePasswordModel->email)->firstOrFail();
-                $user->update(['password' => bcrypt($request->password)]);
+                $user->setPasswordAttribute($request->password);
                 $changePasswordModel->delete();
 
                 return (new UserResource($user))->response()->setStatusCode(200);

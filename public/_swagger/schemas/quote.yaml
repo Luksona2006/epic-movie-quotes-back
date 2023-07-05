@@ -4,7 +4,6 @@ components:
       allOf:
         - $ref: "../common.yaml#/components/schemas/Id"
         - $ref: "../common.yaml#/components/schemas/MovieId"
-        - $ref: "../common.yaml#/components/schemas/QuoteId"
         - type: object
           properties:
             text:
@@ -19,4 +18,3 @@ components:
             image:
               type: string
               example: quoteImages/e6RHNcGs8DGtjjTQdBhMhD5XTBhGc8.jpg
-        - $ref: "../common.yaml#/components/schemas/TimeStamps"
