@@ -34,7 +34,7 @@ class RegisterRequest extends FormRequest
     public function messages()
     {
         return [
-            'email.unique' => __('validation.required'),
+            'email.unique' => __('validation.unique'),
         ];
     }
 }
