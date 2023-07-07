@@ -45,38 +45,47 @@ class QuoteController extends Controller
 
     public function update(Quote $quote, UpdateQuoteRequest $request): JsonResponse
     {
-        if($request->quote_en && $request->quote_ka) {
-            $text = [
-                'en' => $request->quote_en ?? $quote->toArray()['text']['en'],
-                'ka' => $request->quote_ka ?? $quote->toArray()['text']['ka'],
-            ];
+        if($request->user()->can('update', $quote)) {
+            if($request->quote_en && $request->quote_ka) {
+                $text = [
+                    'en' => $request->quote_en ?? $quote->toArray()['text']['en'],
+                    'ka' => $request->quote_ka ?? $quote->toArray()['text']['ka'],
+                ];
 
-            $quote->text = $text;
-        };
+                $quote->text = $text;
+            };
 
-        if($request->image) {
-            $image = $request->image;
-            $extension = explode(';', explode('/', $image)[1])[0];
-            $image = str_replace('data:image/png;base64,', '', $image);
-            $image = str_replace(' ', '+', $image);
-            $imageName = Str::random(30) . '.' . $extension;
+            if($request->image) {
+                $image = $request->image;
+                $extension = explode(';', explode('/', $image)[1])[0];
+                $image = str_replace('data:image/png;base64,', '', $image);
+                $image = str_replace(' ', '+', $image);
+                $imageName = Str::random(30) . '.' . $extension;
 
 
-            Storage::delete($quote->image);
-            Storage::put('quoteImages/' . $imageName, base64_decode($image));
+                Storage::delete($quote->image);
+                Storage::put('quoteImages/' . $imageName, base64_decode($image));
 
-            $quote->image = 'quoteImages/' .  $imageName;
+                $quote->image = 'quoteImages/' .  $imageName;
+            }
+
+            $quote->save();
+
+            return (new QuoteResource($quote))->response()->setStatusCode(200);
         }
 
-        $quote->save();
-
-        return (new QuoteResource($quote))->response()->setStatusCode(200);
+        return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.update_quote')])]);
     }
 
     public function destroy(Quote $quote): JsonResponse
     {
-        $quote->delete();
-        return response()->json(['message' => __('messages.deleted_successfully', ['deleted' => __('messages.quote')])]);
+        if(auth()->user()->can('delete', $quote)) {
+            $quote->delete();
+            return response()->json(['message' => __('messages.deleted_successfully', ['deleted' => __('messages.quote')])]);
+        }
+
+
+        return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.update_movie')])]);
     }
 
     public function index(Request $request): JsonResponse
@@ -92,7 +101,11 @@ class QuoteController extends Controller
     {
         $quote = Quote::with('user', 'comments')->findOrFail($id);
 
-        return (new QuoteResource($quote))->response()->setStatusCode(200);
+        if(auth()->user()->can('view', Quote::class)) {
+            return (new QuoteResource($quote))->response()->setStatusCode(200);
+        }
+
+        return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.get_quote')])]);
     }
 
     public function search(Request $request): JsonResponse
