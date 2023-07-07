@@ -26,7 +26,7 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request): JsonResponse
     {
-        $user = User::find(auth()->id());
+        $user = User::find(auth()->user()->id);
 
         if($request->new_username) {
             $user->name = $request->new_username;

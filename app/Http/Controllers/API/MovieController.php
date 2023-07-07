@@ -65,92 +65,85 @@ class MovieController extends Controller
 
     public function update(Movie $movie, UpdateMovieRequest $request): JsonResponse
     {
-        if($request->user()->can('update', $movie)) {
-            if($request->name_en && $request->name_ka) {
-                $name = [
-                    'en' => $request->name_en,
-                    'ka' => $request->name_ka
-                ];
+        if($request->name_en && $request->name_ka) {
+            $name = [
+                'en' => $request->name_en,
+                'ka' => $request->name_ka
+            ];
 
-                $movie->name = $name;
-            };
+            $movie->name = $name;
+        };
 
-            if($request->director_en && $request->director_ka) {
-                $director = [
-                    'en' => $request->director_en,
-                    'ka' => $request->director_ka
-                ];
+        if($request->director_en && $request->director_ka) {
+            $director = [
+                'en' => $request->director_en,
+                'ka' => $request->director_ka
+            ];
 
-                $movie->director = $director;
-            };
+            $movie->director = $director;
+        };
 
-            if($request->description_en && $request->description_ka) {
-                $description = [
-                    'en' => $request->description_en,
-                    'ka' => $request->description_ka
-                ];
+        if($request->description_en && $request->description_ka) {
+            $description = [
+                'en' => $request->description_en,
+                'ka' => $request->description_ka
+            ];
 
-                $movie->description = $description;
-            };
+            $movie->description = $description;
+        };
 
-            if($request->genres_ids) {
-                foreach ($request->genres_ids as $genreId) {
-                    $isSameGenre = false;
-                    foreach ($movie->genres->toArray() as $genreMovie) {
-                        $genreMovie['id'] === $genreId ? $isSameGenre = true : 0;
-                    }
-                    if(!$isSameGenre) {
-                        GenreMovie::create(['genre_id' => $genreId, 'movie_id' => $movie->id]);
-                    }
-                }
-
+        if($request->genres_ids) {
+            foreach ($request->genres_ids as $genreId) {
+                $isSameGenre = false;
                 foreach ($movie->genres->toArray() as $genreMovie) {
-                    $isRemoved = true;
-                    foreach ($request->genres_ids as $genreId) {
-                        $genreMovie['id'] === $genreId ? $isRemoved = false : 0;
-                    }
-
-                    if($isRemoved) {
-                        GenreMovie::where('genre_id', $genreMovie['id'])->first()->delete();
-                    }
+                    $genreMovie['id'] === $genreId ? $isSameGenre = true : 0;
+                }
+                if(!$isSameGenre) {
+                    GenreMovie::create(['genre_id' => $genreId, 'movie_id' => $movie->id]);
                 }
             }
 
-            if($request->year) {
-                $movie->year = $request->year;
+            foreach ($movie->genres->toArray() as $genreMovie) {
+                $isRemoved = true;
+                foreach ($request->genres_ids as $genreId) {
+                    $genreMovie['id'] === $genreId ? $isRemoved = false : 0;
+                }
+
+                if($isRemoved) {
+                    GenreMovie::where('genre_id', $genreMovie['id'])->first()->delete();
+                }
             }
-
-            if($request->image) {
-                $image = $request->image;
-                $extension = explode(';', explode('/', $image)[1])[0];
-                $image = str_replace('data:image/png;base64,', '', $image);
-                $image = str_replace(' ', '+', $image);
-                $imageName = Str::random(30) . '.' . $extension;
-
-
-                Storage::delete($movie->image);
-                Storage::put('movieImages/' . $imageName, base64_decode($image));
-
-                $movie->image = 'movieImages/' .  $imageName;
-            }
-
-            $movie->save();
-            $movie = Movie::with('quotes', 'genres')->find($movie->id);
-
-            return (new MovieResource($movie))->response()->setStatusCode(200);
         }
 
-        return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.update_movie')])]);
+        if($request->year) {
+            $movie->year = $request->year;
+        }
+
+        if($request->image) {
+            $image = $request->image;
+            $extension = explode(';', explode('/', $image)[1])[0];
+            $image = str_replace('data:image/png;base64,', '', $image);
+            $image = str_replace(' ', '+', $image);
+            $imageName = Str::random(30) . '.' . $extension;
+
+
+            Storage::delete($movie->image);
+            Storage::put('movieImages/' . $imageName, base64_decode($image));
+
+            $movie->image = 'movieImages/' .  $imageName;
+        }
+
+        $movie->save();
+        $movie = Movie::with('quotes', 'genres')->find($movie->id);
+
+        return (new MovieResource($movie))->response()->setStatusCode(200);
+
     }
 
     public function destroy(Movie $movie): JsonResponse
     {
-        if(auth()->user()->can('delete', $movie)) {
-            $movie->delete();
-            return response()->json(['message' => __('messages.deleted_successfully', ['deleted' => __('messages.movie')])]);
-        }
-
-        return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.remove_movie')])]);
+        $movie->delete();
+        return response()->json(['message' => __('messages.deleted_successfully', ['deleted' => __('messages.movie')])]);
     }
 
     public function paginateMovies(Request $request): JsonResponse
@@ -172,8 +165,8 @@ class MovieController extends Controller
 
     public function show(int $id): JsonResponse
     {
-        if(auth()->user()->can('view', Movie::class)) {
-            $movie = Movie::with('quotes', 'genres')->findOrFail($id);
+        if(auth()->id() === Movie::findOrFail($id)->user_id) {
+            $movie = Movie::with('quotes', 'genres')->find($id);
 
             return (new MovieResource($movie))->response()->setStatusCode(200);
         }
