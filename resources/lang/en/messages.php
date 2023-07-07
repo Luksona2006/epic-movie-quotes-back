@@ -16,6 +16,8 @@ return [
     "get_comments" => "get comments",
     "remove_movie" => "remove movie",
     "remove_quote" => "remove quote",
+    "update_movie" => "update movie",
+    "update_quote" => "update quote",
     "create_movie" => "create movie",
     "deleted_successfully" => ":deleted deleted successfully",
     "update_details" => "update details",

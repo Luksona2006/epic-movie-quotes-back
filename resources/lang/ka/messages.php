@@ -16,6 +16,8 @@ return [
     "get_comments" => "ნახოთ კომენტარები",
     "remove_movie" => "წაშალოთ ფილმი",
     "remove_quote" => "წაშალოთ ციტატა",
+    "update_movie" => "გაანახლოთ ფილმი",
+    "update_quote" => "გაანახლოთ ციტატა",
     "create_movie" => "შექმნათ ფილმი",
     "deleted_successfully" => ":deleted წაიშალა წარმატებით",
     "update_details" => "გაანახლოთ მონაცემები",
