@@ -22,7 +22,7 @@ Epic Movie Quotes is a website where you can register account and then login to 
 1. First of all you need to clone E Space repository from github:
 
 ```
-git clone https://github.com/RedberryInternship/luka-bakuridze-coronatime.git
+git clone https://github.com/RedberryInternship/luka-bakuridze-epic-movie-quotes-back.git
 ```
 
 2. Next step requires you to run composer install in order to install all the dependencies.
