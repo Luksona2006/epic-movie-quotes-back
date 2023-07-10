@@ -15,7 +15,7 @@ class LikeController extends Controller
 {
     public function like(Quote $quote, Request $request): JsonResponse
     {
-        $userId= auth()->id();
+        $userId = auth()->id();
 
         $likes = QuoteUser::where('quote_id', $quote->id)->get()->toArray();
         $likesSum = count($likes);
