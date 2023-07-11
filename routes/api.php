@@ -29,6 +29,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::post('locale', [LocalizationController::class, 'setLocale'])->name('locale.set_locale');
+Route::get('change-email/{token}', [UserController::class, 'confirmEmailChange'])->name('change_email.confirm_email_change');
 
 Route::group(['middleware' => 'guest:sanctum'], function () {
     Route::group(['controller' => AuthController::class], function () {
@@ -39,8 +40,6 @@ Route::group(['middleware' => 'guest:sanctum'], function () {
         Route::get('reset-password/{token}', 'redirectToPasswordReset')->name('reset.redirect_to_password_reset');
         Route::post('reset-password/{token}', 'resetPassword')->name('reset_password');
     });
-
-    Route::get('change-email/{token}', [UserController::class, 'confirmEmailChange'])->name('change_email.confirm_email_change');
 });
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
