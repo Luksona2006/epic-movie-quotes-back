@@ -16,7 +16,7 @@ class CommentQuote implements ShouldBroadcast
 
     public $quoteId;
     public $comment;
-    public $isOwnQuote;
+    public $userId;
 
 
     /**
@@ -24,11 +24,11 @@ class CommentQuote implements ShouldBroadcast
      *
      * @return void
      */
-    public function __construct($quoteId, $comment, $isOwnQuote)
+    public function __construct($quoteId, $comment, $userId)
     {
         $this->quoteId = $quoteId;
         $this->comment = $comment;
-        $this->isOwnQuote = $isOwnQuote;
+        $this->userId = $userId;
     }
 
     /**

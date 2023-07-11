@@ -35,7 +35,7 @@ class CommentController extends Controller
             event(new RecieveNotification($quote->user_id, $notificationFullData));
         }
 
-        event(new CommentQuote($quote->id, $comment, $isOwnQuote));
+        event(new CommentQuote($quote->id, $comment, $user->id));
 
 
         return response()->json(['quote_id' => $quote->id , 'comment' => $comment]);
