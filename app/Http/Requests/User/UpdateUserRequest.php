@@ -24,10 +24,10 @@ class UpdateUserRequest extends FormRequest
     public function rules()
     {
         return [
-            'new_username' => ['nullable'],
+            'new_username' => ['nullable', 'unique:users,name'],
             'new_password' => ['nullable'],
             'confirm_password' => ['nullable', 'same:new_password'],
-            'new_email' => ['nullable', 'unique:users,email'],
+            'new_email' => ['nullable', 'unique:users'],
             'image' => ['nullable']
         ];
     }
