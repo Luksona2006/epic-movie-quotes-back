@@ -28,9 +28,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::post('locale', [LocalizationController::class, 'setLocale'])->name('locale.set_locale');
-Route::get('change-email/{token}', [UserController::class, 'confirmEmailChange'])->name('change_email.confirm_email_change');
-
 Route::group(['middleware' => 'guest:sanctum'], function () {
     Route::group(['controller' => AuthController::class], function () {
         Route::post('login', 'login')->name('login');
@@ -83,6 +80,8 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 });
 
 Route::group(['middleware' => 'web', 'controller' => SocialiteController::class], function () {
+    Route::post('locale', [LocalizationController::class, 'setLocale'])->name('locale.set_locale');
+    Route::get('change-email/{token}', [UserController::class, 'confirmEmailChange'])->name('change_email.confirm_email_change');
     Route::get('auth/google/redirect', 'socialiteRedirect')->name('auth_google.socialite_redirect');
     Route::get('auth/google/callback', 'socialiteCreateUser')->name('auth_google.socialite_create_user');
 });
