@@ -185,8 +185,8 @@ class MovieController extends Controller
         $search = $request->searchBy;
         if($search) {
             $searchedMovies = Movie::where('user_id', auth()->id())
-            ->whereRaw('LOWER(JSON_EXTRACT(name, "$.en")) like ?', '%'.strtolower($search).'%')
-            ->orWhereRaw('LOWER(JSON_EXTRACT(name, "$.ka")) like ?', '%'.strtolower($search).'%');
+            ->whereRaw('LOWER(JSON_EXTRACT(name, "$.en")) like ? and user_id = '.auth()->id(), '%'.strtolower($search).'%')
+            ->orWhereRaw('LOWER(JSON_EXTRACT(name, "$.ka")) like ? and user_id = '.auth()->id(), '%'.strtolower($search).'%');
 
             $moviesPaginate = $searchedMovies->paginate(10, ['*'], 'movies-per-page', $request->pageNum);
 
