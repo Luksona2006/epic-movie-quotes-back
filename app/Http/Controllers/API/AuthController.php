@@ -24,16 +24,21 @@ class AuthController extends Controller
 {
     public function login(LoginRequest $request): JsonResponse
     {
-        $credentials = $request->only(['email', 'password']);
+        $loginValue = $request->login;
+        $login_type = filter_var($loginValue, FILTER_VALIDATE_EMAIL) ? 'email' : 'name';
+        $request->merge([
+            $login_type => $loginValue,
+        ]);
 
-        $user = User::where('email', $request->email)->firstOrFail();
+        $user = User::where($login_type, $loginValue)->firstOrFail();
         if(!$user->email_verified_at) {
             return response()->json(['message' => __('messages.account_is_not_verified_yet')]);
         }
 
-        if(Auth::guard()->attempt($credentials, $request->has('remember_me'))) {
+        if (Auth::guard()->attempt($request->only([$login_type, 'password']), $request->has('remember_me'))) {
             return (new UserResource($user))->response()->setStatusCode(200);
-        };
+        }
+
         return response()->json(['message' => __('messages.invalid_credentials')], 401);
     }
 
