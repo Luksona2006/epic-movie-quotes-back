@@ -40,7 +40,7 @@ class MovieController extends Controller
 
             $image = $request->image;
             $extension = explode(';', explode('/', $image)[1])[0];
-            $image = str_replace('data:image/png;base64,', '', $image);
+            $image = str_replace('data:image/'.$extension.';base64,', '', $image);
             $image = str_replace(' ', '+', $image);
             $imageName = Str::random(30) . '.' . $extension;
 
@@ -123,7 +123,7 @@ class MovieController extends Controller
             if($request->image) {
                 $image = $request->image;
                 $extension = explode(';', explode('/', $image)[1])[0];
-                $image = str_replace('data:image/png;base64,', '', $image);
+                $image = str_replace('data:image/'.$extension.';base64,', '', $image);
                 $image = str_replace(' ', '+', $image);
                 $imageName = Str::random(30) . '.' . $extension;
 
