@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use App\Models\User;
 use App\Models\Quote;
-use App\Models\UserNotification;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Notification extends Model
@@ -18,7 +17,7 @@ class Notification extends Model
 
     public function user(): BelongsToMany
     {
-        return $this->belongsToMany(User::class)->using(UserNotification::class);
+        return $this->belongsToMany(User::class);
     }
 
     public function quote(): BelongsTo

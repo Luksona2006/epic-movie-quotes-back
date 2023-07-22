@@ -106,6 +106,16 @@ class QuoteController extends Controller
         return response()->json(['message' => __('messages.you_are_not_able_to', ['notAbleTo' => __('messages.get_quote')])], 404);
     }
 
+    public function showUserQuotes(int $id, Request $request): JsonResponse
+    {
+        $quotes = Quote::where('user_id', $id)->with('user', 'comments')->get();
+        $quotesPaginate = Quote::where('user_id', $id)->with('movie', 'comments')->latest()->paginate(10, ['*'], 'quotes-per-page', $request->pageNum);
+
+        $quotes = QuoteResource::collection($quotesPaginate->items());
+
+        return response()->json(['quotes' => $quotes, 'isLastPage' => $quotesPaginate->toArray()['last_page'] === $request->pageNum]);
+    }
+
     public function search(Request $request): JsonResponse
     {
         $search = $request->searchBy;

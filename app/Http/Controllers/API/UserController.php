@@ -7,6 +7,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\User\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\ChangeEmail;
+use App\Models\FriendRequest;
+use App\Models\Friend;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -74,6 +76,17 @@ class UserController extends Controller
         $user->save();
 
         return (new UserResource($user))->response()->setStatusCode(200);
+    }
+
+    public function show($id): JsonResponse
+    {
+        $user = (new UserResource(User::findOrFail($id)))->toArray('get');
+        $friends = Friend::where('first_user', $id)->orWhere('second_user', $id)->count();
+
+        $hasRecievedFriendRequest = FriendRequest::where([['from_user', $id], ['to_user', auth()->id()]])->count() > 0;
+        $hasSentFriendRequest = FriendRequest::where([['from_user', auth()->id()], ['to_user', $id]])->count() > 0;
+        $isFriend = Friend::where('first_user', auth()->id())->orWhere('second_user', auth()->id())->count() > 0;
+        return response()->json(['user' => [...$user, 'friends' => $friends], 'hasRecievedFriendRequest' => $hasRecievedFriendRequest || $hasSentFriendRequest ? ($hasRecievedFriendRequest ? true : false) : null, 'isFriend' => $isFriend, ]);
     }
 
     public function getAuthUser(): JsonResponse

@@ -4,6 +4,7 @@ use App\Http\Controllers\API\Quote\QuoteController;
 use App\Http\Controllers\API\Quote\CommentController;
 use App\Http\Controllers\API\Quote\LikeController;
 use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API\FriendController;
 use App\Http\Controllers\API\GenreController;
 use App\Http\Controllers\API\MovieController;
 use App\Http\Controllers\API\NotificationController;
@@ -45,6 +46,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 
     Route::group(['controller' => UserController::class], function () {
         Route::get('user/auth', 'getAuthUser')->name('user.get_auth_user');
+        Route::get('user/{id}', 'show')->name('user.show');
         Route::put('user', 'update')->name('user.update');
     });
 
@@ -54,8 +56,9 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('quotes/{quote}', 'show')->name('quotes.show');
         Route::put('quotes/{quote}', 'update')->name('quotes.update');
         Route::delete('quotes/{quote}', 'destroy')->name('quotes.destroy');
-
         Route::post('quotes/search', 'search')->name('quotes.search');
+
+        Route::post('users/{id}/quotes', 'showUserQuotes')->name('users.show_user_quotes');
     });
 
     Route::post('quotes/{quote}/like', [LikeController::class, 'like'])->name('quote.like');
@@ -76,6 +79,13 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('notifications', 'index')->name('notifications.index');
         Route::put('notifications/{notification}', 'update')->name('notification.update');
         Route::put('notifications', 'updateAll')->name('notifications.update_all');
+    });
+
+    Route::group(['controller' => FriendController::class], function () {
+        Route::post('friends/request', 'sendRequest')->name('friends.send_request');
+        Route::delete('friends/request', 'destroyRequest')->name('friends.destroy_request');
+        Route::post('friends', 'create')->name('friends.create');
+        Route::get('users/{id}/friends', 'index')->name('friends.index');
     });
 });
 
