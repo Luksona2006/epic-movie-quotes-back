@@ -85,7 +85,7 @@ class UserController extends Controller
 
         $hasRecievedFriendRequest = FriendRequest::where([['from_user', $id], ['to_user', auth()->id()]])->count() > 0;
         $hasSentFriendRequest = FriendRequest::where([['from_user', auth()->id()], ['to_user', $id]])->count() > 0;
-        $isFriend = Friend::where('first_user', auth()->id())->orWhere('second_user', auth()->id())->count() > 0;
+        $isFriend = Friend::where([['first_user', auth()->id()], ['second_user', $id]])->orWhere([['first_user', $id],['second_user', auth()->id()]])->count() > 0;
         return response()->json(['user' => [...$user, 'friends' => $friends], 'hasRecievedFriendRequest' => $hasRecievedFriendRequest || $hasSentFriendRequest ? ($hasRecievedFriendRequest ? true : false) : null, 'isFriend' => $isFriend, ]);
     }
 
