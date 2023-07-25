@@ -80,13 +80,13 @@ class UserController extends Controller
 
     public function show($id): JsonResponse
     {
-        $user = (new UserResource(User::findOrFail($id)))->toArray('get');
-        $friends = Friend::where('first_user', $id)->orWhere('second_user', $id)->count();
-
-        $hasRecievedFriendRequest = FriendRequest::where([['from_user', $id], ['to_user', auth()->id()]])->count() > 0;
-        $hasSentFriendRequest = FriendRequest::where([['from_user', auth()->id()], ['to_user', $id]])->count() > 0;
-        $isFriend = Friend::where([['first_user', auth()->id()], ['second_user', $id]])->orWhere([['first_user', $id],['second_user', auth()->id()]])->count() > 0;
-        return response()->json(['user' => [...$user, 'friends' => $friends], 'hasRecievedFriendRequest' => $hasRecievedFriendRequest || $hasSentFriendRequest ? ($hasRecievedFriendRequest ? true : false) : null, 'isFriend' => $isFriend, ]);
+        $user = (new UserResource(User::findOrFail($id)));
+        $authUser = auth()->user();
+        $friends = $user->allFriends->count();
+        $hasRecievedFriendRequest = $authUser->pendingFriendsFrom()->wherePivot('user_id', $id)->count() > 0;
+        $hasSentFriendRequest = $authUser->pendingFriendsTo()->wherePivot('friend_id', $id)->count() > 0;
+        $isFriend = count([...$user->acceptedFriendsTo()->wherePivot('user_id', $id)->get()->toArray(), ...$user->acceptedFriendsFrom()->wherePivot('friend_id', $id)->get()->toArray()]) > 0;
+        return response()->json(['user' => [...$user->toArray('get'), 'friends' => $friends], 'hasRecievedFriendRequest' => $hasRecievedFriendRequest || $hasSentFriendRequest ? ($hasRecievedFriendRequest ? true : false) : null, 'isFriend' => $isFriend, ]);
     }
 
     public function getAuthUser(): JsonResponse

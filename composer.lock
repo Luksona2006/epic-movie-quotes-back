@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8b49bc85f9c27d733ff737ce30c52daa",
+    "content-hash": "8b067e430cbca65a29c6c5e6db898a3e",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -3612,6 +3612,111 @@
                 }
             ],
             "time": "2023-05-06T10:22:13+00:00"
+        },
+        {
+            "name": "staudenmeir/laravel-merged-relations",
+            "version": "v1.5.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/staudenmeir/laravel-merged-relations.git",
+                "reference": "dc186050806f8961fa9dcb1c7d41d4e50d958271"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/staudenmeir/laravel-merged-relations/zipball/dc186050806f8961fa9dcb1c7d41d4e50d958271",
+                "reference": "dc186050806f8961fa9dcb1c7d41d4e50d958271",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/database": "^9.0",
+                "php": "^8.0.2",
+                "staudenmeir/laravel-migration-views": "^1.6"
+            },
+            "require-dev": {
+                "nesbot/carbon": "^2.62.1",
+                "orchestra/testbench": "^7.0",
+                "staudenmeir/eloquent-has-many-deep": "^1.17"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Staudenmeir\\LaravelMergedRelations\\DatabaseServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Staudenmeir\\LaravelMergedRelations\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jonas Staudenmeir",
+                    "email": "mail@jonas-staudenmeir.de"
+                }
+            ],
+            "description": "Merged Laravel Eloquent relationships",
+            "support": {
+                "issues": "https://github.com/staudenmeir/laravel-merged-relations/issues",
+                "source": "https://github.com/staudenmeir/laravel-merged-relations/tree/v1.5.3"
+            },
+            "time": "2023-07-01T08:26:54+00:00"
+        },
+        {
+            "name": "staudenmeir/laravel-migration-views",
+            "version": "v1.6.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/staudenmeir/laravel-migration-views.git",
+                "reference": "79bda6b8fbdff7159edc56bb88e533f8cfef2fd7"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/staudenmeir/laravel-migration-views/zipball/79bda6b8fbdff7159edc56bb88e533f8cfef2fd7",
+                "reference": "79bda6b8fbdff7159edc56bb88e533f8cfef2fd7",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/database": "^9.0",
+                "php": "^8.0.2"
+            },
+            "require-dev": {
+                "orchestra/testbench": "^7.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Staudenmeir\\LaravelMigrationViews\\DatabaseServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Staudenmeir\\LaravelMigrationViews\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jonas Staudenmeir",
+                    "email": "mail@jonas-staudenmeir.de"
+                }
+            ],
+            "description": "Laravel database migrations with SQL views",
+            "support": {
+                "issues": "https://github.com/staudenmeir/laravel-migration-views/issues",
+                "source": "https://github.com/staudenmeir/laravel-migration-views/tree/v1.6.2"
+            },
+            "time": "2022-05-15T10:08:23+00:00"
         },
         {
             "name": "symfony/console",

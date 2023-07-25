@@ -19,8 +19,8 @@ class FriendResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'first_user' => new UserResource(User::findOrFail($this->first_user)),
-            'second_user' => new UserResource(User::findOrFail($this->first_user)),
+            'user' => new UserResource(User::findOrFail($this->user_id)),
+            'friend' => new UserResource(User::findOrFail($this->friend_id)),
         ];
     }
 }

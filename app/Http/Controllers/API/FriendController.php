@@ -8,18 +8,18 @@ use App\Http\Requests\Friend\FriendRequest;
 use App\Http\Requests\Friend\AcceptFriendRequest;
 use App\Http\Requests\Friend\DeclineFriendRequest;
 use App\Http\Resources\FriendResource;
-use App\Models\FriendRequest as ModelsFriendRequest;
 use App\Models\Friend;
 use App\Models\Notification;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 
 class FriendController extends Controller
 {
     public function sendRequest(FriendRequest $request): JsonResponse
     {
-        ModelsFriendRequest::create([
-            'from_user' => auth()->id(),
-            'to_user' => $request->to_user,
+        Friend::create([
+            'user_id' => auth()->id(),
+            'friend_id' => $request->to_user,
         ]);
 
 
@@ -39,10 +39,7 @@ class FriendController extends Controller
 
     public function create(AcceptFriendRequest $request): JsonResponse
     {
-        Friend::create([
-            'first_user' =>  $request->from_user,
-            'second_user' => auth()->id(),
-        ]);
+        Friend::where('friend_id', auth()->id())->where('user_id', $request->from_user)->update(['accepted' => true]);
 
         $notification = Notification::create([
             'to_user' => $request->from_user,
@@ -53,7 +50,6 @@ class FriendController extends Controller
         $notificationFullData = [...$notification->toArray()];
         $notificationFullData['user'] = auth()->user();
 
-        ModelsFriendRequest::where('from_user', $request->from_user)->where('to_user', auth()->id())->first()->delete();
         event(new RecieveNotification($request->from_user, $notificationFullData));
 
         return response()->json(['accepted' => true]);
@@ -61,8 +57,10 @@ class FriendController extends Controller
 
     public function destroyRequest(DeclineFriendRequest $request): JsonResponse
     {
-        ModelsFriendRequest::where([['from_user', $request->from_user], ['to_user', auth()->id()]])
-        ->orWhere([['from_user', auth()->id()], ['to_user', $request->from_user]])->firstOrFail()->delete();
+        $user = auth()->user();
+
+        $user->pendingFriendsTo->where('friend_id', $request->from_user)->firstOrFail()->delete();
+        $user->pendingFriendsFrom->where('user_id', $request->from_user)->firstOrFail()->delete();
 
         Notification::where([['from_user', $request->from_user], ['to_user', auth()->id()]])
         ->orWhere([['from_user', auth()->id()], ['to_user', $request->from_user]])->firstOrFail()->delete();
@@ -72,7 +70,7 @@ class FriendController extends Controller
 
     public function index(int $id): JsonResponse
     {
-        $friends = Friend::where('first_user', $id)->orWhere('second_user', $id)->get();
-        return response()->json(['friends' => FriendResource::collection($friends)]);
+        $user = User::findOrFail($id);
+        return response()->json(['friends' => FriendResource::collection($user->friends)]);
     }
 }
