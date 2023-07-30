@@ -6,6 +6,7 @@ use App\Http\Controllers\API\Quote\LikeController;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\FriendController;
 use App\Http\Controllers\API\GenreController;
+use App\Http\Controllers\API\MessageController;
 use App\Http\Controllers\API\MovieController;
 use App\Http\Controllers\API\NotificationController;
 use App\Http\Controllers\API\UserController;
@@ -83,9 +84,14 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 
     Route::group(['controller' => FriendController::class], function () {
         Route::post('friends/request', 'sendRequest')->name('friends.send_request');
-        Route::delete('friends/request', 'destroyRequest')->name('friends.destroy_request');
+        Route::delete('friends/request/{id}', 'destroyRequest')->name('friends.destroy_request');
         Route::post('friends', 'create')->name('friends.create');
         Route::get('users/{id}/friends', 'index')->name('friends.index');
+    });
+
+    Route::group(['controller' => MessageController::class], function () {
+        Route::get('users/{user}/messages', 'show')->name('users_messages.show');
+        Route::post('users/auth/messages', 'create')->name('users_messages.create');
     });
 });
 

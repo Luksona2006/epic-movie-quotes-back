@@ -110,4 +110,20 @@ class User extends Authenticatable
     {
         return $this->mergedRelation('all_friends');
     }
+
+    public function messagesTo(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'messages', 'user_id', 'friend_id')->withPivot('text')->withTimestamps();
+    }
+
+    public function messagesFrom(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'messages', 'friend_id', 'user_id')->withPivot('text')->withTimestamps();
+    }
+
+    public function allMessages(): MergedRelation
+    {
+        return $this->mergedRelation('all_messages');
+    }
+
 }

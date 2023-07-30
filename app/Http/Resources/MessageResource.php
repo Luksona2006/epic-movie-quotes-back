@@ -3,9 +3,8 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
-use App\Http\Resources\UserResource;
 
-class CommentResource extends JsonResource
+class MessageResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -13,15 +12,15 @@ class CommentResource extends JsonResource
      * @param  \Illuminate\Http\Request  $request
      * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
      */
+
     public $preserveKeys = true;
-    public static $wrap = 'comment';
+    public static $wrap = 'message';
 
     public function toArray($request): array
     {
         return [
-            'id' => $this->id,
-            'text' => $this->text,
-            'user' => new UserResource($this->user)
+            'user_id' => $this->pivot->user_id ?? $this->user_id,
+            'text' => $this->pivot->text ?? $this->text,
         ];
     }
 }

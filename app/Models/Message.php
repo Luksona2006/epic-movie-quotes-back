@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
-class Friend extends Pivot
+class Message extends Pivot
 {
     /**
     * Indicates if the IDs are auto-incrementing.
@@ -14,5 +14,5 @@ class Friend extends Pivot
     public $incrementing = true;
 
     protected $guarded = ['id'];
-    protected $table = 'friends';
+    protected $table = 'messages';
 }

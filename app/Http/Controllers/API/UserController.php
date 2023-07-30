@@ -85,7 +85,7 @@ class UserController extends Controller
         $friends = $user->allFriends->count();
         $hasRecievedFriendRequest = $authUser->pendingFriendsFrom()->wherePivot('user_id', $id)->count() > 0;
         $hasSentFriendRequest = $authUser->pendingFriendsTo()->wherePivot('friend_id', $id)->count() > 0;
-        $isFriend = count([...$user->acceptedFriendsTo()->wherePivot('user_id', $id)->get()->toArray(), ...$user->acceptedFriendsFrom()->wherePivot('friend_id', $id)->get()->toArray()]) > 0;
+        $isFriend = $user->acceptedFriendsTo()->wherePivot('user_id', $id)->count() > 0 || $user->acceptedFriendsFrom()->wherePivot('friend_id', $id)->count() > 0;
         return response()->json(['user' => [...$user->toArray('get'), 'friends' => $friends], 'hasRecievedFriendRequest' => $hasRecievedFriendRequest || $hasSentFriendRequest ? ($hasRecievedFriendRequest ? true : false) : null, 'isFriend' => $isFriend, ]);
     }
 

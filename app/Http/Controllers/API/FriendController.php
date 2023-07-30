@@ -39,7 +39,9 @@ class FriendController extends Controller
 
     public function create(AcceptFriendRequest $request): JsonResponse
     {
-        Friend::where('friend_id', auth()->id())->where('user_id', $request->from_user)->update(['accepted' => true]);
+        $user = auth()->user();
+
+        $user->pendingFriendsFrom()->wherePivot('user_id', $request->from_user)->update(['accepted' => true]);
 
         $notification = Notification::create([
             'to_user' => $request->from_user,
@@ -48,22 +50,22 @@ class FriendController extends Controller
         ]);
 
         $notificationFullData = [...$notification->toArray()];
-        $notificationFullData['user'] = auth()->user();
+        $notificationFullData['user'] = $user;
 
         event(new RecieveNotification($request->from_user, $notificationFullData));
 
         return response()->json(['accepted' => true]);
     }
 
-    public function destroyRequest(DeclineFriendRequest $request): JsonResponse
+    public function destroyRequest(int $id): JsonResponse
     {
         $user = auth()->user();
 
-        $user->pendingFriendsTo->where('friend_id', $request->from_user)->firstOrFail()->delete();
-        $user->pendingFriendsFrom->where('user_id', $request->from_user)->firstOrFail()->delete();
+        Friend::where([['user_id', $id], ['friend_id', auth()->id()]])
+        ->orWhere([['user_id', auth()->id()], ['friend_id', $id]])->firstOrFail()->delete();
 
-        Notification::where([['from_user', $request->from_user], ['to_user', auth()->id()]])
-        ->orWhere([['from_user', auth()->id()], ['to_user', $request->from_user]])->firstOrFail()->delete();
+        Notification::where([['from_user', $id], ['to_user', auth()->id()]])
+        ->orWhere([['from_user', auth()->id()], ['to_user', $id]])->firstOrFail()->delete();
 
         return response()->json(['deleted' => true]);
     }
@@ -71,6 +73,6 @@ class FriendController extends Controller
     public function index(int $id): JsonResponse
     {
         $user = User::findOrFail($id);
-        return response()->json(['friends' => FriendResource::collection($user->friends)]);
+        return response()->json(['friends' => FriendResource::collection($user->allFriends)]);
     }
 }

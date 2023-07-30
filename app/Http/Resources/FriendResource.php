@@ -14,6 +14,7 @@ class FriendResource extends JsonResource
      * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
      */
     public $preserveKeys = true;
+    public static $wrap = 'friend';
 
     public function toArray($request): array
     {
