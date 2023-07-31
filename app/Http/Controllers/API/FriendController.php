@@ -8,9 +8,11 @@ use App\Http\Requests\Friend\FriendRequest;
 use App\Http\Requests\Friend\AcceptFriendRequest;
 use App\Http\Requests\Friend\DeclineFriendRequest;
 use App\Http\Resources\FriendResource;
+use App\Http\Resources\UserResource;
 use App\Models\Friend;
 use App\Models\Notification;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 
 class FriendController extends Controller
@@ -30,7 +32,8 @@ class FriendController extends Controller
         ]);
 
         $notificationFullData = [...$notification->toArray()];
-        $notificationFullData['user'] = auth()->user();
+        $notificationFullData['user'] = new UserResource(auth()->user());
+        $notificationFullData['time'] = Carbon::parse($notification['created_at'])->diffForHumans(Carbon::now());
 
         event(new RecieveNotification($request->to_user, $notificationFullData));
 
@@ -50,7 +53,8 @@ class FriendController extends Controller
         ]);
 
         $notificationFullData = [...$notification->toArray()];
-        $notificationFullData['user'] = $user;
+        $notificationFullData['user'] = new UserResource($user);
+        $notificationFullData['time'] = Carbon::parse($notification['created_at'])->diffForHumans(Carbon::now());
 
         event(new RecieveNotification($request->from_user, $notificationFullData));
 

@@ -11,6 +11,8 @@ use Illuminate\Http\Request;
 use App\Events\CommentQuote;
 use App\Events\RecieveNotification;
 use App\Http\Resources\CommentResource;
+use App\Http\Resources\UserResource;
+use Carbon\Carbon;
 
 class CommentController extends Controller
 {
@@ -31,7 +33,8 @@ class CommentController extends Controller
         if(!$isOwnQuote) {
             $notification = Notification::create(['from_user' => $user->id, 'to_user' => $quote->user_id ,'quote_id' => $quote->id, 'type' => 'comment']);
             $notificationFullData = [...$notification->toArray()];
-            $notificationFullData['user'] = $user;
+            $notificationFullData['user'] = new UserResource($user);
+            $notificationFullData['time'] = Carbon::parse($notification['created_at'])->diffForHumans(Carbon::now());
             event(new RecieveNotification($quote->user_id, $notificationFullData));
         }
 

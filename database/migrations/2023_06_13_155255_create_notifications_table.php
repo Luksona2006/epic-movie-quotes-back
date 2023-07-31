@@ -19,6 +19,7 @@ return new class () extends Migration {
             $table->foreignId('quote_id')->nullable()->constrained()->cascadeOnDelete();
             $table->string('type');
             $table->boolean('seen')->default(false);
+            $table->string('text')->nullable();
             $table->timestamps();
         });
     }
