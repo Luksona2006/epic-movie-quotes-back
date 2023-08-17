@@ -30,13 +30,13 @@ class NotificationController extends Controller
                 }
             };
 
-            $newsSum = count(array_filter($notifications, function ($notification) {
+            $newsSum = count(array_filter($notificationsWithUsers, function ($notification) {
                 if(!$notification['seen'] && $notification['type'] !== 'message') {
                     return $notification;
                 }
             }));
 
-            $messagesNewsSum = count(array_filter($notifications, function ($notification) {
+            $messagesNewsSum = count(array_filter($notificationsWithUsers, function ($notification) {
                 if(!$notification['seen'] && ($notification['type'] === 'message' && $notification['to_user'] === auth()->id())) {
                     return $notification;
                 }
